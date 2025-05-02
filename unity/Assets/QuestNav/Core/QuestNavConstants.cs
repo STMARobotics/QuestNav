@@ -135,6 +135,11 @@
             public const string EULER_ANGLES = BASE_PATH + "/eulerAngles";
 
             /// <summary>
+            /// Array with all of the pose data, so it can be reteived by the robot from a single frame
+            /// </summary>
+            public const string POSE_ARRAY = BASE_PATH + "/poseArray";
+
+            /// <summary>
             /// Initial position topic
             /// </summary>
             public const string INIT_POSITION = BASE_PATH + "/init/position";

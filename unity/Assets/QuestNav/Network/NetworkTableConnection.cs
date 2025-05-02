@@ -328,7 +328,8 @@ namespace QuestNav.Network
                 "172.22.11.2",
                 $"roboRIO-{teamNumber}-FRC.local",
                 $"roboRIO-{teamNumber}-FRC.lan",
-                $"roboRIO-{teamNumber}-FRC.frc-field.local"
+                $"roboRIO-{teamNumber}-FRC.frc-field.local",
+                "192.168.1.155" // Andy's PC at home
             };
 
             while (!connectionEstablished)
@@ -490,6 +491,7 @@ namespace QuestNav.Network
             frcDataSink.PublishTopic(QuestNavConstants.Topics.POSITION, "float[]");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.QUATERNION, "float[]");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.EULER_ANGLES, "float[]");
+            frcDataSink.PublishTopic(QuestNavConstants.Topics.POSE_ARRAY, "float[]");
             
             // Device data
             frcDataSink.PublishTopic(QuestNavConstants.Topics.BATTERY_PERCENT, "double");
@@ -573,6 +575,7 @@ namespace QuestNav.Network
             frcDataSink.PublishValue(QuestNavConstants.Topics.POSITION, position.ToArray());
             frcDataSink.PublishValue(QuestNavConstants.Topics.QUATERNION, rotation.ToArray());
             frcDataSink.PublishValue(QuestNavConstants.Topics.EULER_ANGLES, eulerAngles.ToArray());
+            frcDataSink.PublishValue(QuestNavConstants.Topics.POSE_ARRAY, position.ToArray().Concat(eulerAngles.ToArray()).ToArray());
         }
 
         public void PublishDeviceData(bool currentlyTracking, int trackingLostEvents, float batteryPercent)
