@@ -737,6 +737,34 @@ Provides methods for creating publishers, subscribers, and managing connections.
       </tr>
     </tbody>
   </table>
+  <a id="QuestNav_Native_NTCore_NtInstance_Now_" data-uid="QuestNav.Native.NTCore.NtInstance.Now*"></a>
+  <h4 id="QuestNav_Native_NTCore_NtInstance_Now" data-uid="QuestNav.Native.NTCore.NtInstance.Now">Now()</h4>
+  <div class="markdown level1 summary"><p>Returns monotonic current time in 1 us increments.
+This is the same time base used for entry and connection timestamps.
+This function by default simply wraps WPI_Now(), but if NT_SetNow() is
+called, this function instead returns the value passed to NT_SetNow();
+this can be used to reduce overhead.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long Now()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
   <a id="QuestNav_Native_NTCore_NtInstance_SetAddresses_" data-uid="QuestNav.Native.NTCore.NtInstance.SetAddresses*"></a>
   <h4 id="QuestNav_Native_NTCore_NtInstance_SetAddresses_System_ValueTuple_System_String_System_Int32____" data-uid="QuestNav.Native.NTCore.NtInstance.SetAddresses(System.ValueTuple{System.String,System.Int32}[])">SetAddresses((string addr, int port)[])</h4>
   <div class="markdown level1 summary"><p>Sets specific IP addresses and ports for NetworkTables connection</p>

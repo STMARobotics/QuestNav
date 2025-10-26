@@ -81,10 +81,7 @@
 
 
   <h1 id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse" class="text-break">Class ProtobufQuestNavCommandResponse</h1>
-  <div class="markdown level0 summary"><ul>
-<li></li>
-</ul>
-<p>Response message sent back after processing a command.</p>
+  <div class="markdown level0 summary"><p>Response message sent back after processing a command.</p>
 <p>This message is sent by the Quest back to the client after processing
 a ProtobufQuestNavCommand. It provides status information about whether
 the command was executed successfully and any error details if it failed.</p>
@@ -241,10 +238,7 @@ commands are in flight simultaneously.</p>
 </h3>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_CommandId_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.CommandId*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_CommandId" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.CommandId">CommandId</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>Command ID that matches the original command.</p>
+  <div class="markdown level1 summary"><p>Command ID that matches the original command.</p>
 <p>This field echoes the command_id from the original ProtobufQuestNavCommand
 that this response corresponds to. Clients use this to match responses
 with their original commands in asynchronous communication.</p>
@@ -294,10 +288,7 @@ with their original commands in asynchronous communication.</p>
   </table>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_ErrorMessage_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.ErrorMessage*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_ErrorMessage" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.ErrorMessage">ErrorMessage</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>Human-readable error message when success = false.</p>
+  <div class="markdown level1 summary"><p>Human-readable error message when success = false.</p>
 <p>This field provides detailed information about why a command failed.
 It should be empty or ignored when success = true.</p>
 <p>Error messages are intended for debugging and logging purposes.
@@ -354,10 +345,7 @@ They may include technical details about the failure cause.</p>
   </table>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_Success_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.Success*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_Success" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.Success">Success</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>Indicates whether the command was executed successfully.</p>
+  <div class="markdown level1 summary"><p>Indicates whether the command was executed successfully.</p>
 <p>true:  Command completed successfully
 false: Command failed (see error_message for details)</p>
 <p>Note: A successful response means the command was processed, but doesn't

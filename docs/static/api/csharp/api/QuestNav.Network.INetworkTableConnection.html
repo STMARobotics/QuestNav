@@ -141,16 +141,40 @@
       </tr>
     </tbody>
   </table>
-  <h3 id="methods">Methods
-</h3>
-  <a id="QuestNav_Network_INetworkTableConnection_GetCommandRequest_" data-uid="QuestNav.Network.INetworkTableConnection.GetCommandRequest*"></a>
-  <h4 id="QuestNav_Network_INetworkTableConnection_GetCommandRequest" data-uid="QuestNav.Network.INetworkTableConnection.GetCommandRequest">GetCommandRequest()</h4>
-  <div class="markdown level1 summary"><p>Gets the latest command request from the robot</p>
+  <a id="QuestNav_Network_INetworkTableConnection_Now_" data-uid="QuestNav.Network.INetworkTableConnection.Now*"></a>
+  <h4 id="QuestNav_Network_INetworkTableConnection_Now" data-uid="QuestNav.Network.INetworkTableConnection.Now">Now</h4>
+  <div class="markdown level1 summary"><p>Gets the current NT time</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">ProtobufQuestNavCommand GetCommandRequest()</code></pre>
+    <pre><code class="lang-csharp hljs">long Now { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+</h3>
+  <a id="QuestNav_Network_INetworkTableConnection_GetCommandRequests_" data-uid="QuestNav.Network.INetworkTableConnection.GetCommandRequests*"></a>
+  <h4 id="QuestNav_Network_INetworkTableConnection_GetCommandRequests" data-uid="QuestNav.Network.INetworkTableConnection.GetCommandRequests">GetCommandRequests()</h4>
+  <div class="markdown level1 summary"><p>Gets all command requests from the robot since the last read, or an empty array if none available</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">TimestampedValue&lt;ProtobufQuestNavCommand&gt;[] GetCommandRequests()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-condensed">
@@ -162,8 +186,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></td>
-        <td><p>The command request, or a default command if none available</p>
+        <td><a class="xref" href="QuestNav.Native.NTCore.TimestampedValue-1.html">TimestampedValue</a>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>&gt;[]</td>
+        <td><p>All command requests since the last read</p>
 </td>
       </tr>
     </tbody>
@@ -261,14 +285,14 @@
       </tr>
     </tbody>
   </table>
-  <a id="QuestNav_Network_INetworkTableConnection_SetCommandResponse_" data-uid="QuestNav.Network.INetworkTableConnection.SetCommandResponse*"></a>
-  <h4 id="QuestNav_Network_INetworkTableConnection_SetCommandResponse_QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_" data-uid="QuestNav.Network.INetworkTableConnection.SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)">SetCommandResponse(ProtobufQuestNavCommandResponse)</h4>
-  <div class="markdown level1 summary"><p>Sends a command response back to the robot</p>
+  <a id="QuestNav_Network_INetworkTableConnection_SendCommandErrorResponse_" data-uid="QuestNav.Network.INetworkTableConnection.SendCommandErrorResponse*"></a>
+  <h4 id="QuestNav_Network_INetworkTableConnection_SendCommandErrorResponse_System_UInt32_System_String_" data-uid="QuestNav.Network.INetworkTableConnection.SendCommandErrorResponse(System.UInt32,System.String)">SendCommandErrorResponse(uint, string)</h4>
+  <div class="markdown level1 summary"><p>Sends a command processing error response back to the robot</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">void SetCommandResponse(ProtobufQuestNavCommandResponse response)</code></pre>
+    <pre><code class="lang-csharp hljs">void SendCommandErrorResponse(uint commandId, string errorMessage)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -281,9 +305,42 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.html">ProtobufQuestNavCommandResponse</a></td>
-        <td><span class="parametername">response</span></td>
-        <td><p>The response to send</p>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uint32">uint</a></td>
+        <td><span class="parametername">commandId</span></td>
+        <td><p>command_id</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></td>
+        <td><span class="parametername">errorMessage</span></td>
+        <td><p>error message</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Network_INetworkTableConnection_SendCommandSuccessResponse_" data-uid="QuestNav.Network.INetworkTableConnection.SendCommandSuccessResponse*"></a>
+  <h4 id="QuestNav_Network_INetworkTableConnection_SendCommandSuccessResponse_System_UInt32_" data-uid="QuestNav.Network.INetworkTableConnection.SendCommandSuccessResponse(System.UInt32)">SendCommandSuccessResponse(uint)</h4>
+  <div class="markdown level1 summary"><p>Sends a command processing success response back to the robot</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendCommandSuccessResponse(uint commandId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uint32">uint</a></td>
+        <td><span class="parametername">commandId</span></td>
+        <td><p>command_id</p>
 </td>
       </tr>
     </tbody>

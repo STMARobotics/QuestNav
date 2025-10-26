@@ -81,10 +81,7 @@
 
 
   <h1 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand" class="text-break">Class ProtobufQuestNavCommand</h1>
-  <div class="markdown level0 summary"><ul>
-<li></li>
-</ul>
-<p>Main command message sent to the QuestNav system.</p>
+  <div class="markdown level0 summary"><p>Main command message sent to the QuestNav system.</p>
 <p>This is the primary message type used to send commands from external systems
 (like robot code) to the Quest headset. Each command includes a type identifier,
 a unique tracking ID, and optional payload data specific to the command type.</p>
@@ -240,10 +237,7 @@ and responses are received separately, matched by the command_id field.</p>
 </h3>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CommandId_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CommandId*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CommandId" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CommandId">CommandId</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>Unique identifier for this command instance.</p>
+  <div class="markdown level1 summary"><p>Unique identifier for this command instance.</p>
 <p>This ID is used to match commands with their responses in asynchronous
 communication. The client should generate unique IDs for each command
 to avoid confusion. The Quest will echo this ID in the response message.</p>
@@ -341,10 +335,7 @@ to avoid confusion. The Quest will echo this ID in the response message.</p>
   </table>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PoseResetPayload_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PoseResetPayload*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PoseResetPayload" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PoseResetPayload">PoseResetPayload</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>Payload for POSE_RESET commands.
+  <div class="markdown level1 summary"><p>Payload for POSE_RESET commands.
 Set this field when type = POSE_RESET.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -369,10 +360,7 @@ Set this field when type = POSE_RESET.</p>
   </table>
   <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Type_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Type*"></a>
   <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Type" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Type">Type</h4>
-  <div class="markdown level1 summary"><ul>
-<li></li>
-</ul>
-<p>The type of command being sent.</p>
+  <div class="markdown level1 summary"><p>The type of command being sent.</p>
 <p>This field determines which payload (if any) should be populated and
 how the Quest should process the command. See QuestNavCommandType
 enum for available command types.</p>

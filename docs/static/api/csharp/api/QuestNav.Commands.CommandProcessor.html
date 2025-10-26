@@ -126,13 +126,13 @@
   <h3 id="constructors">Constructors
 </h3>
   <a id="QuestNav_Commands_CommandProcessor__ctor_" data-uid="QuestNav.Commands.CommandProcessor.#ctor*"></a>
-  <h4 id="QuestNav_Commands_CommandProcessor__ctor_NetworkTableConnection_UnityEngine_Transform_UnityEngine_Transform_UnityEngine_Transform_" data-uid="QuestNav.Commands.CommandProcessor.#ctor(NetworkTableConnection,UnityEngine.Transform,UnityEngine.Transform,UnityEngine.Transform)">CommandProcessor(NetworkTableConnection, Transform, Transform, Transform)</h4>
+  <h4 id="QuestNav_Commands_CommandProcessor__ctor_QuestNav_Network_INetworkTableConnection_UnityEngine_Transform_UnityEngine_Transform_UnityEngine_Transform_" data-uid="QuestNav.Commands.CommandProcessor.#ctor(QuestNav.Network.INetworkTableConnection,UnityEngine.Transform,UnityEngine.Transform,UnityEngine.Transform)">CommandProcessor(INetworkTableConnection, Transform, Transform, Transform)</h4>
   <div class="markdown level1 summary"><p>Initializes a new command processor with required dependencies</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public CommandProcessor(NetworkTableConnection networkTableConnection, Transform vrCamera, Transform vrCameraRoot, Transform resetTransform)</code></pre>
+    <pre><code class="lang-csharp hljs">public CommandProcessor(INetworkTableConnection networkTableConnection, Transform vrCamera, Transform vrCameraRoot, Transform resetTransform)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -145,7 +145,7 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="NetworkTableConnection.html">NetworkTableConnection</a></td>
+        <td><a class="xref" href="QuestNav.Network.INetworkTableConnection.html">INetworkTableConnection</a></td>
         <td><span class="parametername">networkTableConnection</span></td>
         <td><p>Network connection for command communication</p>
 </td>
@@ -174,7 +174,7 @@
 </h3>
   <a id="QuestNav_Commands_CommandProcessor_ProcessCommands_" data-uid="QuestNav.Commands.CommandProcessor.ProcessCommands*"></a>
   <h4 id="QuestNav_Commands_CommandProcessor_ProcessCommands" data-uid="QuestNav.Commands.CommandProcessor.ProcessCommands">ProcessCommands()</h4>
-  <div class="markdown level1 summary"><p>Processes incoming commands from the robot and executes them if they haven't been processed before</p>
+  <div class="markdown level1 summary"><p>Processes incoming commands from the robot and executes them in order</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>

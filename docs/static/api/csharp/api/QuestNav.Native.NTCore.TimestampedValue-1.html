@@ -5,11 +5,11 @@
   <head>
     <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-      <title>Class ProtobufSubscriber&lt;T&gt; | QuestNav API Documentation </title>
+      <title>Struct TimestampedValue&lt;T&gt; | QuestNav API Documentation </title>
       <meta name="viewport" content="width=device-width">
-      <meta name="title" content="Class ProtobufSubscriber&lt;T&gt; | QuestNav API Documentation ">
+      <meta name="title" content="Struct TimestampedValue&lt;T&gt; | QuestNav API Documentation ">
     
-    <meta name="description" content="Subscriber for protobuf messages over NetworkTables. Handles deserialization of byte arrays to protobuf messages.">
+    <meta name="description" content="Represents a NetworkTables value with its associated timestamp information.">
       <link rel="shortcut icon" href="../favicon.ico">
       <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
       <link rel="stylesheet" href="../styles/docfx.css">
@@ -76,48 +76,37 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1">
+            <article class="content wrap" id="_content" data-uid="QuestNav.Native.NTCore.TimestampedValue`1">
 
 
 
-  <h1 id="QuestNav_Native_NTCore_ProtobufSubscriber_1" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1" class="text-break">Class ProtobufSubscriber&lt;T&gt;</h1>
-  <div class="markdown level0 summary"><p>Subscriber for protobuf messages over NetworkTables. Handles deserialization of byte arrays to protobuf messages.</p>
+  <h1 id="QuestNav_Native_NTCore_TimestampedValue_1" data-uid="QuestNav.Native.NTCore.TimestampedValue`1" class="text-break">Struct TimestampedValue&lt;T&gt;</h1>
+  <div class="markdown level0 summary"><p>Represents a NetworkTables value with its associated timestamp information.</p>
 </div>
   <div class="markdown level0 conceptual"></div>
-  <div class="inheritance">
-    <h5>Inheritance</h5>
-    <div class="level0"><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
-    <div class="level1"><span class="xref">ProtobufSubscriber&lt;T&gt;</span></div>
-  </div>
   <div class="inheritedMembers">
     <h5>Inherited Members</h5>
     <div>
-      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.valuetype.equals">ValueType.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode">ValueType.GetHashCode()</a>
     </div>
     <div>
       <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
     </div>
     <div>
-      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
-    </div>
-    <div>
       <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
-    </div>
-    <div>
-      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
     </div>
     <div>
       <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
     </div>
-    <div>
-      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
-    </div>
   </div>
   <h6><strong>Namespace</strong>: <a class="xref" href="QuestNav.html">QuestNav</a>.<a class="xref" href="QuestNav.Native.html">Native</a>.<a class="xref" href="QuestNav.Native.NTCore.html">NTCore</a></h6>
   <h6><strong>Assembly</strong>: QuestNav.dll</h6>
-  <h5 id="QuestNav_Native_NTCore_ProtobufSubscriber_1_syntax">Syntax</h5>
+  <h5 id="QuestNav_Native_NTCore_TimestampedValue_1_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class ProtobufSubscriber&lt;T&gt; where T : IMessage&lt;T&gt;, new()</code></pre>
+    <pre><code class="lang-csharp hljs">public struct TimestampedValue&lt;T&gt;</code></pre>
   </div>
   <h5 class="typeParameters">Type Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -130,21 +119,21 @@
     <tbody>
       <tr>
         <td><span class="parametername">T</span></td>
-        <td><p>The protobuf message type</p>
+        <td><p>The type of the value</p>
 </td>
       </tr>
     </tbody>
   </table>
-  <h3 id="methods">Methods
+  <h3 id="constructors">Constructors
 </h3>
-  <a id="QuestNav_Native_NTCore_ProtobufSubscriber_1_Get_" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1.Get*"></a>
-  <h4 id="QuestNav_Native_NTCore_ProtobufSubscriber_1_Get__0_" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1.Get(`0)">Get(T)</h4>
-  <div class="markdown level1 summary"><p>Gets the latest protobuf message from NetworkTables, or returns the default value if none available</p>
+  <a id="QuestNav_Native_NTCore_TimestampedValue_1__ctor_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.#ctor*"></a>
+  <h4 id="QuestNav_Native_NTCore_TimestampedValue_1__ctor__0_System_Int64_System_Int64_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.#ctor(`0,System.Int64,System.Int64)">TimestampedValue(T, long, long)</h4>
+  <div class="markdown level1 summary"><p>Creates a new timestamped value</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public T Get(T defaultValue)</code></pre>
+    <pre><code class="lang-csharp hljs">public TimestampedValue(T value, long serverTime, long lastChange)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -158,13 +147,84 @@
     <tbody>
       <tr>
         <td><span class="xref">T</span></td>
-        <td><span class="parametername">defaultValue</span></td>
-        <td><p>The default value to return if no message is available</p>
+        <td><span class="parametername">value</span></td>
+        <td><p>The value</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td><span class="parametername">serverTime</span></td>
+        <td><p>Server timestamp in microseconds since server start</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td><span class="parametername">lastChange</span></td>
+        <td><p>Timestamp when value last changed in microseconds since Unix epoch</p>
 </td>
       </tr>
     </tbody>
   </table>
-  <h5 class="returns">Returns</h5>
+  <h3 id="properties">Properties
+</h3>
+  <a id="QuestNav_Native_NTCore_TimestampedValue_1_LastChange_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.LastChange*"></a>
+  <h4 id="QuestNav_Native_NTCore_TimestampedValue_1_LastChange" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.LastChange">LastChange</h4>
+  <div class="markdown level1 summary"><p>The timestamp when this value was last changed (in microseconds since Unix epoch)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long LastChange { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_TimestampedValue_1_ServerTime_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.ServerTime*"></a>
+  <h4 id="QuestNav_Native_NTCore_TimestampedValue_1_ServerTime" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.ServerTime">ServerTime</h4>
+  <div class="markdown level1 summary"><p>The NetworkTables server timestamp when this value was published (in microseconds since server start)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long ServerTime { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_TimestampedValue_1_Value_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.Value*"></a>
+  <h4 id="QuestNav_Native_NTCore_TimestampedValue_1_Value" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.Value">Value</h4>
+  <div class="markdown level1 summary"><p>The actual value from NetworkTables</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public T Value { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-condensed">
     <thead>
       <tr>
@@ -175,19 +235,19 @@
     <tbody>
       <tr>
         <td><span class="xref">T</span></td>
-        <td><p>The latest protobuf message or the default value</p>
-</td>
+        <td></td>
       </tr>
     </tbody>
   </table>
-  <a id="QuestNav_Native_NTCore_ProtobufSubscriber_1_ReadQueueValues_" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1.ReadQueueValues*"></a>
-  <h4 id="QuestNav_Native_NTCore_ProtobufSubscriber_1_ReadQueueValues" data-uid="QuestNav.Native.NTCore.ProtobufSubscriber`1.ReadQueueValues">ReadQueueValues()</h4>
-  <div class="markdown level1 summary"><p>Reads the protobuf message queue for this subscriber, returning only successfully parsed messages.</p>
-</div>
+  <h3 id="methods">Methods
+</h3>
+  <a id="QuestNav_Native_NTCore_TimestampedValue_1_ToString_" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.ToString*"></a>
+  <h4 id="QuestNav_Native_NTCore_TimestampedValue_1_ToString" data-uid="QuestNav.Native.NTCore.TimestampedValue`1.ToString">ToString()</h4>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public TimestampedValue&lt;T&gt;[] ReadQueueValues()</code></pre>
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-condensed">
@@ -199,12 +259,13 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="QuestNav.Native.NTCore.TimestampedValue-1.html">TimestampedValue</a>&lt;T&gt;[]</td>
-        <td><p>An array of protobuf messages of type T from the queue</p>
-</td>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></td>
+        <td></td>
       </tr>
     </tbody>
   </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.valuetype.tostring">ValueType.ToString()</a></div>
 
 </article>
           </div>

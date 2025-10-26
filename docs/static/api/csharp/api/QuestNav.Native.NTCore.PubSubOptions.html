@@ -9,7 +9,7 @@
       <meta name="viewport" content="width=device-width">
       <meta name="title" content="Struct PubSubOptions | QuestNav API Documentation ">
     
-    
+    <meta name="description" content="Options for NetworkTables publishers and subscribers. Controls behavior such as update frequency, storage, and filtering.">
       <link rel="shortcut icon" href="../favicon.ico">
       <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
       <link rel="stylesheet" href="../styles/docfx.css">
@@ -81,7 +81,9 @@
 
 
   <h1 id="QuestNav_Native_NTCore_PubSubOptions" data-uid="QuestNav.Native.NTCore.PubSubOptions" class="text-break">Struct PubSubOptions</h1>
-  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 summary"><p>Options for NetworkTables publishers and subscribers.
+Controls behavior such as update frequency, storage, and filtering.</p>
+</div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritedMembers">
     <h5>Inherited Members</h5>
@@ -114,7 +116,8 @@
 </h3>
   <a id="QuestNav_Native_NTCore_PubSubOptions_AllDefault_" data-uid="QuestNav.Native.NTCore.PubSubOptions.AllDefault*"></a>
   <h4 id="QuestNav_Native_NTCore_PubSubOptions_AllDefault" data-uid="QuestNav.Native.NTCore.PubSubOptions.AllDefault">AllDefault</h4>
-  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 summary"><p>Default publisher/subscriber options with reasonable defaults for most use cases.</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
@@ -135,9 +138,144 @@
       </tr>
     </tbody>
   </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_DisableLocal_" data-uid="QuestNav.Native.NTCore.PubSubOptions.DisableLocal*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_DisableLocal" data-uid="QuestNav.Native.NTCore.PubSubOptions.DisableLocal">DisableLocal</h4>
+  <div class="markdown level1 summary"><p>For subscriptions, if local value updates should not be queued for
+ReadQueue(). See also DisableRemote. If true, updates from the local
+client (same NetworkTables instance) will not be stored in the queue.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool DisableLocal { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_DisableRemote_" data-uid="QuestNav.Native.NTCore.PubSubOptions.DisableRemote*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_DisableRemote" data-uid="QuestNav.Native.NTCore.PubSubOptions.DisableRemote">DisableRemote</h4>
+  <div class="markdown level1 summary"><p>For subscriptions, if remote value updates should not be queued for
+ReadQueue(). See also DisableLocal. If true, updates from remote clients
+(other NetworkTables instances) will not be stored in the queue.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool DisableRemote { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_ExcludePublisher_" data-uid="QuestNav.Native.NTCore.PubSubOptions.ExcludePublisher*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_ExcludePublisher" data-uid="QuestNav.Native.NTCore.PubSubOptions.ExcludePublisher">ExcludePublisher</h4>
+  <div class="markdown level1 summary"><p>For subscriptions, if non-zero, value updates for ReadQueue() are not
+queued for this publisher. Use this to exclude updates from a specific
+publisher by its handle/ID.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint ExcludePublisher { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uint32">uint</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_ExcludeSelf_" data-uid="QuestNav.Native.NTCore.PubSubOptions.ExcludeSelf*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_ExcludeSelf" data-uid="QuestNav.Native.NTCore.PubSubOptions.ExcludeSelf">ExcludeSelf</h4>
+  <div class="markdown level1 summary"><p>For entries, don't queue (for ReadQueue) value updates for the entry's
+internal publisher. If true, updates published by the same entry that
+is also subscribing will not be queued for ReadQueue().</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ExcludeSelf { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_Hidden_" data-uid="QuestNav.Native.NTCore.PubSubOptions.Hidden*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_Hidden" data-uid="QuestNav.Native.NTCore.PubSubOptions.Hidden">Hidden</h4>
+  <div class="markdown level1 summary"><p>For subscriptions, don't share the existence of the subscription with the
+network. Note this means updates will not be received from the network
+unless another subscription overlaps with this one, and the subscription
+will not appear in metatopics. Useful for internal monitoring without
+affecting network traffic.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Hidden { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
   <a id="QuestNav_Native_NTCore_PubSubOptions_KeepDuplicates_" data-uid="QuestNav.Native.NTCore.PubSubOptions.KeepDuplicates*"></a>
   <h4 id="QuestNav_Native_NTCore_PubSubOptions_KeepDuplicates" data-uid="QuestNav.Native.NTCore.PubSubOptions.KeepDuplicates">KeepDuplicates</h4>
-  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 summary"><p>Preserve duplicate value changes (rather than ignoring them).
+If false, consecutive identical values are filtered out.
+If true, all value updates are preserved even if they contain the same data.</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
@@ -160,7 +298,11 @@
   </table>
   <a id="QuestNav_Native_NTCore_PubSubOptions_Periodic_" data-uid="QuestNav.Native.NTCore.PubSubOptions.Periodic*"></a>
   <h4 id="QuestNav_Native_NTCore_PubSubOptions_Periodic" data-uid="QuestNav.Native.NTCore.PubSubOptions.Periodic">Periodic</h4>
-  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 summary"><p>How frequently changes will be sent over the network, in seconds.
+NetworkTables may send more frequently than this (e.g. use a combined
+minimum period for all values) or apply a restricted range to this value.
+The default is 100 ms (0.1 seconds).</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
@@ -181,9 +323,66 @@
       </tr>
     </tbody>
   </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_PollStorage_" data-uid="QuestNav.Native.NTCore.PubSubOptions.PollStorage*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_PollStorage" data-uid="QuestNav.Native.NTCore.PubSubOptions.PollStorage">PollStorage</h4>
+  <div class="markdown level1 summary"><p>Polling storage size for a subscription. Specifies the maximum number of
+updates NetworkTables should store between calls to the subscriber's
+ReadQueue() function. If zero, defaults to 1 if SendAll is false, 20 if
+SendAll is true.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint PollStorage { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uint32">uint</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_PrefixMatch_" data-uid="QuestNav.Native.NTCore.PubSubOptions.PrefixMatch*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_PrefixMatch" data-uid="QuestNav.Native.NTCore.PubSubOptions.PrefixMatch">PrefixMatch</h4>
+  <div class="markdown level1 summary"><p>Perform prefix match on subscriber topic names. Is ignored/overridden by
+Subscribe() functions; only present in struct for the purposes of getting
+information about subscriptions. When true, the subscription will match
+all topics that start with the specified name prefix.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool PrefixMatch { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
   <a id="QuestNav_Native_NTCore_PubSubOptions_SendAll_" data-uid="QuestNav.Native.NTCore.PubSubOptions.SendAll*"></a>
   <h4 id="QuestNav_Native_NTCore_PubSubOptions_SendAll" data-uid="QuestNav.Native.NTCore.PubSubOptions.SendAll">SendAll</h4>
-  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 summary"><p>Send all value changes over the network.
+If false, only the latest value is sent when the periodic timer expires.
+If true, all value changes are sent as they occur.</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
@@ -204,11 +403,39 @@
       </tr>
     </tbody>
   </table>
+  <a id="QuestNav_Native_NTCore_PubSubOptions_TopicsOnly_" data-uid="QuestNav.Native.NTCore.PubSubOptions.TopicsOnly*"></a>
+  <h4 id="QuestNav_Native_NTCore_PubSubOptions_TopicsOnly" data-uid="QuestNav.Native.NTCore.PubSubOptions.TopicsOnly">TopicsOnly</h4>
+  <div class="markdown level1 summary"><p>For subscriptions, don't ask for value changes (only topic announcements).
+If true, the subscriber will only receive notifications when topics are
+created or destroyed, but not when their values change.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool TopicsOnly { readonly get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
   <h3 id="methods">Methods
 </h3>
   <a id="QuestNav_Native_NTCore_PubSubOptions_ToNative_" data-uid="QuestNav.Native.NTCore.PubSubOptions.ToNative*"></a>
   <h4 id="QuestNav_Native_NTCore_PubSubOptions_ToNative" data-uid="QuestNav.Native.NTCore.PubSubOptions.ToNative">ToNative()</h4>
-  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 summary"><p>Converts this managed PubSubOptions to the native NativePubSubOptions structure
+used by the NetworkTables native library.</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
@@ -225,7 +452,8 @@
     <tbody>
       <tr>
         <td><a class="xref" href="QuestNav.Native.NTCore.NativePubSubOptions.html">NativePubSubOptions</a></td>
-        <td></td>
+        <td><p>A NativePubSubOptions struct with equivalent settings</p>
+</td>
       </tr>
     </tbody>
   </table>

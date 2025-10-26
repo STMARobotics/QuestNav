@@ -92,10 +92,7 @@ Classes
       <section><p>Holder for reflection information generated from geometry3d.proto</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufEllipse2d.html">ProtobufEllipse2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D ellipse with arbitrary orientation.</p>
+      <section><p>Represents a 2D ellipse with arbitrary orientation.</p>
 <p>This message defines an elliptical region in 2D space using a center pose
 and semi-axis lengths. The ellipse can be rotated to any orientation
 based on the center pose's rotation component.</p>
@@ -122,10 +119,7 @@ based on the center pose's rotation component.</p>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufPose2d.html">ProtobufPose2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a complete 2D pose (position and orientation).</p>
+      <section><p>Represents a complete 2D pose (position and orientation).</p>
 <p>This message combines a 2D position (translation) with a 2D orientation
 (rotation) to fully describe an object's pose in the 2D plane. This is
 the fundamental representation for robot poses in WPILib and QuestNav.</p>
@@ -145,10 +139,7 @@ the fundamental representation for robot poses in WPILib and QuestNav.</p>
 coordinate frame, allowing transformation of points between the two systems.</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a complete 3D pose (position and orientation).</p>
+      <section><p>Represents a complete 3D pose (position and orientation).</p>
 <p>This message combines a 3D position (translation) with a 3D orientation
 (rotation) to fully describe an object's pose in 3D space. This extends
 the 2D pose concept into three dimensions for applications requiring
@@ -175,10 +166,7 @@ Given a point P in the object's local frame, the corresponding point
 in the reference frame is: P_ref = rotation * P_local + translation</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufQuaternion.html">ProtobufQuaternion</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a quaternion for 3D rotation.</p>
+      <section><p>Represents a quaternion for 3D rotation.</p>
 <p>Quaternions provide a mathematically robust way to represent 3D rotations
 without the singularities (gimbal lock) that can occur with Euler angles.
 They are the preferred representation for 3D rotations in robotics.</p>
@@ -207,10 +195,7 @@ w = cos(θ/2), (x,y,z) = sin(θ/2) * unit_axis</li>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufRectangle2d.html">ProtobufRectangle2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D rectangle with arbitrary orientation.</p>
+      <section><p>Represents a 2D rectangle with arbitrary orientation.</p>
 <p>This message defines a rectangular region in 2D space using a center pose
 and width/height dimensions. The rectangle can be rotated to any orientation
 based on the center pose's rotation component.</p>
@@ -231,10 +216,7 @@ based on the center pose's rotation component.</p>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufRotation2d.html">ProtobufRotation2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D rotation angle.</p>
+      <section><p>Represents a 2D rotation angle.</p>
 <p>This message encodes a rotation in the 2D plane using a single angle value.
 It follows the standard mathematical convention for angle measurement and
 is used to represent orientations and rotational displacements.</p>
@@ -255,10 +237,7 @@ is used to represent orientations and rotational displacements.</p>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufRotation3d.html">ProtobufRotation3d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 3D rotation using a quaternion.</p>
+      <section><p>Represents a 3D rotation using a quaternion.</p>
 <p>This message wraps a quaternion to represent 3D rotations in a standardized
 way. It provides a clean interface for 3D rotation operations while
 leveraging the mathematical advantages of quaternions internally.</p>
@@ -281,10 +260,7 @@ coordinate system to another.</p>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTransform2d.html">ProtobufTransform2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D coordinate transformation.</p>
+      <section><p>Represents a 2D coordinate transformation.</p>
 <p>This message describes how to transform coordinates from one 2D coordinate
 frame to another. It combines a translation and rotation to define the
 relationship between two coordinate systems.</p>
@@ -302,10 +278,7 @@ P_B = Transform2d * P_A = Rotation * P_A + Translation</p>
 inverted to get the reverse transformation.</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTransform3d.html">ProtobufTransform3d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 3D coordinate transformation.</p>
+      <section><p>Represents a 3D coordinate transformation.</p>
 <p>This message describes how to transform coordinates from one 3D coordinate
 frame to another. It combines a 3D translation and rotation to define the
 complete spatial relationship between two coordinate systems.</p>
@@ -331,10 +304,7 @@ inverted to get the reverse transformation. Transforms can also be composed
 to create transformation chains through multiple coordinate frames.</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTranslation2d.html">ProtobufTranslation2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D translation (displacement) vector.</p>
+      <section><p>Represents a 2D translation (displacement) vector.</p>
 <p>This message encodes a 2D displacement or position vector using Cartesian
 coordinates. It's used as a building block for more complex geometric
 representations like poses and transforms.</p>
@@ -353,10 +323,7 @@ representations like poses and transforms.</p>
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTranslation3d.html">ProtobufTranslation3d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 3D translation (displacement) vector.</p>
+      <section><p>Represents a 3D translation (displacement) vector.</p>
 <p>This message encodes a 3D displacement or position vector using Cartesian
 coordinates. It extends the 2D translation concept into three dimensions
 and serves as a building block for more complex 3D geometric representations.</p>
@@ -377,10 +344,7 @@ and serves as a building block for more complex 3D geometric representations.</p
 </ul>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTwist2d.html">ProtobufTwist2d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 2D twist (velocity in 2D space).</p>
+      <section><p>Represents a 2D twist (velocity in 2D space).</p>
 <p>This message encodes the instantaneous velocity of an object in 2D space,
 including both linear and angular velocity components. It describes how
 an object's pose is changing over time.</p>
@@ -403,10 +367,7 @@ The twist can be expressed in different coordinate frames (robot-relative
 or field-relative) depending on the application context.</p>
 </section>
       <h4><a class="xref" href="Wpi.Proto.ProtobufTwist3d.html">ProtobufTwist3d</a></h4>
-      <section><ul>
-<li></li>
-</ul>
-<p>Represents a 3D twist (velocity in 3D space).</p>
+      <section><p>Represents a 3D twist (velocity in 3D space).</p>
 <p>This message encodes the instantaneous velocity of an object in 3D space,
 including both linear and angular velocity components. It describes how
 an object's 3D pose is changing over time, extending the 2D twist concept
