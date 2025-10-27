@@ -21,3 +21,4 @@ unity/Assets/Resources/PerformanceTestRunSettings.*
 unity/Assets/StreamingAssets/RuntimeActionBindings.*
 /.cursor
 /unity/Assets/XR/Resources/*
+/unity/.cursor
