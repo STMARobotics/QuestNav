@@ -36,11 +36,58 @@ export interface ConfigUpdateResponse {
 }
 
 export interface ServerInfo {
+  // App Information
+  appName: string
   version: string
+  unityVersion: string
+  buildDate: string
+  
+  // Platform Information
   platform: string
   deviceModel: string
+  deviceName: string
+  operatingSystem: string
+  
+  // System Information
+  processorType: string
+  processorCount: number
+  systemMemorySize: number
+  graphicsDeviceName: string
+  
+  // Config Information
   connectedClients: number
   configPath: string
+  serverPort: number
+  authenticationEnabled: boolean
+  
+  timestamp: number
+}
+
+export interface HeadsetStatus {
+  // Pose
+  position: { x: number, y: number, z: number }
+  rotation: { x: number, y: number, z: number, w: number }
+  eulerAngles: { pitch: number, yaw: number, roll: number }
+  
+  // Tracking
+  isTracking: boolean
+  trackingLostEvents: number
+  
+  // Battery
+  batteryPercent: number
+  batteryLevel: number
+  batteryStatus: string
+  batteryCharging: boolean
+  
+  // Network
+  networkConnected: boolean
+  ipAddress: string
+  teamNumber: number
+  
+  // Performance
+  fps: number
+  frameCount: number
+  
   timestamp: number
 }
 

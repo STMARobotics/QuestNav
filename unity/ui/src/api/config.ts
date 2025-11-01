@@ -1,6 +1,6 @@
 // API client for configuration endpoints
 
-import type { ConfigSchema, ConfigUpdateRequest, ConfigUpdateResponse, ServerInfo } from '../types'
+import type { ConfigSchema, ConfigUpdateRequest, ConfigUpdateResponse, ServerInfo, HeadsetStatus } from '../types'
 
 class ConfigApi {
   private baseUrl: string
@@ -31,14 +31,14 @@ class ConfigApi {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken()
     
-    if (!token) {
-      throw new Error('No authentication token')
-    }
-
-    const headers = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers
+      ...options.headers as Record<string, string>
+    }
+    
+    // Add auth header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -76,6 +76,10 @@ class ConfigApi {
 
   async getServerInfo(): Promise<ServerInfo> {
     return this.request<ServerInfo>('/api/info')
+  }
+  
+  async getHeadsetStatus(): Promise<HeadsetStatus> {
+    return this.request<HeadsetStatus>('/api/status')
   }
 
   async testConnection(): Promise<boolean> {

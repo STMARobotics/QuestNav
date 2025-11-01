@@ -100,11 +100,23 @@ export const useConfigStore = defineStore('config', () => {
     values.value = {}
   }
 
-  // Initialize from localStorage
-  const storedToken = configApi.getToken()
-  if (storedToken) {
-    authenticate(storedToken)
+  // Initialize: try without auth first, fall back to stored token
+  async function tryInitialize() {
+    try {
+      // Try to load schema without authentication
+      await loadSchema()
+      await loadConfig()
+      isAuthenticated.value = true
+    } catch (err) {
+      // If it fails, try with stored token
+      const storedToken = configApi.getToken()
+      if (storedToken) {
+        await authenticate(storedToken)
+      }
+    }
   }
+  
+  tryInitialize()
 
   return {
     // State

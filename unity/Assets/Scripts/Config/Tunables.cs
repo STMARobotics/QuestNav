@@ -5,7 +5,7 @@ namespace QuestNav.Config
     public static class Tunables
     {
         // ===== QuestNav Configuration =====
-        
+
         [Config(
             DisplayName = "Default Team Number",
             Description = "Default FRC team number for NetworkTables connection",
@@ -194,5 +194,15 @@ namespace QuestNav.Config
             Order = 41
         )]
         public static bool enableCORSDevMode = false;
+
+        [Config(
+            DisplayName = "Require Authentication",
+            Description = "Require token authentication for web interface access",
+            Category = "General",
+            ControlType = "checkbox",
+            RequiresRestart = true,
+            Order = 42
+        )]
+        public static bool requireAuthentication = false;
     }
 }

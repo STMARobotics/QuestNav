@@ -49,21 +49,64 @@
         <h2>Server Information</h2>
         
         <div v-if="serverInfo" class="info-grid">
+          <h3>Application</h3>
+          <div class="info-item">
+            <span class="info-label">App Name:</span>
+            <span class="info-value">{{ serverInfo.appName }}</span>
+          </div>
           <div class="info-item">
             <span class="info-label">Version:</span>
             <span class="info-value">{{ serverInfo.version }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Platform:</span>
-            <span class="info-value">{{ serverInfo.platform }}</span>
+            <span class="info-label">Build Date:</span>
+            <span class="info-value">{{ serverInfo.buildDate }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Device:</span>
+            <span class="info-label">Unity Version:</span>
+            <span class="info-value">{{ serverInfo.unityVersion }}</span>
+          </div>
+          
+          <h3>Device</h3>
+          <div class="info-item">
+            <span class="info-label">Device Model:</span>
             <span class="info-value">{{ serverInfo.deviceModel }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Connected Clients:</span>
-            <span class="info-value">{{ serverInfo.connectedClients }}</span>
+            <span class="info-label">Device Name:</span>
+            <span class="info-value">{{ serverInfo.deviceName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Operating System:</span>
+            <span class="info-value">{{ serverInfo.operatingSystem }}</span>
+          </div>
+          
+          <h3>System</h3>
+          <div class="info-item">
+            <span class="info-label">Processor:</span>
+            <span class="info-value">{{ serverInfo.processorType }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">CPU Cores:</span>
+            <span class="info-value">{{ serverInfo.processorCount }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">System Memory:</span>
+            <span class="info-value">{{ serverInfo.systemMemorySize }} MB</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Graphics:</span>
+            <span class="info-value">{{ serverInfo.graphicsDeviceName }}</span>
+          </div>
+          
+          <h3>Server</h3>
+          <div class="info-item">
+            <span class="info-label">Port:</span>
+            <span class="info-value">{{ serverInfo.serverPort }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Authentication:</span>
+            <span class="info-value">{{ serverInfo.authenticationEnabled ? 'Enabled' : 'Disabled' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Config Path:</span>
@@ -204,9 +247,23 @@ function handleLogout() {
 }
 
 .info-grid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.info-grid h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.info-grid h3:first-child {
+  margin-top: 0;
 }
 
 .info-item {

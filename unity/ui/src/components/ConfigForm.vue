@@ -19,18 +19,26 @@
       <div class="tabs-container card">
         <div class="tabs-nav">
           <button
-            v-for="category in configStore.categories"
-            :key="category"
-            :class="['tab-button', { active: activeTab === category }]"
-            @click="activeTab = category"
+            v-for="tab in allTabs"
+            :key="tab"
+            :class="['tab-button', { active: activeTab === tab }]"
+            @click="activeTab = tab"
           >
-            {{ category }}
-            <span class="tab-count">{{ configStore.fieldsByCategory[category]?.length || 0 }}</span>
+            {{ tab }}
+            <span v-if="tab !== 'Status'" class="tab-count">
+              {{ configStore.fieldsByCategory[tab]?.length || 0 }}
+            </span>
           </button>
         </div>
 
         <!-- Tab Content -->
         <div class="tab-content">
+          <!-- Status Tab -->
+          <div v-show="activeTab === 'Status'" class="tab-panel">
+            <StatusView />
+          </div>
+          
+          <!-- Config Tabs -->
           <div
             v-for="category in configStore.categories"
             :key="category"
@@ -60,19 +68,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '../stores/config'
 import ConfigField from './ConfigField.vue'
+import StatusView from './StatusView.vue'
 
 const configStore = useConfigStore()
-const activeTab = ref<string>('QuestNav')
+const activeTab = ref<string>('Status')
+
+// Add Status as first tab
+const allTabs = computed(() => ['Status', ...configStore.categories])
 
 onMounted(async () => {
   await loadData()
-  // Set first category as active tab if QuestNav doesn't exist
-  if (configStore.categories.length > 0 && !configStore.categories.includes('QuestNav')) {
-    activeTab.value = configStore.categories[0]
-  }
 })
 
 async function loadData() {
