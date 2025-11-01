@@ -234,12 +234,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-DSZ1Floc.css",
-                Path.Combine(assetsDir, "main-DSZ1Floc.css")
+                "ui/assets/main-DnIUwsh4.css",
+                Path.Combine(assetsDir, "main-DnIUwsh4.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-Bbg2kUbF.js",
-                Path.Combine(assetsDir, "main-Bbg2kUbF.js")
+                "ui/assets/main-CDdctYJ_.js",
+                Path.Combine(assetsDir, "main-CDdctYJ_.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");

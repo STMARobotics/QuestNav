@@ -3,6 +3,7 @@
     <div class="logs-controls">
       <div class="controls-left">
         <button @click="loadLogs" class="secondary">🔄 Refresh</button>
+        <button @click="exportLogs" class="secondary">💾 Export</button>
         <button @click="clearLogs" class="danger">🗑️ Clear Logs</button>
         <label class="auto-scroll-label">
           <input type="checkbox" v-model="autoScroll" />
@@ -107,6 +108,39 @@ async function clearLogs() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to clear logs'
   }
+}
+
+function exportLogs() {
+  // Generate log file content
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+  const filename = `questnav-logs-${timestamp}.log`
+  
+  let content = `QuestNav Unity Logs\n`
+  content += `Exported: ${new Date().toLocaleString()}\n`
+  content += `Total Logs: ${logs.value.length}\n`
+  content += `Filter: ${filterLevel.value}\n`
+  content += `${'='.repeat(80)}\n\n`
+  
+  filteredLogs.value.forEach((log, index) => {
+    const time = new Date(log.timestamp).toLocaleString()
+    content += `[${index + 1}] ${time} [${log.type}]\n`
+    content += `${log.message}\n`
+    
+    if (log.stackTrace && log.type !== 'Log') {
+      content += `\nStack Trace:\n${log.stackTrace}\n`
+    }
+    
+    content += `${'-'.repeat(80)}\n\n`
+  })
+  
+  // Create and download file
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 function scrollToBottom() {
