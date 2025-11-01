@@ -19,9 +19,6 @@
             <button class="secondary" @click="showInfo">
               ℹ️ Info
             </button>
-            <button class="danger" @click="handleLogout">
-              🚪 Logout
-            </button>
           </div>
         </div>
       </header>
@@ -140,12 +137,6 @@ async function showInfo() {
     showInfoModal.value = true
   } catch (error) {
     console.error('Failed to load server info:', error)
-  }
-}
-
-function handleLogout() {
-  if (confirm('Are you sure you want to reload the page?')) {
-    window.location.reload()
   }
 }
 </script>

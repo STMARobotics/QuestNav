@@ -309,7 +309,7 @@ namespace QuestNav.Config
             var status = StatusProvider.Instance.GetStatus();
             await context.SendDataAsync(status);
         }
-        
+
         private async Task HandleGetLogs(IHttpContext context)
         {
             int count = 100;
@@ -317,11 +317,11 @@ namespace QuestNav.Config
             {
                 int.TryParse(context.Request.QueryString["count"], out count);
             }
-            
+
             var logs = LogCollector.Instance.GetRecentLogs(count);
             await context.SendDataAsync(new { success = true, logs = logs });
         }
-        
+
         private async Task HandleClearLogs(IHttpContext context)
         {
             LogCollector.Instance.ClearLogs();

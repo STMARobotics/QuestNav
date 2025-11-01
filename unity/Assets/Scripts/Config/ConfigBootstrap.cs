@@ -95,7 +95,7 @@ namespace QuestNav.Config
             // Initialize singletons on main thread before server starts
             var statusProvider = StatusProvider.Instance;
             var logCollector = LogCollector.Instance;
-            
+
             m_isInitialized = true;
             Debug.Log("[ConfigBootstrap] Initialization complete");
 
@@ -234,12 +234,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-DnIUwsh4.css",
-                Path.Combine(assetsDir, "main-DnIUwsh4.css")
+                "ui/assets/main-sKiS_H-Q.css",
+                Path.Combine(assetsDir, "main-sKiS_H-Q.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-CDdctYJ_.js",
-                Path.Combine(assetsDir, "main-CDdctYJ_.js")
+                "ui/assets/main-BJ3Kb4Nr.js",
+                Path.Combine(assetsDir, "main-BJ3Kb4Nr.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");
