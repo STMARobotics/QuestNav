@@ -130,7 +130,7 @@ namespace QuestNav.Config
         [Config(
             DisplayName = "Tag Size (meters)",
             Description = "Physical size of AprilTag markers in meters",
-            Category = "AprilTag Detection",
+            Category = "AprilTag",
             Min = 0.01f,
             Max = 1.0f,
             Step = 0.01f,
@@ -142,7 +142,7 @@ namespace QuestNav.Config
         [Config(
             DisplayName = "Decimation",
             Description = "Downscale factor for detection (higher = faster, less accurate)",
-            Category = "AprilTag Detection",
+            Category = "AprilTag",
             Min = 1,
             Max = 8,
             Step = 1,
@@ -154,7 +154,7 @@ namespace QuestNav.Config
         [Config(
             DisplayName = "Max Detections Per Second",
             Description = "Maximum detection rate to maintain performance",
-            Category = "AprilTag Detection",
+            Category = "AprilTag",
             Min = 1f,
             Max = 60f,
             Step = 1f,
@@ -166,18 +166,18 @@ namespace QuestNav.Config
         [Config(
             DisplayName = "Enable Debug Logging",
             Description = "Enable verbose debug output for detection system",
-            Category = "AprilTag Detection",
+            Category = "AprilTag",
             ControlType = "checkbox",
             Order = 23
         )]
         public static bool enableDebugLogging = false;
 
-        // ===== Network Configuration =====
+        // ===== General Configuration =====
 
         [Config(
             DisplayName = "Server Port",
             Description = "HTTP server port for configuration UI",
-            Category = "Network",
+            Category = "General",
             Min = 1024,
             Max = 65535,
             ControlType = "input",
@@ -189,7 +189,7 @@ namespace QuestNav.Config
         [Config(
             DisplayName = "Enable CORS Dev Mode",
             Description = "Allow localhost connections for development",
-            Category = "Network",
+            Category = "General",
             ControlType = "checkbox",
             Order = 41
         )]
