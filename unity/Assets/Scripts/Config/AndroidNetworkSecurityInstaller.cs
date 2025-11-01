@@ -7,7 +7,8 @@ namespace QuestNav.Config
 {
     public static class AndroidNetworkSecurityInstaller
     {
-        private const string NETWORK_SECURITY_CONFIG = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        private const string NETWORK_SECURITY_CONFIG =
+            @"<?xml version=""1.0"" encoding=""utf-8""?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted=""true"">
         <domain includeSubdomains=""true"">localhost</domain>
@@ -26,8 +27,15 @@ namespace QuestNav.Config
         [MenuItem("QuestNav/Config/Install Network Security Config")]
         public static void InstallNetworkSecurityConfig()
         {
-            string androidLibPath = Path.Combine(Application.dataPath, "Plugins", "Android", "QuestNavConfig.androidlib", "res", "xml");
-            
+            string androidLibPath = Path.Combine(
+                Application.dataPath,
+                "Plugins",
+                "Android",
+                "QuestNavConfig.androidlib",
+                "res",
+                "xml"
+            );
+
             if (!Directory.Exists(androidLibPath))
             {
                 Directory.CreateDirectory(androidLibPath);
@@ -35,11 +43,12 @@ namespace QuestNav.Config
 
             string configPath = Path.Combine(androidLibPath, "network_security_config.xml");
             File.WriteAllText(configPath, NETWORK_SECURITY_CONFIG);
-            
-            Debug.Log($"[AndroidNetworkSecurityInstaller] Created network_security_config.xml in Android Library");
+
+            Debug.Log(
+                $"[AndroidNetworkSecurityInstaller] Created network_security_config.xml in Android Library"
+            );
             AssetDatabase.Refresh();
         }
     }
 }
 #endif
-
