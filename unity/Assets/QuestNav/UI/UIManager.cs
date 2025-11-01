@@ -269,11 +269,29 @@ namespace QuestNav.UI
             syncFromTunables();
         }
 
+        private string lastDebugIPOverride = "";
+        
         /// <summary>
         /// Syncs UI elements with Tunables values (updated via web config)
         /// </summary>
         private void syncFromTunables()
         {
+            // Check if debug IP override changed - triggers reconnection
+            if (lastDebugIPOverride != Tunables.debugNTServerAddressOverride)
+            {
+                string newValue = Tunables.debugNTServerAddressOverride ?? "";
+                
+                // Only trigger reconnection if the value is empty (cleared) or a valid IP
+                bool shouldReconnect = string.IsNullOrEmpty(newValue) || IsValidIPAddress(newValue);
+                
+                if (shouldReconnect)
+                {
+                    lastDebugIPOverride = newValue;
+                    // Trigger reconnection with current team number (which checks debug override internally)
+                    networkTableConnection.UpdateTeamNumber(teamNumber);
+                }
+            }
+            
             // Sync team number if changed via web interface
             if (teamNumber != Tunables.defaultTeamNumber)
             {
@@ -290,6 +308,30 @@ namespace QuestNav.UI
             }
         }
 
+        /// <summary>
+        /// Validates if a string is a valid IPv4 address
+        /// </summary>
+        private bool IsValidIPAddress(string ipString)
+        {
+            if (string.IsNullOrEmpty(ipString))
+                return false;
+            
+            string[] parts = ipString.Split('.');
+            if (parts.Length != 4)
+                return false;
+            
+            foreach (string part in parts)
+            {
+                if (!int.TryParse(part, out int num))
+                    return false;
+                
+                if (num < 0 || num > 255)
+                    return false;
+            }
+            
+            return true;
+        }
+        
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>

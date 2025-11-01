@@ -5,7 +5,7 @@ namespace QuestNav.Config
     public static class Tunables
     {
         // ===== QuestNav Configuration =====
-
+        
         [Config(
             DisplayName = "Default Team Number",
             Description = "Default FRC team number for NetworkTables connection",
@@ -18,6 +18,15 @@ namespace QuestNav.Config
         public static int defaultTeamNumber = 9999;
 
         [Config(
+            DisplayName = "Debug IP Override",
+            Description = "Override team number and connect to specific IP address (leave empty to use team number). WARNING: Debugging only!",
+            Category = "QuestNav",
+            ControlType = "input",
+            Order = 2
+        )]
+        public static string debugNTServerAddressOverride = "";
+
+        [Config(
             DisplayName = "NetworkTables Server Port",
             Description = "Port for NetworkTables server connection",
             Category = "QuestNav",
@@ -25,7 +34,7 @@ namespace QuestNav.Config
             Max = 65535,
             ControlType = "input",
             RequiresRestart = true,
-            Order = 2
+            Order = 3
         )]
         public static int ntServerPort = 5810;
 
@@ -38,7 +47,7 @@ namespace QuestNav.Config
             Step = 10,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 3
+            Order = 4
         )]
         public static int mainUpdateHz = 100;
 
@@ -51,7 +60,7 @@ namespace QuestNav.Config
             Step = 1,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 4
+            Order = 5
         )]
         public static int slowUpdateHz = 3;
 
@@ -64,7 +73,7 @@ namespace QuestNav.Config
             Step = 1f,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 5
+            Order = 6
         )]
         public static float displayFrequency = 120.0f;
 
@@ -73,7 +82,7 @@ namespace QuestNav.Config
             Description = "Automatically start NetworkTables connection on app launch",
             Category = "QuestNav",
             ControlType = "checkbox",
-            Order = 6
+            Order = 7
         )]
         public static bool autoStartOnBoot = false;
 
@@ -85,7 +94,7 @@ namespace QuestNav.Config
             Max = 1000,
             Step = 10,
             ControlType = "slider",
-            Order = 7
+            Order = 8
         )]
         public static int poseResetTtlMs = 50;
 
@@ -97,7 +106,7 @@ namespace QuestNav.Config
             Max = 10,
             Step = 1,
             ControlType = "slider",
-            Order = 8
+            Order = 9
         )]
         public static int maxPoseReadRetries = 3;
 
@@ -109,7 +118,7 @@ namespace QuestNav.Config
             Max = 0.1f,
             Step = 0.001f,
             ControlType = "slider",
-            Order = 9
+            Order = 10
         )]
         public static float positionErrorThreshold = 0.01f;
 
@@ -121,7 +130,7 @@ namespace QuestNav.Config
             Max = 50,
             Step = 1,
             ControlType = "slider",
-            Order = 10
+            Order = 11
         )]
         public static int ntLogLevelMin = 9;
 

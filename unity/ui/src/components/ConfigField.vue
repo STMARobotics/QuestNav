@@ -1,13 +1,17 @@
 <template>
-  <div class="config-field">
+  <div class="config-field" :class="{ 'field-warning': isDebugIPField && localValue }">
     <div class="field-header">
       <label :for="field.path" class="field-label">
         {{ field.displayName }}
         <span v-if="field.requiresRestart" class="restart-badge">Requires Restart</span>
+        <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG MODE ACTIVE</span>
       </label>
       <span v-if="field.description" class="field-description">
         {{ field.description }}
       </span>
+      <div v-if="isDebugIPField && localValue" class="debug-warning">
+        WARNING: Team number is being overridden. Connection will use IP: {{ localValue }}
+      </div>
     </div>
 
     <div class="field-control">
@@ -87,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { ConfigFieldSchema } from '../types'
 
 const props = defineProps<{
@@ -100,6 +104,8 @@ const emit = defineEmits<{
 }>()
 
 const localValue = ref(props.value)
+
+const isDebugIPField = computed(() => props.field.path === 'Tunables/debugNTServerAddressOverride')
 
 watch(() => props.value, (newValue) => {
   localValue.value = newValue
@@ -206,6 +212,13 @@ function formatColorRGBA(color: any): string {
   gap: 0.75rem;
 }
 
+.config-field.field-warning {
+  padding: 1rem;
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 2px solid var(--warning-color);
+  border-radius: 8px;
+}
+
 .field-header {
   display: flex;
   flex-direction: column;
@@ -227,6 +240,32 @@ function formatColorRGBA(color: any): string {
   color: #000;
   border-radius: 12px;
   font-weight: 500;
+}
+
+.debug-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--danger-color);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 600;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.debug-warning {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(255, 193, 7, 0.2);
+  border-left: 4px solid var(--warning-color);
+  border-radius: 4px;
+  color: var(--warning-color);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .field-description {
