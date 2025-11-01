@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Handles persistence of configuration data to disk.
+    /// Stores configuration in Application.persistentDataPath as JSON files.
+    /// </summary>
     public class ConfigStore
     {
         private const string CONFIG_FILENAME = "config.json";
@@ -19,6 +23,10 @@ namespace QuestNav.Config
             m_authPath = Path.Combine(Application.persistentDataPath, AUTH_FILENAME);
         }
 
+        /// <summary>
+        /// Loads configuration data from persistent storage.
+        /// Returns empty ConfigData if file doesn't exist or fails to load.
+        /// </summary>
         public ConfigData LoadConfig()
         {
             try
@@ -36,6 +44,12 @@ namespace QuestNav.Config
             return new ConfigData();
         }
 
+        /// <summary>
+        /// Saves configuration data to persistent storage.
+        /// Automatically updates the lastModified timestamp.
+        /// </summary>
+        /// <param name="config">Configuration data to save</param>
+        /// <returns>True if save was successful, false otherwise</returns>
         public bool SaveConfig(ConfigData config)
         {
             try
@@ -52,6 +66,11 @@ namespace QuestNav.Config
             }
         }
 
+        /// <summary>
+        /// Loads or generates authentication token for the web interface.
+        /// Note: Authentication is currently disabled in ConfigServer.
+        /// </summary>
+        /// <returns>AuthToken with generated or loaded token</returns>
         public AuthToken LoadOrGenerateToken()
         {
             try
@@ -87,6 +106,10 @@ namespace QuestNav.Config
             }
         }
 
+        /// <summary>
+        /// Generates a secure random token for authentication.
+        /// Creates a 32-character alphanumeric token.
+        /// </summary>
         private string GenerateSecureToken()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -101,6 +124,7 @@ namespace QuestNav.Config
             return new string(token);
         }
 
+        /// <summary>Gets the full path to the configuration file.</summary>
         public string GetConfigPath() => m_configPath;
     }
 }

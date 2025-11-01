@@ -5,6 +5,11 @@ using UnityEngine;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Editor utility to install Android network security configuration.
+    /// Allows cleartext HTTP traffic on local networks for the configuration server.
+    /// Required for Quest to serve HTTP web interface on local network.
+    /// </summary>
     public static class AndroidNetworkSecurityInstaller
     {
         private const string NETWORK_SECURITY_CONFIG =
@@ -24,6 +29,11 @@ namespace QuestNav.Config
     </base-config>
 </network-security-config>";
 
+        /// <summary>
+        /// Creates network_security_config.xml in Android library resources.
+        /// Enables cleartext HTTP on private networks for configuration server.
+        /// Menu: QuestNav > Config > Install Network Security Config
+        /// </summary>
         [MenuItem("QuestNav/Config/Install Network Security Config")]
         public static void InstallNetworkSecurityConfig()
         {

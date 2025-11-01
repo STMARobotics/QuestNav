@@ -5,6 +5,11 @@ using UnityEngine;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Bootstraps the QuestNav configuration system on app startup.
+    /// Initializes reflection binding, loads saved config, starts HTTP server, and extracts web UI files.
+    /// Runs on Unity main thread using coroutines for proper thread safety.
+    /// </summary>
     public class ConfigBootstrap : MonoBehaviour
     {
         [Header("Server Settings")]
@@ -22,6 +27,10 @@ namespace QuestNav.Config
         private ConfigStore m_store;
         private bool m_isInitialized = false;
 
+        /// <summary>
+        /// Initializes configuration system on app startup.
+        /// Reads tunables, starts initialization coroutine if configured.
+        /// </summary>
         void Awake()
         {
             if (typeof(Tunables).GetField("serverPort") != null)
@@ -36,6 +45,9 @@ namespace QuestNav.Config
             }
         }
 
+        /// <summary>
+        /// Handles app pause/resume events. Stops server on pause, restarts on resume.
+        /// </summary>
         void OnApplicationPause(bool pauseStatus)
         {
             if (pauseStatus)
@@ -48,16 +60,27 @@ namespace QuestNav.Config
             }
         }
 
+        /// <summary>
+        /// Stops server on app quit.
+        /// </summary>
         void OnApplicationQuit()
         {
             StopServer();
         }
 
+        /// <summary>
+        /// Stops server on component destruction.
+        /// </summary>
         void OnDestroy()
         {
             StopServer();
         }
 
+        /// <summary>
+        /// Initializes the configuration system: reflection binding, config store, and singletons.
+        /// Loads saved configuration and applies values to tunables.
+        /// Must run on main thread for Unity API access.
+        /// </summary>
         private IEnumerator InitializeCoroutine()
         {
             if (m_isInitialized)

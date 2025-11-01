@@ -4,7 +4,9 @@ namespace QuestNav.Config
 {
     /// <summary>
     /// Provides access to runtime status information for the web interface.
-    /// This is a singleton that can be accessed from anywhere to get current headset status.
+    /// Singleton that collects headset pose, tracking, battery, and network status.
+    /// Updated at 3Hz from QuestNav.SlowUpdate() and served via /api/status endpoint.
+    /// Must be initialized on main thread before ConfigServer starts.
     /// </summary>
     public class StatusProvider : MonoBehaviour
     {

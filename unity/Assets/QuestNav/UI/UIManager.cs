@@ -270,7 +270,7 @@ namespace QuestNav.UI
         }
 
         private string lastDebugIPOverride = "";
-        
+
         /// <summary>
         /// Syncs UI elements with Tunables values (updated via web config)
         /// </summary>
@@ -280,10 +280,10 @@ namespace QuestNav.UI
             if (lastDebugIPOverride != Tunables.debugNTServerAddressOverride)
             {
                 string newValue = Tunables.debugNTServerAddressOverride ?? "";
-                
+
                 // Only trigger reconnection if the value is empty (cleared) or a valid IP
                 bool shouldReconnect = string.IsNullOrEmpty(newValue) || IsValidIPAddress(newValue);
-                
+
                 if (shouldReconnect)
                 {
                     lastDebugIPOverride = newValue;
@@ -291,7 +291,7 @@ namespace QuestNav.UI
                     networkTableConnection.UpdateTeamNumber(teamNumber);
                 }
             }
-            
+
             // Sync team number if changed via web interface
             if (teamNumber != Tunables.defaultTeamNumber)
             {
@@ -315,23 +315,23 @@ namespace QuestNav.UI
         {
             if (string.IsNullOrEmpty(ipString))
                 return false;
-            
+
             string[] parts = ipString.Split('.');
             if (parts.Length != 4)
                 return false;
-            
+
             foreach (string part in parts)
             {
                 if (!int.TryParse(part, out int num))
                     return false;
-                
+
                 if (num < 0 || num > 255)
                     return false;
             }
-            
+
             return true;
         }
-        
+
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>

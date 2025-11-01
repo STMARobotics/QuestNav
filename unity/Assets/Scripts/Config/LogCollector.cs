@@ -6,7 +6,10 @@ namespace QuestNav.Config
 {
     /// <summary>
     /// Collects Unity log messages for display in the web interface.
-    /// Maintains a circular buffer of recent log entries.
+    /// Maintains a circular buffer of 500 most recent log entries.
+    /// Subscribes to Application.logMessageReceived for real-time capture.
+    /// Served via /api/logs endpoint with filtering and export capabilities.
+    /// Must be initialized on main thread before ConfigServer starts.
     /// </summary>
     public class LogCollector : MonoBehaviour
     {
@@ -14,6 +17,10 @@ namespace QuestNav.Config
         private readonly Queue<LogEntry> logQueue = new Queue<LogEntry>();
         private const int MAX_LOGS = 500;
 
+        /// <summary>
+        /// Represents a single Unity log entry with timestamp.
+        /// Uses properties for proper JSON.NET serialization.
+        /// </summary>
         [Serializable]
         public class LogEntry
         {

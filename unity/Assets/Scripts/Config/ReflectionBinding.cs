@@ -5,6 +5,11 @@ using System.Reflection;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Provides reflection-based binding to static fields marked with [Config] attribute.
+    /// Scans all loaded assemblies for configurable fields and provides get/set/schema generation.
+    /// Handles type conversion, value clamping, and JSON serialization for web interface.
+    /// </summary>
     public class ReflectionBinding
     {
         private readonly Dictionary<string, FieldInfo> m_fieldsByPath =

@@ -224,9 +224,10 @@ public class NetworkTableConnection : INetworkTableConnection
 
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
-    /// Uses team number for standard operation or debug IP override if configured.
+    /// Checks Tunables.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
+    /// Forces disconnection when switching between IP override and team number modes.
     /// </summary>
-    /// <param name="teamNumber">The new team number</param>
+    /// <param name="teamNumber">The FRC team number (ignored if debug IP override is set)</param>
     public void UpdateTeamNumber(int teamNumber)
     {
         // Set team number/ip if in debug mode
@@ -239,7 +240,7 @@ public class NetworkTableConnection : INetworkTableConnection
                 ntInstance.SetAddresses(new (string addr, int port)[] { ("0.0.0.0", 0) });
                 ipAddressSet = false;
             }
-            
+
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
             ntInstance.SetTeamNumber(teamNumber, Tunables.ntServerPort);
             teamNumberSet = true;
@@ -252,10 +253,7 @@ public class NetworkTableConnection : INetworkTableConnection
             ntInstance.SetAddresses(
                 new (string addr, int port)[]
                 {
-                    (
-                        Tunables.debugNTServerAddressOverride,
-                        Tunables.ntServerPort
-                    ),
+                    (Tunables.debugNTServerAddressOverride, Tunables.ntServerPort),
                 }
             );
             ipAddressSet = true;
