@@ -68,19 +68,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from '../stores/config'
 import ConfigField from './ConfigField.vue'
 import StatusView from './StatusView.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
+let pollInterval: number | null = null
 
 // Add Status as first tab
 const allTabs = computed(() => ['Status', ...configStore.categories])
 
 onMounted(async () => {
   await loadData()
+  
+  // Poll config values every 3 seconds to sync with VR UI changes
+  pollInterval = setInterval(async () => {
+    await configStore.loadConfig()
+  }, 3000) as unknown as number
+})
+
+onUnmounted(() => {
+  if (pollInterval !== null) {
+    clearInterval(pollInterval)
+  }
 })
 
 async function loadData() {
