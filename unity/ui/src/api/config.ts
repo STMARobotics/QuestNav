@@ -51,6 +51,14 @@ class ConfigApi {
   async getHeadsetStatus(): Promise<HeadsetStatus> {
     return this.request<HeadsetStatus>('/api/status')
   }
+  
+  async getLogs(count: number = 100): Promise<{ success: boolean, logs: any[] }> {
+    return this.request(`/api/logs?count=${count}`)
+  }
+  
+  async clearLogs(): Promise<{ success: boolean, message: string }> {
+    return this.request('/api/logs', { method: 'DELETE' })
+  }
 
 }
 

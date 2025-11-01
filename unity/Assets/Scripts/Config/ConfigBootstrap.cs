@@ -92,6 +92,10 @@ namespace QuestNav.Config
                 m_binding.ApplyValues(savedConfig.values);
             }
 
+            // Initialize singletons on main thread before server starts
+            var statusProvider = StatusProvider.Instance;
+            var logCollector = LogCollector.Instance;
+            
             m_isInitialized = true;
             Debug.Log("[ConfigBootstrap] Initialization complete");
 
@@ -230,12 +234,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-CbC-PmyG.css",
-                Path.Combine(assetsDir, "main-CbC-PmyG.css")
+                "ui/assets/main-DSZ1Floc.css",
+                Path.Combine(assetsDir, "main-DSZ1Floc.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-BunKSgtt.js",
-                Path.Combine(assetsDir, "main-BunKSgtt.js")
+                "ui/assets/main-Bbg2kUbF.js",
+                Path.Combine(assetsDir, "main-Bbg2kUbF.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");

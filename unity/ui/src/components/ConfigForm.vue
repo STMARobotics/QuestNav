@@ -25,7 +25,7 @@
             @click="activeTab = tab"
           >
             {{ tab }}
-            <span v-if="tab !== 'Status'" class="tab-count">
+            <span v-if="tab !== 'Status' && tab !== 'Logs'" class="tab-count">
               {{ configStore.fieldsByCategory[tab]?.length || 0 }}
             </span>
           </button>
@@ -36,6 +36,11 @@
           <!-- Status Tab -->
           <div v-show="activeTab === 'Status'" class="tab-panel">
             <StatusView />
+          </div>
+          
+          <!-- Logs Tab -->
+          <div v-show="activeTab === 'Logs'" class="tab-panel">
+            <LogsView />
           </div>
           
           <!-- Config Tabs -->
@@ -72,13 +77,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from '../stores/config'
 import ConfigField from './ConfigField.vue'
 import StatusView from './StatusView.vue'
+import LogsView from './LogsView.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
 let pollInterval: number | null = null
 
-// Add Status as first tab
-const allTabs = computed(() => ['Status', ...configStore.categories])
+// Add Status and Logs as first tabs
+const allTabs = computed(() => ['Status', 'Logs', ...configStore.categories])
 
 onMounted(async () => {
   await loadData()

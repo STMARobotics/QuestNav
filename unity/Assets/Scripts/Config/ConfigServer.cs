@@ -192,6 +192,14 @@ namespace QuestNav.Config
                 {
                     await HandleGetStatus(context);
                 }
+                else if (path == "/api/logs" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
+                    await HandleGetLogs(context);
+                }
+                else if (path == "/api/logs" && context.Request.HttpVerb == HttpVerbs.Delete)
+                {
+                    await HandleClearLogs(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -300,6 +308,24 @@ namespace QuestNav.Config
         {
             var status = StatusProvider.Instance.GetStatus();
             await context.SendDataAsync(status);
+        }
+        
+        private async Task HandleGetLogs(IHttpContext context)
+        {
+            int count = 100;
+            if (context.Request.QueryString["count"] != null)
+            {
+                int.TryParse(context.Request.QueryString["count"], out count);
+            }
+            
+            var logs = LogCollector.Instance.GetRecentLogs(count);
+            await context.SendDataAsync(new { success = true, logs = logs });
+        }
+        
+        private async Task HandleClearLogs(IHttpContext context)
+        {
+            LogCollector.Instance.ClearLogs();
+            await context.SendDataAsync(new { success = true, message = "Logs cleared" });
         }
     }
 }
