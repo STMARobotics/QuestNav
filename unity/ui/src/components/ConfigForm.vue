@@ -50,14 +50,14 @@
             v-show="activeTab === category"
             class="tab-panel"
           >
-            <div class="fields-grid">
-              <ConfigField
-                v-for="field in configStore.fieldsByCategory[category]"
-                :key="field.path"
-                :field="field"
-                :value="configStore.values[field.path]"
-                @update="handleUpdate"
-              />
+        <div class="fields-grid">
+          <ConfigField
+            v-for="field in configStore.fieldsByCategory[category]"
+            :key="field.path"
+            :field="field"
+            :value="configStore.values[field.path]"
+            @update="handleUpdate"
+          />
             </div>
           </div>
         </div>

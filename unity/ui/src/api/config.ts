@@ -47,7 +47,7 @@ class ConfigApi {
   async getServerInfo(): Promise<ServerInfo> {
     return this.request<ServerInfo>('/api/info')
   }
-  
+
   async getHeadsetStatus(): Promise<HeadsetStatus> {
     return this.request<HeadsetStatus>('/api/status')
   }
@@ -58,7 +58,7 @@ class ConfigApi {
   
   async clearLogs(): Promise<{ success: boolean, message: string }> {
     return this.request('/api/logs', { method: 'DELETE' })
-  }
+    }
 
 }
 

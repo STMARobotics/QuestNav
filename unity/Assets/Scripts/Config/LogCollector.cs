@@ -13,7 +13,7 @@ namespace QuestNav.Config
         private static LogCollector instance;
         private readonly Queue<LogEntry> logQueue = new Queue<LogEntry>();
         private const int MAX_LOGS = 500;
-        
+
         [Serializable]
         public class LogEntry
         {
@@ -22,7 +22,7 @@ namespace QuestNav.Config
             public string type { get; set; }
             public long timestamp { get; set; }
         }
-        
+
         public static LogCollector Instance
         {
             get
@@ -36,7 +36,7 @@ namespace QuestNav.Config
                 return instance;
             }
         }
-        
+
         void Awake()
         {
             if (instance != null && instance != this)
@@ -46,16 +46,16 @@ namespace QuestNav.Config
             }
             instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
             // Subscribe to Unity log callbacks
             Application.logMessageReceived += HandleLog;
         }
-        
+
         void OnDestroy()
         {
             Application.logMessageReceived -= HandleLog;
         }
-        
+
         private void HandleLog(string message, string stackTrace, LogType type)
         {
             var entry = new LogEntry
@@ -63,13 +63,13 @@ namespace QuestNav.Config
                 message = message,
                 stackTrace = stackTrace,
                 type = type.ToString(),
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             };
-            
+
             lock (logQueue)
             {
                 logQueue.Enqueue(entry);
-                
+
                 // Keep only the most recent logs
                 while (logQueue.Count > MAX_LOGS)
                 {
@@ -77,19 +77,19 @@ namespace QuestNav.Config
                 }
             }
         }
-        
+
         public List<LogEntry> GetRecentLogs(int count = 100)
         {
             lock (logQueue)
             {
                 var logs = new List<LogEntry>(logQueue);
-                
+
                 // Return most recent logs (up to count)
                 int startIndex = Math.Max(0, logs.Count - count);
                 return logs.GetRange(startIndex, logs.Count - startIndex);
             }
         }
-        
+
         public void ClearLogs()
         {
             lock (logQueue)
@@ -99,4 +99,3 @@ namespace QuestNav.Config
         }
     }
 }
-
