@@ -8,6 +8,25 @@ using Newtonsoft.Json;
 namespace QuestNav.Config
 {
     /// <summary>
+    /// Cached server information captured on main thread
+    /// </summary>
+    public class CachedServerInfo
+    {
+        public string appName;
+        public string version;
+        public string unityVersion;
+        public string buildDate;
+        public string platform;
+        public string deviceModel;
+        public string deviceName;
+        public string operatingSystem;
+        public string processorType;
+        public int processorCount;
+        public int systemMemorySize;
+        public string graphicsDeviceName;
+    }
+
+    /// <summary>
     /// Pure C# class (NOT MonoBehaviour) that runs EmbedIO server on background thread.
     /// Uses async/await which is acceptable per Unity rules for non-MonoBehaviour classes.
     /// Does not call Unity APIs directly - uses ILogger interface instead.
@@ -23,6 +42,9 @@ namespace QuestNav.Config
         private readonly bool m_enableCORSDevMode;
         private readonly string m_staticPath;
         private readonly ILogger m_logger;
+
+        // Cached server info (captured on main thread)
+        private CachedServerInfo m_cachedServerInfo;
 
         public bool IsRunning => m_server != null && m_server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{m_port}/";
@@ -44,6 +66,35 @@ namespace QuestNav.Config
             m_enableCORSDevMode = enableCORSDevMode;
             m_staticPath = staticPath;
             m_logger = logger;
+
+            // Cache server info on main thread (before server starts on background thread)
+            CacheServerInfo();
+        }
+
+        private void CacheServerInfo()
+        {
+            m_cachedServerInfo = new CachedServerInfo
+            {
+                // App Information
+                appName = UnityEngine.Application.productName,
+                version = UnityEngine.Application.version,
+                unityVersion = UnityEngine.Application.unityVersion,
+                buildDate = System
+                    .IO.File.GetLastWriteTime(UnityEngine.Application.dataPath)
+                    .ToString("yyyy-MM-dd HH:mm:ss"),
+
+                // Platform Information
+                platform = UnityEngine.Application.platform.ToString(),
+                deviceModel = UnityEngine.SystemInfo.deviceModel,
+                deviceName = UnityEngine.SystemInfo.deviceName,
+                operatingSystem = UnityEngine.SystemInfo.operatingSystem,
+
+                // System Information
+                processorType = UnityEngine.SystemInfo.processorType,
+                processorCount = UnityEngine.SystemInfo.processorCount,
+                systemMemorySize = UnityEngine.SystemInfo.systemMemorySize,
+                graphicsDeviceName = UnityEngine.SystemInfo.graphicsDeviceName,
+            };
         }
 
         public void Start()
@@ -58,7 +109,6 @@ namespace QuestNav.Config
 
             m_logger?.Log($"[ConfigServer] Starting server on port {m_port}");
             m_logger?.Log($"[ConfigServer] Static files path: {m_staticPath}");
-            m_logger?.Log($"[ConfigServer] Auth token: {m_authToken}");
 
             m_server = new WebServer(o =>
                 o.WithUrlPrefix($"http://*:{m_port}/").WithMode(HttpListenerMode.EmbedIO)
@@ -117,22 +167,7 @@ namespace QuestNav.Config
                     return;
                 }
 
-                // Auth check
-                string authHeader = context.Request.Headers["Authorization"];
-                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                {
-                    context.Response.StatusCode = 401;
-                    await context.SendDataAsync(new { success = false, message = "Unauthorized" });
-                    return;
-                }
-
-                string token = authHeader.Substring("Bearer ".Length).Trim();
-                if (token != m_authToken)
-                {
-                    context.Response.StatusCode = 401;
-                    await context.SendDataAsync(new { success = false, message = "Invalid token" });
-                    return;
-                }
+                // No authentication required - open access
 
                 // Route requests
                 string path = context.Request.Url.AbsolutePath;
@@ -152,6 +187,10 @@ namespace QuestNav.Config
                 else if (path == "/api/info" && context.Request.HttpVerb == HttpVerbs.Get)
                 {
                     await HandleGetInfo(context);
+                }
+                else if (path == "/api/status" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
+                    await HandleGetStatus(context);
                 }
                 else
                 {
@@ -231,16 +270,36 @@ namespace QuestNav.Config
 
         private async Task HandleGetInfo(IHttpContext context)
         {
+            // Use cached server info (captured on main thread during construction)
             var info = new
             {
-                version = "1.0.0",
-                platform = "Android",
-                deviceModel = "Quest",
+                // Cached from main thread
+                appName = m_cachedServerInfo.appName,
+                version = m_cachedServerInfo.version,
+                unityVersion = m_cachedServerInfo.unityVersion,
+                buildDate = m_cachedServerInfo.buildDate,
+                platform = m_cachedServerInfo.platform,
+                deviceModel = m_cachedServerInfo.deviceModel,
+                deviceName = m_cachedServerInfo.deviceName,
+                operatingSystem = m_cachedServerInfo.operatingSystem,
+                processorType = m_cachedServerInfo.processorType,
+                processorCount = m_cachedServerInfo.processorCount,
+                systemMemorySize = m_cachedServerInfo.systemMemorySize,
+                graphicsDeviceName = m_cachedServerInfo.graphicsDeviceName,
+
+                // Runtime information (safe on background thread)
                 connectedClients = 0,
                 configPath = m_store.GetConfigPath(),
+                serverPort = m_port,
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
             await context.SendDataAsync(info);
+        }
+
+        private async Task HandleGetStatus(IHttpContext context)
+        {
+            var status = StatusProvider.Instance.GetStatus();
+            await context.SendDataAsync(status);
         }
     }
 }

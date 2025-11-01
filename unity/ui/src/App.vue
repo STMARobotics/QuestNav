@@ -1,10 +1,7 @@
 <template>
   <div id="app">
-    <!-- Auth Gate -->
-    <AuthGate v-if="!configStore.isAuthenticated" />
-
     <!-- Main Application -->
-    <div v-else class="app-container">
+    <div class="app-container">
       <!-- Header -->
       <header class="app-header">
         <div class="header-content">
@@ -105,10 +102,6 @@
             <span class="info-value">{{ serverInfo.serverPort }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Authentication:</span>
-            <span class="info-value">{{ serverInfo.authenticationEnabled ? 'Enabled' : 'Disabled' }}</span>
-          </div>
-          <div class="info-item">
             <span class="info-label">Config Path:</span>
             <span class="info-value">{{ serverInfo.configPath }}</span>
           </div>
@@ -124,7 +117,6 @@
 import { ref } from 'vue'
 import { useConfigStore } from './stores/config'
 import { configApi } from './api/config'
-import AuthGate from './components/AuthGate.vue'
 import ConfigForm from './components/ConfigForm.vue'
 import type { ServerInfo } from './types'
 
@@ -152,8 +144,8 @@ async function showInfo() {
 }
 
 function handleLogout() {
-  if (confirm('Are you sure you want to logout?')) {
-    configStore.logout()
+  if (confirm('Are you sure you want to reload the page?')) {
+    window.location.reload()
   }
 }
 </script>

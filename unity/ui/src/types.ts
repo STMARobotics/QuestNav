@@ -58,7 +58,6 @@ export interface ServerInfo {
   connectedClients: number
   configPath: string
   serverPort: number
-  authenticationEnabled: boolean
   
   timestamp: number
 }

@@ -20,8 +20,6 @@ namespace QuestNav.Config
         private ConfigServer m_server;
         private ReflectionBinding m_binding;
         private ConfigStore m_store;
-        private AuthToken m_auth;
-        private string m_authToken = "";
         private bool m_isInitialized = false;
 
         void Awake()
@@ -84,14 +82,7 @@ namespace QuestNav.Config
                 yield break;
             }
 
-            // Load or generate auth token
-            m_auth = m_store.LoadOrGenerateToken();
-            if (m_auth == null || string.IsNullOrEmpty(m_auth.token))
-            {
-                Debug.LogError("[ConfigBootstrap] Failed to load/generate auth token");
-                yield break;
-            }
-            m_authToken = m_auth.token;
+            // No authentication required - skip token generation
 
             // Load saved configuration
             var savedConfig = m_store.LoadConfig();
@@ -142,7 +133,7 @@ namespace QuestNav.Config
             m_server = new ConfigServer(
                 m_binding,
                 m_store,
-                m_authToken,
+                null, // No auth token needed
                 m_serverPort,
                 m_enableCORSDevMode,
                 staticPath,
@@ -203,19 +194,15 @@ namespace QuestNav.Config
 
         private IEnumerator ExtractAndroidUIFiles(string targetPath)
         {
-            // Check if Vue build exists (not the fallback)
+            // Force delete old UI files to ensure fresh extraction
+            if (Directory.Exists(targetPath))
+            {
+                Debug.Log("[ConfigBootstrap] Clearing old UI files...");
+                Directory.Delete(targetPath, true);
+            }
+
             string indexPath = Path.Combine(targetPath, "index.html");
             string assetsDir = Path.Combine(targetPath, "assets");
-
-            if (
-                File.Exists(indexPath)
-                && Directory.Exists(assetsDir)
-                && Directory.GetFiles(assetsDir).Length > 0
-            )
-            {
-                Debug.Log("[ConfigBootstrap] UI files already extracted");
-                yield break;
-            }
 
             // Delete old fallback files if they exist
             if (File.Exists(indexPath))
@@ -243,12 +230,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-DfKlr22t.css",
-                Path.Combine(assetsDir, "main-DfKlr22t.css")
+                "ui/assets/main-CX72Op47.css",
+                Path.Combine(assetsDir, "main-CX72Op47.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-C8dGtgpB.js",
-                Path.Combine(assetsDir, "main-C8dGtgpB.js")
+                "ui/assets/main-BLq9ggDf.js",
+                Path.Combine(assetsDir, "main-BLq9ggDf.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");
@@ -314,16 +301,14 @@ namespace QuestNav.Config
             Debug.Log("╔═══════════════════════════════════════════════════════════╗");
             Debug.Log("║          QuestNav Configuration Server                    ║");
             Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Auth Token: {m_authToken}");
             Debug.Log($"║ Port: {m_serverPort}");
             Debug.Log($"║ Config Path: {m_store.GetConfigPath()}");
             Debug.Log("╠═══════════════════════════════════════════════════════════╣");
             Debug.Log($"║ Connect: http://<quest-ip>:{m_serverPort}/");
-            Debug.Log($"║ Enter token: {m_authToken}");
+            Debug.Log("║ No authentication required - open access");
             Debug.Log("╚═══════════════════════════════════════════════════════════╝");
         }
 
         public bool IsServerRunning => m_server != null && m_server.IsRunning;
-        public string AuthToken => m_authToken;
     }
 }

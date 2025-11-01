@@ -216,11 +216,31 @@ namespace QuestNav.Config
 
                 schema.fields.Add(fieldSchema);
 
+                // Create separate instances for categories to avoid circular references
                 if (!schema.categories.ContainsKey(fieldSchema.category))
                 {
                     schema.categories[fieldSchema.category] = new List<ConfigFieldSchema>();
                 }
-                schema.categories[fieldSchema.category].Add(fieldSchema);
+
+                var categoryFieldSchema = new ConfigFieldSchema
+                {
+                    path = fieldSchema.path,
+                    displayName = fieldSchema.displayName,
+                    description = fieldSchema.description,
+                    category = fieldSchema.category,
+                    type = fieldSchema.type,
+                    controlType = fieldSchema.controlType,
+                    min = fieldSchema.min,
+                    max = fieldSchema.max,
+                    step = fieldSchema.step,
+                    defaultValue = fieldSchema.defaultValue,
+                    currentValue = fieldSchema.currentValue,
+                    requiresRestart = fieldSchema.requiresRestart,
+                    order = fieldSchema.order,
+                    options = fieldSchema.options,
+                };
+
+                schema.categories[fieldSchema.category].Add(categoryFieldSchema);
             }
 
             return schema;

@@ -125,53 +125,6 @@ namespace QuestNav.Config
         )]
         public static int ntLogLevelMin = 9;
 
-        // ===== AprilTag Configuration =====
-
-        [Config(
-            DisplayName = "Tag Size (meters)",
-            Description = "Physical size of AprilTag markers in meters",
-            Category = "AprilTag",
-            Min = 0.01f,
-            Max = 1.0f,
-            Step = 0.01f,
-            ControlType = "slider",
-            Order = 20
-        )]
-        public static float tagSizeMeters = 0.08f;
-
-        [Config(
-            DisplayName = "Decimation",
-            Description = "Downscale factor for detection (higher = faster, less accurate)",
-            Category = "AprilTag",
-            Min = 1,
-            Max = 8,
-            Step = 1,
-            ControlType = "slider",
-            Order = 21
-        )]
-        public static int decimation = 2;
-
-        [Config(
-            DisplayName = "Max Detections Per Second",
-            Description = "Maximum detection rate to maintain performance",
-            Category = "AprilTag",
-            Min = 1f,
-            Max = 60f,
-            Step = 1f,
-            ControlType = "slider",
-            Order = 22
-        )]
-        public static float maxDetectionsPerSecond = 15f;
-
-        [Config(
-            DisplayName = "Enable Debug Logging",
-            Description = "Enable verbose debug output for detection system",
-            Category = "AprilTag",
-            ControlType = "checkbox",
-            Order = 23
-        )]
-        public static bool enableDebugLogging = false;
-
         // ===== General Configuration =====
 
         [Config(
@@ -194,15 +147,5 @@ namespace QuestNav.Config
             Order = 41
         )]
         public static bool enableCORSDevMode = false;
-
-        [Config(
-            DisplayName = "Require Authentication",
-            Description = "Require token authentication for web interface access",
-            Category = "General",
-            ControlType = "checkbox",
-            RequiresRestart = true,
-            Order = 42
-        )]
-        public static bool requireAuthentication = false;
     }
 }

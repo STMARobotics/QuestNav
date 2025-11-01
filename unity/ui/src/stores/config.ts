@@ -9,7 +9,6 @@ export const useConfigStore = defineStore('config', () => {
   // State
   const schema = ref<ConfigSchema | null>(null)
   const values = ref<Record<string, any>>({})
-  const isAuthenticated = ref(false)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const lastUpdated = ref<number>(0)
@@ -26,20 +25,6 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   // Actions
-  async function authenticate(token: string) {
-    try {
-      configApi.setToken(token)
-      await configApi.testConnection()
-      isAuthenticated.value = true
-      error.value = null
-      return true
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Authentication failed'
-      isAuthenticated.value = false
-      return false
-    }
-  }
-
   async function loadSchema() {
     isLoading.value = true
     error.value = null
@@ -93,36 +78,10 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  function logout() {
-    configApi.clearToken()
-    isAuthenticated.value = false
-    schema.value = null
-    values.value = {}
-  }
-
-  // Initialize: try without auth first, fall back to stored token
-  async function tryInitialize() {
-    try {
-      // Try to load schema without authentication
-      await loadSchema()
-      await loadConfig()
-      isAuthenticated.value = true
-    } catch (err) {
-      // If it fails, try with stored token
-      const storedToken = configApi.getToken()
-      if (storedToken) {
-        await authenticate(storedToken)
-      }
-    }
-  }
-  
-  tryInitialize()
-
   return {
     // State
     schema,
     values,
-    isAuthenticated,
     isLoading,
     error,
     lastUpdated,
@@ -132,11 +91,9 @@ export const useConfigStore = defineStore('config', () => {
     fieldsByCategory,
     
     // Actions
-    authenticate,
     loadSchema,
     loadConfig,
-    updateValue,
-    logout
+    updateValue
   }
 })
 
