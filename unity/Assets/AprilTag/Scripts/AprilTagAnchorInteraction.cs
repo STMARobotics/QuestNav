@@ -373,7 +373,6 @@ namespace AprilTag
             m_hoveredAnchor = null;
         }
 
-
         private void DeleteHighlightedAnchor()
         {
             if (m_spatialAnchorManager == null)
@@ -387,10 +386,12 @@ namespace AprilTag
                 if (spatialAnchor != null)
                 {
                     var tagId = m_spatialAnchorManager.GetTagIdForAnchor(spatialAnchor);
-                    
+
                     if (EnableDebugLogging)
                     {
-                        Debug.Log($"[AnchorInteraction] Deleting highlighted anchor for tag {tagId}");
+                        Debug.Log(
+                            $"[AnchorInteraction] Deleting highlighted anchor for tag {tagId}"
+                        );
                     }
 
                     // Clear highlight first
@@ -424,7 +425,6 @@ namespace AprilTag
             // Strong haptic feedback
             OVRInput.SetControllerVibration(1f, 0.3f);
         }
-
 
         private void OnDestroy()
         {

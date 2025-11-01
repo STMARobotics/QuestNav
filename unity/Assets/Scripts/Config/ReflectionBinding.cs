@@ -7,9 +7,12 @@ namespace QuestNav.Config
 {
     public class ReflectionBinding
     {
-        private readonly Dictionary<string, FieldInfo> m_fieldsByPath = new Dictionary<string, FieldInfo>();
-        private readonly Dictionary<string, ConfigAttribute> m_attributesByPath = new Dictionary<string, ConfigAttribute>();
+        private readonly Dictionary<string, FieldInfo> m_fieldsByPath =
+            new Dictionary<string, FieldInfo>();
+        private readonly Dictionary<string, ConfigAttribute> m_attributesByPath =
+            new Dictionary<string, ConfigAttribute>();
         private readonly Dictionary<string, Type> m_typesByPath = new Dictionary<string, Type>();
+
         public ReflectionBinding()
         {
             ScanConfigurableFields();
@@ -18,25 +21,27 @@ namespace QuestNav.Config
         private void ScanConfigurableFields()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            
+
             foreach (var assembly in assemblies)
             {
                 try
                 {
                     var types = assembly.GetTypes();
-                    
+
                     foreach (var type in types)
                     {
-                        var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                        
+                        var fields = type.GetFields(
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static
+                        );
+
                         foreach (var field in fields)
                         {
                             var configAttr = field.GetCustomAttribute<ConfigAttribute>();
-                            
+
                             if (configAttr != null)
                             {
                                 string path = $"{type.Name}/{field.Name}";
-                                
+
                                 m_fieldsByPath[path] = field;
                                 m_attributesByPath[path] = configAttr;
                                 m_typesByPath[path] = field.FieldType;
@@ -57,7 +62,7 @@ namespace QuestNav.Config
             {
                 throw new ArgumentException($"No configurable field found at path: {path}");
             }
-            
+
             return field.GetValue(null);
         }
 
@@ -104,7 +109,7 @@ namespace QuestNav.Config
                     float g = 0f;
                     float b = 0f;
                     float a = 1f;
-                    
+
                     if (jObj.TryGetValue("r", out var rToken))
                         r = rToken.ToObject<float>();
                     if (jObj.TryGetValue("g", out var gToken))
@@ -113,23 +118,23 @@ namespace QuestNav.Config
                         b = bToken.ToObject<float>();
                     if (jObj.TryGetValue("a", out var aToken))
                         a = aToken.ToObject<float>();
-                    
+
                     return CreateColor(r, g, b, a);
                 }
             }
 
             if (targetType == typeof(int))
                 return Convert.ToInt32(value);
-            
+
             if (targetType == typeof(float))
                 return Convert.ToSingle(value);
-            
+
             if (targetType == typeof(double))
                 return Convert.ToDouble(value);
-            
+
             if (targetType == typeof(bool))
                 return Convert.ToBoolean(value);
-            
+
             if (targetType == typeof(string))
                 return Convert.ToString(value);
 
@@ -146,24 +151,30 @@ namespace QuestNav.Config
                 if (type == typeof(int))
                 {
                     int intValue = (int)value;
-                    if (min != null) intValue = Math.Max(intValue, Convert.ToInt32(min));
-                    if (max != null) intValue = Math.Min(intValue, Convert.ToInt32(max));
+                    if (min != null)
+                        intValue = Math.Max(intValue, Convert.ToInt32(min));
+                    if (max != null)
+                        intValue = Math.Min(intValue, Convert.ToInt32(max));
                     return intValue;
                 }
-                
+
                 if (type == typeof(float))
                 {
                     float floatValue = (float)value;
-                    if (min != null) floatValue = Math.Max(floatValue, Convert.ToSingle(min));
-                    if (max != null) floatValue = Math.Min(floatValue, Convert.ToSingle(max));
+                    if (min != null)
+                        floatValue = Math.Max(floatValue, Convert.ToSingle(min));
+                    if (max != null)
+                        floatValue = Math.Min(floatValue, Convert.ToSingle(max));
                     return floatValue;
                 }
-                
+
                 if (type == typeof(double))
                 {
                     double doubleValue = (double)value;
-                    if (min != null) doubleValue = Math.Max(doubleValue, Convert.ToDouble(min));
-                    if (max != null) doubleValue = Math.Min(doubleValue, Convert.ToDouble(max));
+                    if (min != null)
+                        doubleValue = Math.Max(doubleValue, Convert.ToDouble(min));
+                    if (max != null)
+                        doubleValue = Math.Min(doubleValue, Convert.ToDouble(max));
                     return doubleValue;
                 }
             }
@@ -178,13 +189,13 @@ namespace QuestNav.Config
         public ConfigSchema GenerateSchema()
         {
             var schema = new ConfigSchema();
-            
+
             foreach (var kvp in m_fieldsByPath.OrderBy(x => m_attributesByPath[x.Key].Order))
             {
                 string path = kvp.Key;
                 var field = kvp.Value;
                 var attr = m_attributesByPath[path];
-                
+
                 var fieldSchema = new ConfigFieldSchema
                 {
                     path = path,
@@ -200,32 +211,32 @@ namespace QuestNav.Config
                     currentValue = SerializeValue(field.GetValue(null)),
                     requiresRestart = attr.RequiresRestart,
                     order = attr.Order,
-                    options = attr.Options
+                    options = attr.Options,
                 };
-                
+
                 schema.fields.Add(fieldSchema);
-                
+
                 if (!schema.categories.ContainsKey(fieldSchema.category))
                 {
                     schema.categories[fieldSchema.category] = new List<ConfigFieldSchema>();
                 }
                 schema.categories[fieldSchema.category].Add(fieldSchema);
             }
-            
+
             return schema;
         }
 
         public Dictionary<string, object> GetAllValues()
         {
             var values = new Dictionary<string, object>();
-            
+
             foreach (var kvp in m_fieldsByPath)
             {
                 string path = kvp.Key;
                 var field = kvp.Value;
                 values[path] = SerializeValue(field.GetValue(null));
             }
-            
+
             return values;
         }
 
@@ -246,34 +257,49 @@ namespace QuestNav.Config
 
         private string GetTypeString(Type type)
         {
-            if (type == typeof(int)) return "int";
-            if (type == typeof(float)) return "float";
-            if (type == typeof(double)) return "double";
-            if (type == typeof(bool)) return "bool";
-            if (type == typeof(string)) return "string";
-            if (type.Name == "Color") return "color";
+            if (type == typeof(int))
+                return "int";
+            if (type == typeof(float))
+                return "float";
+            if (type == typeof(double))
+                return "double";
+            if (type == typeof(bool))
+                return "bool";
+            if (type == typeof(string))
+                return "string";
+            if (type.Name == "Color")
+                return "color";
             return "object";
         }
 
         private string InferControlType(Type type)
         {
-            if (type == typeof(bool)) return "checkbox";
-            if (type.Name == "Color") return "color";
-            if (type == typeof(int) || type == typeof(float) || type == typeof(double)) return "slider";
+            if (type == typeof(bool))
+                return "checkbox";
+            if (type.Name == "Color")
+                return "color";
+            if (type == typeof(int) || type == typeof(float) || type == typeof(double))
+                return "slider";
             return "input";
         }
 
         private object GetDefaultValue(FieldInfo field)
         {
             var type = field.FieldType;
-            
-            if (type == typeof(int)) return 0;
-            if (type == typeof(float)) return 0f;
-            if (type == typeof(double)) return 0.0;
-            if (type == typeof(bool)) return false;
-            if (type == typeof(string)) return "";
-            if (type.Name == "Color") return CreateColor(1, 1, 1, 1);
-            
+
+            if (type == typeof(int))
+                return 0;
+            if (type == typeof(float))
+                return 0f;
+            if (type == typeof(double))
+                return 0.0;
+            if (type == typeof(bool))
+                return false;
+            if (type == typeof(string))
+                return "";
+            if (type.Name == "Color")
+                return CreateColor(1, 1, 1, 1);
+
             return null;
         }
 
@@ -289,13 +315,13 @@ namespace QuestNav.Config
                 float g = (float)type.GetProperty("g").GetValue(value);
                 float b = (float)type.GetProperty("b").GetValue(value);
                 float a = (float)type.GetProperty("a").GetValue(value);
-                
+
                 return new Dictionary<string, float>
                 {
                     { "r", r },
                     { "g", g },
                     { "b", b },
-                    { "a", a }
+                    { "a", a },
                 };
             }
 
@@ -326,8 +352,9 @@ namespace QuestNav.Config
         }
 
         public bool HasPath(string path) => m_fieldsByPath.ContainsKey(path);
+
         public IEnumerable<string> GetAllPaths() => m_fieldsByPath.Keys;
+
         public int FieldCount => m_fieldsByPath.Count;
     }
 }
-

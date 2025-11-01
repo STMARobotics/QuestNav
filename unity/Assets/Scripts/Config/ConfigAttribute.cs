@@ -23,4 +23,3 @@ namespace QuestNav.Config
         }
     }
 }
-

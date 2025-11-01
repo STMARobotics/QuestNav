@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Collections;
+using System.IO;
 using UnityEngine;
 
 namespace QuestNav.Config
@@ -8,9 +8,14 @@ namespace QuestNav.Config
     public class ConfigBootstrap : MonoBehaviour
     {
         [Header("Server Settings")]
-        [SerializeField] private int m_serverPort = 18080;
-        [SerializeField] private bool m_enableCORSDevMode = false;
-        [SerializeField] private bool m_startOnAwake = true;
+        [SerializeField]
+        private int m_serverPort = 18080;
+
+        [SerializeField]
+        private bool m_enableCORSDevMode = false;
+
+        [SerializeField]
+        private bool m_startOnAwake = true;
 
         private ConfigServer m_server;
         private ReflectionBinding m_binding;
@@ -125,12 +130,12 @@ namespace QuestNav.Config
                 yield break;
             }
 
-            #if UNITY_ANDROID && !UNITY_EDITOR
-                // On Android, extract UI files from APK first
-                yield return ExtractAndroidUIFiles(staticPath);
-            #else
-                EnsureStaticFilesExist(staticPath);
-            #endif
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // On Android, extract UI files from APK first
+            yield return ExtractAndroidUIFiles(staticPath);
+#else
+            EnsureStaticFilesExist(staticPath);
+#endif
 
             // Create server with logger interface
             var logger = new UnityLogger();
@@ -184,16 +189,16 @@ namespace QuestNav.Config
 
         private string GetStaticFilesPath()
         {
-            #if UNITY_ANDROID && !UNITY_EDITOR
-                // On Android, must extract from APK to persistentDataPath
-                string persistentPath = Path.Combine(Application.persistentDataPath, "ui");
-                Debug.Log($"[ConfigBootstrap] Using persistent path for Android: {persistentPath}");
-                return persistentPath;
-            #else
-                string streamingPath = Path.Combine(Application.streamingAssetsPath, "ui");
-                Debug.Log($"[ConfigBootstrap] Using StreamingAssets path: {streamingPath}");
-                return streamingPath;
-            #endif
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // On Android, must extract from APK to persistentDataPath
+            string persistentPath = Path.Combine(Application.persistentDataPath, "ui");
+            Debug.Log($"[ConfigBootstrap] Using persistent path for Android: {persistentPath}");
+            return persistentPath;
+#else
+            string streamingPath = Path.Combine(Application.streamingAssetsPath, "ui");
+            Debug.Log($"[ConfigBootstrap] Using StreamingAssets path: {streamingPath}");
+            return streamingPath;
+#endif
         }
 
         private IEnumerator ExtractAndroidUIFiles(string targetPath)
@@ -201,8 +206,12 @@ namespace QuestNav.Config
             // Check if Vue build exists (not the fallback)
             string indexPath = Path.Combine(targetPath, "index.html");
             string assetsDir = Path.Combine(targetPath, "assets");
-            
-            if (File.Exists(indexPath) && Directory.Exists(assetsDir) && Directory.GetFiles(assetsDir).Length > 0)
+
+            if (
+                File.Exists(indexPath)
+                && Directory.Exists(assetsDir)
+                && Directory.GetFiles(assetsDir).Length > 0
+            )
             {
                 Debug.Log("[ConfigBootstrap] UI files already extracted");
                 yield break;
@@ -233,8 +242,14 @@ namespace QuestNav.Config
             Debug.Log($"[ConfigBootstrap] Extracting assets to: {assetsDir}");
 
             // Extract known Vite output files (check build output for actual names)
-            yield return ExtractAndroidFile("ui/assets/main-DfKlr22t.css", Path.Combine(assetsDir, "main-DfKlr22t.css"));
-            yield return ExtractAndroidFile("ui/assets/main-C8dGtgpB.js", Path.Combine(assetsDir, "main-C8dGtgpB.js"));
+            yield return ExtractAndroidFile(
+                "ui/assets/main-DfKlr22t.css",
+                Path.Combine(assetsDir, "main-DfKlr22t.css")
+            );
+            yield return ExtractAndroidFile(
+                "ui/assets/main-C8dGtgpB.js",
+                Path.Combine(assetsDir, "main-C8dGtgpB.js")
+            );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");
         }
@@ -242,8 +257,11 @@ namespace QuestNav.Config
         private IEnumerator ExtractAndroidFile(string sourceRelative, string targetAbsolute)
         {
             string sourcePath = Path.Combine(Application.streamingAssetsPath, sourceRelative);
-            
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(sourcePath))
+
+            using (
+                UnityEngine.Networking.UnityWebRequest www =
+                    UnityEngine.Networking.UnityWebRequest.Get(sourcePath)
+            )
             {
                 yield return www.SendWebRequest();
 
@@ -254,7 +272,9 @@ namespace QuestNav.Config
                 }
                 else
                 {
-                    Debug.LogWarning($"[ConfigBootstrap] Failed to extract {sourceRelative}: {www.error}");
+                    Debug.LogWarning(
+                        $"[ConfigBootstrap] Failed to extract {sourceRelative}: {www.error}"
+                    );
                 }
             }
         }
@@ -264,8 +284,9 @@ namespace QuestNav.Config
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-                
-                string defaultHtml = @"<!DOCTYPE html>
+
+                string defaultHtml =
+                    @"<!DOCTYPE html>
 <html>
 <head>
     <title>Config UI</title>
@@ -306,4 +327,3 @@ namespace QuestNav.Config
         public string AuthToken => m_authToken;
     }
 }
-

@@ -71,4 +71,3 @@ namespace QuestNav.Config
         public static bool enableCORSDevMode = false;
     }
 }
-

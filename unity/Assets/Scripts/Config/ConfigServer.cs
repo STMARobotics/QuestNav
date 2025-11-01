@@ -1,11 +1,8 @@
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using EmbedIO;
 using EmbedIO.Actions;
-using EmbedIO.Files;
 using Newtonsoft.Json;
 
 namespace QuestNav.Config
@@ -30,7 +27,15 @@ namespace QuestNav.Config
         public bool IsRunning => m_server != null && m_server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{m_port}/";
 
-        public ConfigServer(ReflectionBinding binding, ConfigStore store, string authToken, int port, bool enableCORSDevMode, string staticPath, ILogger logger)
+        public ConfigServer(
+            ReflectionBinding binding,
+            ConfigStore store,
+            string authToken,
+            int port,
+            bool enableCORSDevMode,
+            string staticPath,
+            ILogger logger
+        )
         {
             m_binding = binding;
             m_store = store;
@@ -55,9 +60,9 @@ namespace QuestNav.Config
             m_logger?.Log($"[ConfigServer] Static files path: {m_staticPath}");
             m_logger?.Log($"[ConfigServer] Auth token: {m_authToken}");
 
-            m_server = new WebServer(o => o
-                .WithUrlPrefix($"http://*:{m_port}/")
-                .WithMode(HttpListenerMode.EmbedIO))
+            m_server = new WebServer(o =>
+                o.WithUrlPrefix($"http://*:{m_port}/").WithMode(HttpListenerMode.EmbedIO)
+            )
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
                 .WithStaticFolder("/", m_staticPath, true);
 
@@ -82,11 +87,11 @@ namespace QuestNav.Config
                 return;
 
             m_logger?.Log("[ConfigServer] Stopping server...");
-            
+
             m_cancellationTokenSource?.Cancel();
             m_server?.Dispose();
             m_server = null;
-            
+
             m_logger?.Log("[ConfigServer] Server stopped");
         }
 
@@ -100,7 +105,10 @@ namespace QuestNav.Config
                     context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
                 }
                 context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-                context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                context.Response.Headers.Add(
+                    "Access-Control-Allow-Headers",
+                    "Content-Type, Authorization"
+                );
 
                 // OPTIONS preflight
                 if (context.Request.HttpVerb == HttpVerbs.Options)
@@ -172,7 +180,7 @@ namespace QuestNav.Config
             {
                 success = true,
                 values = values,
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
             await context.SendDataAsync(result);
         }
@@ -203,7 +211,7 @@ namespace QuestNav.Config
                     success = true,
                     message = "Configuration updated",
                     oldValue = oldValue,
-                    newValue = newValue
+                    newValue = newValue,
                 };
 
                 await context.SendDataAsync(response);
@@ -211,11 +219,13 @@ namespace QuestNav.Config
             else
             {
                 context.Response.StatusCode = 400;
-                await context.SendDataAsync(new ConfigUpdateResponse
-                {
-                    success = false,
-                    message = "Failed to update configuration"
-                });
+                await context.SendDataAsync(
+                    new ConfigUpdateResponse
+                    {
+                        success = false,
+                        message = "Failed to update configuration",
+                    }
+                );
             }
         }
 
@@ -228,7 +238,7 @@ namespace QuestNav.Config
                 deviceModel = "Quest",
                 connectedClients = 0,
                 configPath = m_store.GetConfigPath(),
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
             await context.SendDataAsync(info);
         }

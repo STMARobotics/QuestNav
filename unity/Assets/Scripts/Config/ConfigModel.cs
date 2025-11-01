@@ -34,7 +34,8 @@ namespace QuestNav.Config
     public class ConfigSchema
     {
         public List<ConfigFieldSchema> fields = new List<ConfigFieldSchema>();
-        public Dictionary<string, List<ConfigFieldSchema>> categories = new Dictionary<string, List<ConfigFieldSchema>>();
+        public Dictionary<string, List<ConfigFieldSchema>> categories =
+            new Dictionary<string, List<ConfigFieldSchema>>();
         public string version = "1.0";
     }
 
@@ -62,4 +63,3 @@ namespace QuestNav.Config
         public string deviceId;
     }
 }
-

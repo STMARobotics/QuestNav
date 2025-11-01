@@ -7,4 +7,3 @@ namespace QuestNav.Config
         void LogError(string message);
     }
 }
-

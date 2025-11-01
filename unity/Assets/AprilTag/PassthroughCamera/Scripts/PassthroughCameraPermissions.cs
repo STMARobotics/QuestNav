@@ -19,12 +19,16 @@ namespace PassthroughCameraSamples
     [MetaCodeSample("PassthroughCameraApiSamples-PassthroughCamera")]
     public class PassthroughCameraPermissions : MonoBehaviour
     {
-        [SerializeField] public List<string> PermissionRequestsOnStartup = new() { OVRPermissionsRequester.ScenePermission };
+        [SerializeField]
+        public List<string> PermissionRequestsOnStartup = new()
+        {
+            OVRPermissionsRequester.ScenePermission,
+        };
 
         public static readonly string[] CameraPermissions =
         {
-            "android.permission.CAMERA",          // Required to use WebCamTexture object.
-            "horizonos.permission.HEADSET_CAMERA" // Required to access the Passthrough Camera API in Horizon OS v74 and above.
+            "android.permission.CAMERA", // Required to use WebCamTexture object.
+            "horizonos.permission.HEADSET_CAMERA", // Required to access the Passthrough Camera API in Horizon OS v74 and above.
         };
 
         public static bool? HasCameraPermission { get; private set; }
@@ -55,7 +59,9 @@ namespace PassthroughCameraSamples
                 callbacks.PermissionGranted += PermissionCallbacksPermissionGranted;
 
                 // It's important to request all necessary permissions in one request because only one 'PermissionCallbacks' instance is supported at a time.
-                var allPermissions = CameraPermissions.Concat(PermissionRequestsOnStartup).ToArray();
+                var allPermissions = CameraPermissions
+                    .Concat(PermissionRequestsOnStartup)
+                    .ToArray();
                 Permission.RequestUserPermissions(allPermissions, callbacks);
             }
         }
@@ -84,18 +90,25 @@ namespace PassthroughCameraSamples
             // Check if we should show a rationale (user can be asked again)
             if (Permission.ShouldShowRequestPermissionRationale(permissionName))
             {
-                PCD.DebugMessage(LogType.Warning, $"PCA: Permission {permissionName} Denied - can ask again");
+                PCD.DebugMessage(
+                    LogType.Warning,
+                    $"PCA: Permission {permissionName} Denied - can ask again"
+                );
             }
             else
             {
-                PCD.DebugMessage(LogType.Warning, $"PCA: Permission {permissionName} Denied - don't ask again");
+                PCD.DebugMessage(
+                    LogType.Warning,
+                    $"PCA: Permission {permissionName} Denied - don't ask again"
+                );
             }
-            
+
             HasCameraPermission = false;
             s_askedOnce = false;
         }
 
-        private static bool IsAllCameraPermissionsGranted() => CameraPermissions.All(Permission.HasUserAuthorizedPermission);
+        private static bool IsAllCameraPermissionsGranted() =>
+            CameraPermissions.All(Permission.HasUserAuthorizedPermission);
 #endif
     }
 }
