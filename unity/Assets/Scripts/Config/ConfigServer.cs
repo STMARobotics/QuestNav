@@ -129,9 +129,16 @@ namespace QuestNav.Config
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
                 .WithStaticFolder("/", m_staticPath, true);
 
-            // Disable verbose EmbedIO logging
+            // Disable verbose EmbedIO logging (only if not already unregistered)
             m_server.StateChanged += (s, e) => { }; // Suppress state change logs
-            Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
+            try
+            {
+                Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
+            }
+            catch
+            {
+                // Logger already unregistered on previous start, ignore
+            }
 
             Task.Run(async () =>
             {

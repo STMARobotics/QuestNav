@@ -274,6 +274,10 @@ namespace QuestNav.Config
         private IEnumerator RestartServerCoroutine()
         {
             Debug.Log("[ConfigBootstrap] Restarting server...");
+            
+            // Wait a moment for the old server to fully stop and release the port
+            yield return new WaitForSeconds(0.5f);
+            
             yield return StartServerCoroutine();
         }
 
