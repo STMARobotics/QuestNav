@@ -343,12 +343,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-DMXer2BU.css",
-                Path.Combine(assetsDir, "main-DMXer2BU.css")
+                "ui/assets/main-BF6XdPsA.css",
+                Path.Combine(assetsDir, "main-BF6XdPsA.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-BLH9ANE7.js",
-                Path.Combine(assetsDir, "main-BLH9ANE7.js")
+                "ui/assets/main-Dxpm8-xV.js",
+                Path.Combine(assetsDir, "main-Dxpm8-xV.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");

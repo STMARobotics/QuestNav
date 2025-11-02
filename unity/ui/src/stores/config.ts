@@ -41,7 +41,13 @@ export const useConfigStore = defineStore('config', () => {
       lastUpdated.value = Date.now()
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load schema'
+      // Don't set error if it's just a network error (server suspended/offline)
+      if (err instanceof Error && err.message.includes('Failed to fetch')) {
+        // Silent fail - connection status indicator will show it's disconnected
+        error.value = null
+      } else {
+        error.value = err instanceof Error ? err.message : 'Failed to load schema'
+      }
       return false
     } finally {
       isLoading.value = false
@@ -57,7 +63,13 @@ export const useConfigStore = defineStore('config', () => {
       lastUpdated.value = Date.now()
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load config'
+      // Don't set error if it's just a network error (server suspended/offline)
+      if (err instanceof Error && err.message.includes('Failed to fetch')) {
+        // Silent fail - connection status indicator will show it's disconnected
+        error.value = null
+      } else {
+        error.value = err instanceof Error ? err.message : 'Failed to load config'
+      }
       return false
     }
   }

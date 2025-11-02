@@ -7,9 +7,15 @@
         <div class="header-content">
           <div class="header-left">
             <h1>🎮 QuestNav Config</h1>
-            <span v-if="configStore.lastUpdated" class="last-updated">
-              Last updated: {{ formatTime(configStore.lastUpdated) }}
-            </span>
+            <div class="header-info">
+              <span v-if="configStore.lastUpdated" class="last-updated">
+                Last updated: {{ formatTime(configStore.lastUpdated) }}
+              </span>
+              <span :class="['connection-status', connectionStatus]">
+                <span class="status-dot"></span>
+                {{ connectionStatusText }}
+              </span>
+            </div>
           </div>
           
           <div class="header-right">
@@ -114,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from './stores/config'
 import { configApi } from './api/config'
 import ConfigForm from './components/ConfigForm.vue'
@@ -123,11 +129,51 @@ import type { ServerInfo } from './types'
 const configStore = useConfigStore()
 const showInfoModal = ref(false)
 const serverInfo = ref<ServerInfo | null>(null)
+const connectionStatus = ref<'connected' | 'disconnected' | 'connecting'>('connecting')
+
+const connectionStatusText = computed(() => {
+  switch (connectionStatus.value) {
+    case 'connected': return 'Connected'
+    case 'disconnected': return 'Disconnected'
+    case 'connecting': return 'Connecting...'
+  }
+})
 
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp)
   return date.toLocaleTimeString()
 }
+
+// Monitor connection status
+let statusCheckInterval: number | null = null
+
+onMounted(() => {
+  // Check connection every 3 seconds
+  statusCheckInterval = setInterval(async () => {
+    try {
+      await configApi.getSchema()
+      connectionStatus.value = 'connected'
+    } catch {
+      connectionStatus.value = 'disconnected'
+    }
+  }, 3000) as unknown as number
+  
+  // Initial check
+  setTimeout(async () => {
+    try {
+      await configApi.getSchema()
+      connectionStatus.value = 'connected'
+    } catch {
+      connectionStatus.value = 'disconnected'
+    }
+  }, 500)
+})
+
+onUnmounted(() => {
+  if (statusCheckInterval !== null) {
+    clearInterval(statusCheckInterval)
+  }
+})
 
 async function refreshData() {
   await configStore.loadSchema()
@@ -195,9 +241,60 @@ async function handleRestart() {
   font-size: 1.5rem;
 }
 
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .last-updated {
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+.connection-status {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.connection-status .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.connection-status.connected {
+  color: var(--success-color);
+}
+
+.connection-status.connected .status-dot {
+  background-color: var(--success-color);
+}
+
+.connection-status.disconnected {
+  color: var(--danger-color);
+}
+
+.connection-status.disconnected .status-dot {
+  background-color: var(--danger-color);
+}
+
+.connection-status.connecting {
+  color: var(--warning-color);
+}
+
+.connection-status.connecting .status-dot {
+  background-color: var(--warning-color);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .header-right {
