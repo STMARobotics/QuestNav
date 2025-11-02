@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 
 namespace QuestNav.Config
@@ -27,6 +28,7 @@ namespace QuestNav.Config
         private ConfigStore m_store;
         private bool m_isInitialized = false;
         private bool m_restartRequested = false;
+        private bool m_poseResetRequested = false;
 
         /// <summary>
         /// Initializes configuration system on app startup.
@@ -47,7 +49,7 @@ namespace QuestNav.Config
         }
 
         /// <summary>
-        /// Checks for restart request flag on main thread.
+        /// Checks for restart and pose reset request flags on main thread.
         /// </summary>
         void Update()
         {
@@ -56,6 +58,12 @@ namespace QuestNav.Config
                 m_restartRequested = false;
                 Debug.Log("[ConfigBootstrap] Executing restart on main thread");
                 RestartApp();
+            }
+
+            if (m_poseResetRequested)
+            {
+                m_poseResetRequested = false;
+                ExecutePoseReset();
             }
         }
 
@@ -237,7 +245,8 @@ namespace QuestNav.Config
                 m_enableCORSDevMode,
                 staticPath,
                 logger,
-                RestartApplication
+                RestartApplication,
+                RequestPoseReset
             );
 
             if (m_server == null)
@@ -330,12 +339,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-Sq0ljtr4.css",
-                Path.Combine(assetsDir, "main-Sq0ljtr4.css")
+                "ui/assets/main-DMXer2BU.css",
+                Path.Combine(assetsDir, "main-DMXer2BU.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-CuZDNAqB.js",
-                Path.Combine(assetsDir, "main-CuZDNAqB.js")
+                "ui/assets/main-BLH9ANE7.js",
+                Path.Combine(assetsDir, "main-BLH9ANE7.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");
@@ -417,6 +426,76 @@ namespace QuestNav.Config
         {
             Debug.Log("[ConfigBootstrap] Restart requested from web interface");
             m_restartRequested = true;
+        }
+
+        /// <summary>
+        /// Requests pose reset. Called from background thread via ConfigServer.
+        /// </summary>
+        private void RequestPoseReset()
+        {
+            m_poseResetRequested = true;
+        }
+
+        /// <summary>
+        /// Executes pose reset to origin by calling PoseResetCommand directly via reflection.
+        /// Uses reflection to avoid circular assembly dependencies between Config and QuestNav.
+        /// </summary>
+        private void ExecutePoseReset()
+        {
+            Debug.Log("[ConfigBootstrap] Executing pose reset to origin");
+
+            // Find QuestNav instance
+            var questNavType = Type.GetType("QuestNav.Core.QuestNav, QuestNav");
+            if (questNavType == null)
+            {
+                Debug.LogError("[ConfigBootstrap] QuestNav.Core.QuestNav type not found");
+                return;
+            }
+
+            var questNav = FindFirstObjectByType(questNavType);
+            if (questNav != null)
+            {
+                // Get VR camera and camera root via reflection
+                var vrCameraField = questNavType.GetField(
+                    "vrCamera",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+                var vrCameraRootField = questNavType.GetField(
+                    "vrCameraRoot",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+
+                if (vrCameraField != null && vrCameraRootField != null)
+                {
+                    Transform vrCamera = vrCameraField.GetValue(questNav) as Transform;
+                    Transform vrCameraRoot = vrCameraRootField.GetValue(questNav) as Transform;
+
+                    if (vrCamera != null && vrCameraRoot != null)
+                    {
+                        // Recenter tracking using the same algorithm as PoseResetCommand
+                        // Target: position (0,0,0) with identity rotation
+
+                        Vector3 targetPosition = Vector3.zero;
+                        Quaternion targetRotation = Quaternion.identity;
+
+                        // Calculate rotation difference between current camera and target
+                        Quaternion newRotation =
+                            targetRotation * Quaternion.Inverse(vrCamera.localRotation);
+
+                        // Apply rotation to root
+                        vrCameraRoot.rotation = newRotation;
+
+                        // Recalculate position after rotation
+                        Vector3 newRootPosition =
+                            targetPosition - (newRotation * vrCamera.localPosition);
+
+                        // Apply position to root
+                        vrCameraRoot.position = newRootPosition;
+
+                        Debug.Log("[ConfigBootstrap] Tracking recentered to origin");
+                    }
+                }
+            }
         }
 
         public bool IsServerRunning => m_server != null && m_server.IsRunning;

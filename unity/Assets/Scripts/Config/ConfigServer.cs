@@ -51,8 +51,9 @@ namespace QuestNav.Config
         // Cached server info (captured on main thread)
         private CachedServerInfo m_cachedServerInfo;
 
-        // Callback for main thread actions
+        // Callbacks for main thread actions
         private MainThreadAction m_restartCallback;
+        private MainThreadAction m_poseResetCallback;
 
         public bool IsRunning => m_server != null && m_server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{m_port}/";
@@ -65,7 +66,8 @@ namespace QuestNav.Config
             bool enableCORSDevMode,
             string staticPath,
             ILogger logger,
-            MainThreadAction restartCallback
+            MainThreadAction restartCallback,
+            MainThreadAction poseResetCallback
         )
         {
             m_binding = binding;
@@ -76,6 +78,7 @@ namespace QuestNav.Config
             m_staticPath = staticPath;
             m_logger = logger;
             m_restartCallback = restartCallback;
+            m_poseResetCallback = poseResetCallback;
 
             // Cache server info on main thread (before server starts on background thread)
             CacheServerInfo();
@@ -218,6 +221,10 @@ namespace QuestNav.Config
                 {
                     await HandleRestart(context);
                 }
+                else if (path == "/api/reset-pose" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
+                    await HandleResetPose(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -352,6 +359,12 @@ namespace QuestNav.Config
 
             // Trigger restart on main thread via callback
             m_restartCallback?.Invoke();
+        }
+
+        private async Task HandleResetPose(IHttpContext context)
+        {
+            m_poseResetCallback?.Invoke();
+            await context.SendDataAsync(new { success = true, message = "Pose reset initiated" });
         }
     }
 }

@@ -63,6 +63,10 @@ class ConfigApi {
   async restartApp(): Promise<{ success: boolean, message: string }> {
     return this.request('/api/restart', { method: 'POST' })
   }
+  
+  async resetPose(): Promise<{ success: boolean, message: string }> {
+    return this.request('/api/reset-pose', { method: 'POST' })
+  }
 
 }
 

@@ -48,10 +48,21 @@
             <span class="value mono">{{ status.position.z.toFixed(3) }} m</span>
           </div>
           <div class="status-item">
+            <span class="label">Pitch:</span>
+            <span class="value mono">{{ status.eulerAngles.pitch.toFixed(1) }}°</span>
+          </div>
+          <div class="status-item">
             <span class="label">Yaw:</span>
             <span class="value mono">{{ status.eulerAngles.yaw.toFixed(1) }}°</span>
           </div>
+          <div class="status-item">
+            <span class="label">Roll:</span>
+            <span class="value mono">{{ status.eulerAngles.roll.toFixed(1) }}°</span>
+          </div>
         </div>
+        <button @click="handleResetPose" class="reset-button">
+          🎯 Recenter Tracking
+        </button>
       </div>
 
       <!-- Tracking Status -->
@@ -135,6 +146,19 @@ async function loadStatus() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load status'
     loading.value = false
+  }
+}
+
+async function handleResetPose() {
+  if (!confirm('Recenter tracking? This will set your current position as the new origin (0,0,0).')) {
+    return
+  }
+  
+  try {
+    await configApi.resetPose()
+    await loadStatus() // Reload to show new position
+  } catch (err) {
+    alert('Failed to reset pose: ' + (err instanceof Error ? err.message : 'Unknown error'))
   }
 }
 
@@ -264,6 +288,17 @@ onUnmounted(() => {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
+}
+
+.reset-button {
+  width: 100%;
+  margin-top: 1rem;
+  background-color: var(--warning-color);
+  color: #000;
+}
+
+.reset-button:hover {
+  background-color: #e0a800;
 }
 
 @media (max-width: 768px) {
