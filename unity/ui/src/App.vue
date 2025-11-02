@@ -19,6 +19,9 @@
             <button class="secondary" @click="showInfo">
               ℹ️ Info
             </button>
+            <button class="danger" @click="handleRestart">
+              🔄 Restart App
+            </button>
           </div>
         </div>
       </header>
@@ -137,6 +140,21 @@ async function showInfo() {
     showInfoModal.value = true
   } catch (error) {
     console.error('Failed to load server info:', error)
+  }
+}
+
+async function handleRestart() {
+  if (!confirm('Are you sure you want to restart the QuestNav application? This will disconnect and restart the app on the Quest headset.')) {
+    return
+  }
+  
+  try {
+    await configApi.restartApp()
+    // Show message that restart was triggered
+    alert('Restart command sent. The app will restart shortly.')
+  } catch (error) {
+    console.error('Failed to restart app:', error)
+    alert('Failed to send restart command: ' + (error instanceof Error ? error.message : 'Unknown error'))
   }
 }
 </script>

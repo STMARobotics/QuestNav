@@ -26,6 +26,7 @@ namespace QuestNav.Config
         private ReflectionBinding m_binding;
         private ConfigStore m_store;
         private bool m_isInitialized = false;
+        private bool m_restartRequested = false;
 
         /// <summary>
         /// Initializes configuration system on app startup.
@@ -43,6 +44,77 @@ namespace QuestNav.Config
             {
                 StartCoroutine(InitializeCoroutine());
             }
+        }
+
+        /// <summary>
+        /// Checks for restart request flag on main thread.
+        /// </summary>
+        void Update()
+        {
+            if (m_restartRequested)
+            {
+                m_restartRequested = false;
+                Debug.Log("[ConfigBootstrap] Executing restart on main thread");
+                RestartApp();
+            }
+        }
+
+        /// <summary>
+        /// Restarts the application on Android/Quest by launching new instance then killing current process.
+        /// On editor, just quits the application.
+        /// </summary>
+        private void RestartApp()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                using (
+                    AndroidJavaClass unityPlayer = new AndroidJavaClass(
+                        "com.unity3d.player.UnityPlayer"
+                    )
+                )
+                using (
+                    AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>(
+                        "currentActivity"
+                    )
+                )
+                using (AndroidJavaObject pm = activity.Call<AndroidJavaObject>("getPackageManager"))
+                using (
+                    AndroidJavaObject intent = pm.Call<AndroidJavaObject>(
+                        "getLaunchIntentForPackage",
+                        Application.identifier
+                    )
+                )
+                {
+                    const int FLAG_ACTIVITY_NEW_TASK = 0x10000000;
+                    const int FLAG_ACTIVITY_CLEAR_TASK = 0x00008000;
+                    const int FLAG_ACTIVITY_CLEAR_TOP = 0x04000000;
+
+                    intent.Call<AndroidJavaObject>(
+                        "addFlags",
+                        FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_CLEAR_TOP
+                    );
+                    activity.Call("startActivity", intent);
+
+                    Debug.Log("[ConfigBootstrap] New instance started, killing current process...");
+                }
+
+                // Kill current process immediately after starting new instance
+                using (AndroidJavaClass process = new AndroidJavaClass("android.os.Process"))
+                {
+                    int pid = process.CallStatic<int>("myPid");
+                    process.CallStatic("killProcess", pid);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[ConfigBootstrap] Failed to restart: {ex.Message}");
+                // Fallback to normal quit
+                UnityEngine.Application.Quit();
+            }
+#else
+            UnityEngine.Application.Quit();
+#endif
         }
 
         /// <summary>
@@ -164,7 +236,8 @@ namespace QuestNav.Config
                 m_serverPort,
                 m_enableCORSDevMode,
                 staticPath,
-                logger
+                logger,
+                RestartApplication
             );
 
             if (m_server == null)
@@ -257,12 +330,12 @@ namespace QuestNav.Config
 
             // Extract known Vite output files (check build output for actual names)
             yield return ExtractAndroidFile(
-                "ui/assets/main-CR8jOAJU.css",
-                Path.Combine(assetsDir, "main-CR8jOAJU.css")
+                "ui/assets/main-Sq0ljtr4.css",
+                Path.Combine(assetsDir, "main-Sq0ljtr4.css")
             );
             yield return ExtractAndroidFile(
-                "ui/assets/main-Dsz_5Opv.js",
-                Path.Combine(assetsDir, "main-Dsz_5Opv.js")
+                "ui/assets/main-CuZDNAqB.js",
+                Path.Combine(assetsDir, "main-CuZDNAqB.js")
             );
 
             Debug.Log("[ConfigBootstrap] UI extraction complete");
@@ -334,6 +407,16 @@ namespace QuestNav.Config
             Debug.Log($"║ Connect: http://<quest-ip>:{m_serverPort}/");
             Debug.Log("║ No authentication required - open access");
             Debug.Log("╚═══════════════════════════════════════════════════════════╝");
+        }
+
+        /// <summary>
+        /// Restarts the application. Called from background thread via ConfigServer callback.
+        /// Sets flag that will be checked on main thread in Update().
+        /// </summary>
+        private void RestartApplication()
+        {
+            Debug.Log("[ConfigBootstrap] Restart requested from web interface");
+            m_restartRequested = true;
         }
 
         public bool IsServerRunning => m_server != null && m_server.IsRunning;

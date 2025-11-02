@@ -27,6 +27,11 @@ namespace QuestNav.Config
     }
 
     /// <summary>
+    /// Callback delegate for main thread actions from background thread
+    /// </summary>
+    public delegate void MainThreadAction();
+
+    /// <summary>
     /// Pure C# class (NOT MonoBehaviour) that runs EmbedIO server on background thread.
     /// Uses async/await which is acceptable per Unity rules for non-MonoBehaviour classes.
     /// Does not call Unity APIs directly - uses ILogger interface instead.
@@ -46,6 +51,9 @@ namespace QuestNav.Config
         // Cached server info (captured on main thread)
         private CachedServerInfo m_cachedServerInfo;
 
+        // Callback for main thread actions
+        private MainThreadAction m_restartCallback;
+
         public bool IsRunning => m_server != null && m_server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{m_port}/";
 
@@ -56,7 +64,8 @@ namespace QuestNav.Config
             int port,
             bool enableCORSDevMode,
             string staticPath,
-            ILogger logger
+            ILogger logger,
+            MainThreadAction restartCallback
         )
         {
             m_binding = binding;
@@ -66,6 +75,7 @@ namespace QuestNav.Config
             m_enableCORSDevMode = enableCORSDevMode;
             m_staticPath = staticPath;
             m_logger = logger;
+            m_restartCallback = restartCallback;
 
             // Cache server info on main thread (before server starts on background thread)
             CacheServerInfo();
@@ -115,6 +125,10 @@ namespace QuestNav.Config
             )
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
                 .WithStaticFolder("/", m_staticPath, true);
+
+            // Disable verbose EmbedIO logging
+            m_server.StateChanged += (s, e) => { }; // Suppress state change logs
+            Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
 
             Task.Run(async () =>
             {
@@ -199,6 +213,10 @@ namespace QuestNav.Config
                 else if (path == "/api/logs" && context.Request.HttpVerb == HttpVerbs.Delete)
                 {
                     await HandleClearLogs(context);
+                }
+                else if (path == "/api/restart" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
+                    await HandleRestart(context);
                 }
                 else
                 {
@@ -326,6 +344,14 @@ namespace QuestNav.Config
         {
             LogCollector.Instance.ClearLogs();
             await context.SendDataAsync(new { success = true, message = "Logs cleared" });
+        }
+
+        private async Task HandleRestart(IHttpContext context)
+        {
+            await context.SendDataAsync(new { success = true, message = "Restart initiated" });
+
+            // Trigger restart on main thread via callback
+            m_restartCallback?.Invoke();
         }
     }
 }

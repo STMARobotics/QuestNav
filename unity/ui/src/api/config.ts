@@ -58,7 +58,11 @@ class ConfigApi {
   
   async clearLogs(): Promise<{ success: boolean, message: string }> {
     return this.request('/api/logs', { method: 'DELETE' })
-    }
+  }
+  
+  async restartApp(): Promise<{ success: boolean, message: string }> {
+    return this.request('/api/restart', { method: 'POST' })
+  }
 
 }
 
