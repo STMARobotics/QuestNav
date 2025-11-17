@@ -75,7 +75,7 @@ jobs:
           path: docs/static/api/proto
       
       - name: Upload Combined Docs Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
           path: docs/

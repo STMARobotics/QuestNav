@@ -47,7 +47,8 @@ jobs:
         
       - name: Upload artifact
         id: upload-docs
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: ./docs/build
           name: questnav-docs-${{ steps.version-info.outputs.version }}
+          path: docs/build
+          retention-days: 7
