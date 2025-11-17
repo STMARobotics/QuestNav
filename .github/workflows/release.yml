@@ -83,7 +83,7 @@ jobs:
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true
-          tag_name: ${{ steps.version-info.outputs.tag }}
+          tag_name: ${{ steps.version-info.outputs.version }}
           files: release/**
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
