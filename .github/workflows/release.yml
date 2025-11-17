@@ -35,6 +35,10 @@ jobs:
   publish-docs:
     needs: [build-proto-java, build-proto-csharp]
     uses: ./.github/workflows/reusable-publish-docs.yml
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     with:
       version: ${{ inputs.version }}
   
