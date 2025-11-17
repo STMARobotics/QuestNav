@@ -75,7 +75,7 @@ jobs:
       - name: Download Vendor JSON
         uses: actions/download-artifact@v4
         with:
-          name: 'questnav-lib-${{ steps.version-info.outputs.version }}'
+          name: 'questnav-json-${{ steps.version-info.outputs.version }}'
           path: 'release'
 
       - name: Release to GitHub Releases
