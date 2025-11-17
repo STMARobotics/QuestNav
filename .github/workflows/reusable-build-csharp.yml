@@ -46,8 +46,9 @@ jobs:
           sparse-checkout-cone-mode: false
           lfs: true
 
-      - name: Free Disk Space
-        uses: ./.github/actions/quest-windows-free-disk-space
+      # ONLY NEEDED WHEN USING GITHUB RUNNERS
+      # - name: Free Disk Space
+      #   uses: ./.github/actions/quest-windows-free-disk-space
 
       - name: Determine Version
         id: version-info
