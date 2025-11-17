@@ -29,7 +29,7 @@ on:
         value: ${{ jobs.build.outputs.apk-artifact-id }}
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows]
     outputs:
       version: ${{ steps.version-info.outputs.version }}
       version-code: ${{ steps.version-info.outputs.version-code }}
