@@ -1,0 +1,65 @@
+name: Publish QuestNavLib
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
+    secrets:
+      MAVEN_USERNAME:
+        description: 'QuestNav Maven Username'
+        required: true
+      MAVEN_PASSWORD:
+        description: 'QuestNav Maven Password'
+        required: true
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: questnav-lib
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            questnav-lib
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          working-directory: questnav-lib
+          cache-key-prefix: gradle-publish
+
+      - name: Publish to Maven
+        run: |
+          ./gradlew publish \
+            -Pversion="${{ steps.version-info.outputs.version }}" \
+            -PversionType="${{ steps.version-info.outputs.version-type }}" \
+            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
+            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
+
+      - name: Upload Vendor JSON Artifact
+        id: upload-json
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-json-${{ steps.version-info.outputs.version }}
+          path: 'questnav-lib/build/generated/vendordeps/*.json'
+          retention-days: 7

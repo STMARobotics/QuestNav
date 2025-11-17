@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+# ----------------------- DETECT CHANGES ----------------------- #
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      java-changed: ${{ steps.changes.outputs.java }}
+      csharp-changed: ${{ steps.changes.outputs.csharp }}
+      proto-changed: ${{ steps.changes.outputs.proto }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            java:
+              - 'questnav-lib/**'
+            csharp:
+              - 'unity/**'
+            proto:
+              - 'protos/**'
+            docs:
+              - 'docs/**'
+
+
+# ----------------------- JAVA ----------------------- #
+  build-proto-java:
+    if: |
+      needs.detect-changes.outputs.proto-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-java.yml
+
+  format-java:
+    if: needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes, build-proto-java]
+    uses: ./.github/workflows/reusable-format-java.yml
+
+  docs-java:
+    if: needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes, build-proto-java]
+    uses: ./.github/workflows/reusable-docs-javadoc.yml
+
+  build-java:
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.java-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true') &&
+      (needs.format-java.result != 'failure' &&
+      needs.docs-java.result != 'failure')
+    needs: [detect-changes, format-java, docs-java]
+    uses: ./.github/workflows/reusable-build-java.yml
+
+  publish-java:
+    if: |
+      always() &&
+      needs.build-java.result == 'success'
+    needs: [build-java]
+    uses: ./.github/workflows/reusable-publish-java.yml
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+# ----------------------- C# ----------------------- #
+  build-proto-csharp:
+    if: |
+      needs.detect-changes.outputs.proto-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-csharp.yml
+    
+  format-csharp:
+    if: needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [detect-changes, build-proto-csharp]
+    uses: ./.github/workflows/reusable-format-csharp.yml
+
+  docs-csharp:
+    if: needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [detect-changes, build-proto-csharp]
+    uses: ./.github/workflows/reusable-docs-docfx.yml
+
+  build-csharp:
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true') &&
+      (needs.format-csharp.result != 'failure' &&
+      needs.docs-csharp.result != 'failure')
+    needs: [detect-changes, docs-csharp, format-csharp]
+    uses: ./.github/workflows/reusable-build-csharp.yml
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+# ----------------------- PROTOBUF ----------------------- #
+  docs-proto:
+    if: needs.detect-changes.outputs.proto-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-docs-proto.yml
+
+  # ----------------------- DOCS ----------------------- #
+  build-docs:
+    if: needs.detect-changes.outputs.docs-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-docs.yml
+
+  # ----------------------- SUMMARY ----------------------- #
+  ci-summary:
+    if: always()
+    needs:
+      - detect-changes
+      - format-java
+      - build-java
+      - docs-java
+      - format-csharp
+      - build-csharp
+      - docs-csharp
+      - build-proto-java
+      - build-proto-csharp
+      - docs-proto
+      - build-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate CI Summary
+        run: |
+          echo "# CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "- Java: \`${{ needs.detect-changes.outputs.java-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`" >> $GITHUB_STEP_SUMMARY

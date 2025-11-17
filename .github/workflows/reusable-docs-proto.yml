@@ -1,0 +1,67 @@
+name: Build Proto Docs
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
+    outputs:
+      artifact-id:
+        description: 'The artifact ID for the proto docs'
+        value: ${{ jobs.build-docs.outputs.artifact-id }}
+
+jobs:
+  build-docs:
+    name: Build Proto Docs
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.upload-proto-docs.outputs.artifact-id }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            protos
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download protoc-gen-doc
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: 'pseudomuto/protoc-gen-doc'
+          latest: true
+          fileName: 'protoc-gen-doc_*_linux_amd64.tar.gz '
+          extract: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Generate Proto Documentation
+        run: |
+          mkdir -p proto-docs
+          protoc --proto_path=protos \
+          --plugin=protoc-gen-doc=./protoc-gen-doc \
+                 --doc_out=proto-docs \
+                 --doc_opt=html,index.html \
+                 protos/*.proto
+
+      - name: Upload Proto Docs Artifact
+        id: upload-proto-docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-proto-docs-${{ steps.version-info.outputs.version }}
+          path: proto-docs/
+          retention-days: 7
