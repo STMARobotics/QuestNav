@@ -54,7 +54,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: 'questnav-docs-${{ steps.version-info.outputs.version }}'
-          path: docs/
+          path: docs
 
       - name: Restore DocFX Artifact
         uses: actions/download-artifact@v4
