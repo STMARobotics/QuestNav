@@ -14,6 +14,11 @@ concurrency:
 jobs:
   determine-publishable-changes:
     runs-on: ubuntu-latest
+    outputs:
+      java-changed: ${{ steps.changes.outputs.java }}
+      csharp-changed: ${{ steps.changes.outputs.csharp }}
+      proto-changed: ${{ steps.changes.outputs.proto }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -53,7 +58,7 @@ jobs:
     if: |
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true'
-    needs: [build-proto-csharp]
+    needs: [build-proto-csharp, determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
       version: ${{ inputs.version }}
@@ -63,7 +68,9 @@ jobs:
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   publish-docs:
-    needs: [build-proto-java, build-proto-csharp]
+    if: |
+      needs.determine-publishable-changes.outputs.docs-changed == 'true'
+    needs: [build-proto-java, build-proto-csharp, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
       contents: write
@@ -76,7 +83,7 @@ jobs:
     if: |
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.csharp-changed == 'true'
-    needs: [build-proto-java]
+    needs: [build-proto-java, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
       version: ${{ inputs.version }}
@@ -91,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [build-apk, publish-docs, publish-java]
+    needs: [build-apk, publish-docs, publish-java, determine-publishable-changes]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
