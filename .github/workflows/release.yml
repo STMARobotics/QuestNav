@@ -49,11 +49,13 @@ jobs:
           base: ${{ steps.get-last-release.outputs.tag }}
 
   build-proto-java:
+    needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-proto-java.yml
     with:
       version: ${{ inputs.version }}
 
   build-proto-csharp:
+    needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-proto-csharp.yml
     with:
       version: ${{ inputs.version }}
