@@ -6,11 +6,6 @@
 .idea/
 .DS_Store
 
-# Generated files
-**/Generated/*.cs
-**/generated/*.java
-
-
 # CMake/NDK build artifacts
 .utmp/
 

@@ -26,11 +26,15 @@ jobs:
         with:
           filters: |
             java:
-              - 'questnav-lib/**'
+              - 'questnav-lib/**.java'
+              - 'questnav-lib/**.gradle'
             csharp:
-              - 'unity/**'
+              - 'unity/**.cs'
+              - 'unity/**.json'
+              - 'unity/**.unity'
+              - 'unity/**.meta'
             proto:
-              - 'protos/**'
+              - 'protos/*.proto'
             docs:
               - 'docs/**'
 

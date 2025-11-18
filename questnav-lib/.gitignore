@@ -47,3 +47,6 @@ gradle-app.setting
 
 # VS Code build directory
 bin
+
+# Generated files
+**/generated/*.java
