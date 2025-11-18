@@ -102,15 +102,15 @@ Generate C# files from proto definitions:
 
 <Tabs>
   <TabItem value="windows" label="Windows">
-```bash
-    mkdir unity\Assets\QuestNav\Generated
-    protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Generated protos\*.proto
+```powershell
+    # From the base directory of the repository
+    protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
 ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
 ```bash
-    mkdir -p unity/Assets/QuestNav/Generated
-    protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Generated protos/*.proto
+    # From the base directory of the repository
+    protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
 ```
   </TabItem>
 </Tabs>
@@ -125,7 +125,8 @@ Generate C# files from proto definitions:
 ```
 
     2. Generate Java files:
-```bash
+```powershell
+    # From the base directory of the repository
     protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
 ```
   </TabItem>
@@ -138,6 +139,7 @@ Generate C# files from proto definitions:
 
     2. Generate Java files:
 ```bash
+    # From the base directory of the repository
     protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
 ```
   </TabItem>
