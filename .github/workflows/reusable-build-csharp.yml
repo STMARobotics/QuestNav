@@ -29,7 +29,7 @@ on:
         value: ${{ jobs.build.outputs.apk-artifact-id }}
 jobs:
   build:
-    runs-on: windows-latest #[self-hosted, Windows]
+    runs-on: [self-hosted, Windows] # windows-latest
     outputs:
       version: ${{ steps.version-info.outputs.version }}
       version-code: ${{ steps.version-info.outputs.version-code }}
@@ -47,8 +47,8 @@ jobs:
           lfs: true
 
       # ONLY NEEDED WHEN USING GITHUB RUNNERS
-      - name: Free Disk Space
-        uses: ./.github/actions/quest-windows-free-disk-space
+      # - name: Free Disk Space
+      #   uses: ./.github/actions/quest-windows-free-disk-space
 
       - name: Determine Version
         id: version-info
