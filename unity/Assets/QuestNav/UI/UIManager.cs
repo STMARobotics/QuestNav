@@ -16,6 +16,16 @@ namespace QuestNav.UI
     public interface IUIManager
     {
         /// <summary>
+        /// Gets the current IP address
+        /// </summary>
+        string IPAddress { get; }
+
+        /// <summary>
+        /// Gets the current team number
+        /// </summary>
+        int TeamNumber { get; }
+
+        /// <summary>
         /// Updates the connection state and ip address in the UI
         /// </summary>
         void UIPeriodic();
