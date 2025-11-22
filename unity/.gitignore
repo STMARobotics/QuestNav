@@ -77,9 +77,6 @@
 *.pdb.meta
 *.mdb.meta
 
-# All Unity .meta files (Unity auto-generates these)
-**/*.meta
-
 # Unity3D generated file on crash reports
 sysinfo.txt
 
