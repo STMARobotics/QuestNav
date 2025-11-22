@@ -87,6 +87,9 @@ export interface HeadsetStatus {
   fps: number
   frameCount: number
   
+  // Web Interface
+  connectedClients: number
+  
   timestamp: number
 }
 

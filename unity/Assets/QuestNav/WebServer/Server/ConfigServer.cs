@@ -149,6 +149,21 @@ namespace QuestNav.WebServer
         /// Callback for main thread pose reset action
         /// </summary>
         private MainThreadAction poseResetCallback;
+
+        /// <summary>
+        /// Dictionary tracking last activity time for each client IP
+        /// </summary>
+        private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients = new System.Collections.Generic.Dictionary<string, DateTime>();
+
+        /// <summary>
+        /// Lock object for thread-safe access to activeClients dictionary
+        /// </summary>
+        private readonly object clientsLock = new object();
+
+        /// <summary>
+        /// Time window for considering a client as "active" (30 seconds)
+        /// </summary>
+        private readonly TimeSpan activeClientWindow = TimeSpan.FromSeconds(30);
         #endregion
 
         #region Properties
@@ -300,6 +315,55 @@ namespace QuestNav.WebServer
         }
         #endregion
 
+        #region Client Tracking
+        /// <summary>
+        /// Records activity from a client IP address.
+        /// Updates the last activity timestamp for the client.
+        /// </summary>
+        /// <param name="clientIp">Client IP address</param>
+        private void RecordClientActivity(string clientIp)
+        {
+            if (string.IsNullOrEmpty(clientIp))
+                return;
+
+            lock (clientsLock)
+            {
+                activeClients[clientIp] = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// Gets the count of active clients (clients that made a request within the active window).
+        /// Cleans up stale client entries during counting.
+        /// </summary>
+        /// <returns>Number of active clients</returns>
+        private int GetActiveClientCount()
+        {
+            lock (clientsLock)
+            {
+                var now = DateTime.UtcNow;
+                var staleClients = new System.Collections.Generic.List<string>();
+
+                // Find stale clients
+                foreach (var kvp in activeClients)
+                {
+                    if (now - kvp.Value > activeClientWindow)
+                    {
+                        staleClients.Add(kvp.Key);
+                    }
+                }
+
+                // Remove stale clients
+                foreach (var client in staleClients)
+                {
+                    activeClients.Remove(client);
+                }
+
+                return activeClients.Count;
+            }
+        }
+        #endregion
+
         #region Helper Methods
         /// <summary>
         /// Sends a JSON response using Newtonsoft.Json serializer (Swan.Lite has IL2CPP issues).
@@ -326,6 +390,10 @@ namespace QuestNav.WebServer
         {
             try
             {
+                // Track client activity
+                string clientIp = context.Request.RemoteEndPoint?.Address?.ToString();
+                RecordClientActivity(clientIp);
+
                 // CORS headers
                 if (enableCORSDevMode)
                 {
@@ -510,7 +578,7 @@ namespace QuestNav.WebServer
                 graphicsDeviceName = cachedServerInfo.graphicsDeviceName,
 
                 // Runtime information (safe on background thread)
-                connectedClients = 0,
+                connectedClients = GetActiveClientCount(),
                 configPath = store.GetConfigPath(),
                 serverPort = port,
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -523,6 +591,9 @@ namespace QuestNav.WebServer
         /// </summary>
         private async Task HandleGetStatus(IHttpContext context)
         {
+            // Update connected clients count in StatusProvider
+            StatusProvider.Instance.UpdateConnectedClients(GetActiveClientCount());
+            
             var status = StatusProvider.Instance.GetStatus();
             await SendJsonResponse(context, status);
         }

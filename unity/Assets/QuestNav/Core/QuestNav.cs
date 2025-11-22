@@ -356,12 +356,30 @@ namespace QuestNav.Core
         }
 
         /// <summary>
-        /// Updates the status provider with current runtime data for the web interface
+        /// Updates the status provider with current runtime data for the web interface.
+        /// Converts Unity coordinates to FRC robot coordinates before passing to StatusProvider.
         /// </summary>
         private void UpdateStatusProvider()
         {
+            // Convert Unity coordinates to FRC robot coordinates for web interface display
+            var frcPose = Conversions.UnityToFrc3d(position, rotation);
+
+            // Convert protobuf pose to Unity types for StatusProvider
+            Vector3 frcPosition = new Vector3(
+                (float)frcPose.Translation.X,
+                (float)frcPose.Translation.Y,
+                (float)frcPose.Translation.Z
+            );
+
+            Quaternion frcRotation = new Quaternion(
+                (float)frcPose.Rotation.Q.X,
+                (float)frcPose.Rotation.Q.Y,
+                (float)frcPose.Rotation.Q.Z,
+                (float)frcPose.Rotation.Q.W
+            );
+
             var statusProvider = StatusProvider.Instance;
-            statusProvider.UpdatePose(position, rotation);
+            statusProvider.UpdatePose(frcPosition, frcRotation);
             statusProvider.UpdateTracking(currentlyTracking, trackingLostEvents);
             statusProvider.UpdateBattery(SystemInfo.batteryLevel, SystemInfo.batteryStatus);
             statusProvider.UpdateNetwork(

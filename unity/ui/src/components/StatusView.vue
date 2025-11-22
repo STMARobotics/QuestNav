@@ -15,7 +15,7 @@
         <h3>🌐 Network</h3>
         <div class="status-items">
           <div class="status-item">
-            <span class="label">Connection:</span>
+            <span class="label">Robot Connection:</span>
             <span :class="['value', status.networkConnected ? 'success' : 'error']">
               {{ status.networkConnected ? 'Connected' : 'Disconnected' }}
             </span>
@@ -48,11 +48,11 @@
             <span class="value mono">{{ status.position.z.toFixed(3) }} m</span>
           </div>
           <div class="status-item">
-            <span class="label">Pitch:</span>
+            <span class="label">Yaw:</span>
             <span class="value mono">{{ status.eulerAngles.pitch.toFixed(1) }}°</span>
           </div>
           <div class="status-item">
-            <span class="label">Yaw:</span>
+            <span class="label">Pitch:</span>
             <span class="value mono">{{ status.eulerAngles.yaw.toFixed(1) }}°</span>
           </div>
           <div class="status-item">
@@ -121,6 +121,10 @@
           <div class="status-item">
             <span class="label">Frame Count:</span>
             <span class="value mono">{{ status.frameCount.toLocaleString() }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Connected Clients:</span>
+            <span class="value">{{ status.connectedClients }}</span>
           </div>
         </div>
       </div>

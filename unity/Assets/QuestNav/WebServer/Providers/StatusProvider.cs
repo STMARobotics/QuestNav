@@ -91,6 +91,11 @@ namespace QuestNav.WebServer
         /// Unity frame count
         /// </summary>
         private int frameCount;
+
+        /// <summary>
+        /// Number of connected web clients
+        /// </summary>
+        private int connectedClients;
         #endregion
 
         #region Unity Lifecycle Methods
@@ -171,6 +176,16 @@ namespace QuestNav.WebServer
             ipAddress = ip;
             teamNumber = team;
         }
+
+        /// <summary>
+        /// Updates the number of connected web clients.
+        /// Can be called from ConfigServer background thread.
+        /// </summary>
+        /// <param name="clients">Number of active web clients</param>
+        public void UpdateConnectedClients(int clients)
+        {
+            connectedClients = clients;
+        }
         #endregion
 
         #region Public Query Methods
@@ -178,6 +193,7 @@ namespace QuestNav.WebServer
         /// Gets current status as an object for JSON serialization.
         /// Called from ConfigServer background thread via /api/status endpoint.
         /// Returns anonymous object suitable for JSON.NET serialization.
+        /// Position and rotation are provided in FRC robot coordinates.
         /// </summary>
         /// <returns>Status data object with all current values</returns>
         public object GetStatus()
@@ -186,7 +202,7 @@ namespace QuestNav.WebServer
 
             return new
             {
-                // Pose
+                // Pose (in FRC coordinates, converted by QuestNav before passing)
                 position = new
                 {
                     x = position.x,
@@ -202,9 +218,9 @@ namespace QuestNav.WebServer
                 },
                 eulerAngles = new
                 {
-                    pitch = eulerAngles.x,
+                    pitch = eulerAngles.z,
                     yaw = eulerAngles.y,
-                    roll = eulerAngles.z,
+                    roll = eulerAngles.x,
                 },
 
                 // Tracking
@@ -225,6 +241,9 @@ namespace QuestNav.WebServer
                 // Performance
                 fps = Mathf.Round(fps),
                 frameCount = frameCount,
+
+                // Web Interface
+                connectedClients = connectedClients,
 
                 // Timestamp
                 timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
