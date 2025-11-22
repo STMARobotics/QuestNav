@@ -63,9 +63,9 @@ namespace QuestNav.WebServer
         private bool restartRequested = false;
 
         /// <summary>
-        /// Flag for pose reset request from background thread
+        /// Pose reset provider component
         /// </summary>
-        private bool poseResetRequested = false;
+        private PoseResetProvider poseResetProvider;
         #endregion
 
         #region Properties
@@ -96,8 +96,8 @@ namespace QuestNav.WebServer
         }
 
         /// <summary>
-        /// Checks for restart and pose reset request flags on main thread.
-        /// These flags are set from background thread via ConfigServer callbacks.
+        /// Checks for restart request flag on main thread.
+        /// This flag is set from background thread via ConfigServer callback.
         /// </summary>
         private void Update()
         {
@@ -106,12 +106,6 @@ namespace QuestNav.WebServer
                 restartRequested = false;
                 Debug.Log("[ConfigBootstrap] Executing restart on main thread");
                 RestartApp();
-            }
-
-            if (poseResetRequested)
-            {
-                poseResetRequested = false;
-                ExecutePoseReset();
             }
         }
 
@@ -179,8 +173,6 @@ namespace QuestNav.WebServer
                 yield break;
             }
 
-            // No authentication required - skip token generation
-
             // Load saved configuration from disk
             var savedConfig = store.LoadConfig();
             if (savedConfig != null && savedConfig.values != null && savedConfig.values.Count > 0)
@@ -193,6 +185,14 @@ namespace QuestNav.WebServer
             // This ensures they're available when server starts on background thread
             var statusProvider = StatusProvider.Instance;
             var logCollector = LogCollector.Instance;
+
+            // Initialize PoseResetProvider component
+            poseResetProvider = gameObject.GetComponent<PoseResetProvider>();
+            if (poseResetProvider == null)
+            {
+                poseResetProvider = gameObject.AddComponent<PoseResetProvider>();
+                Debug.Log("[ConfigBootstrap] Added PoseResetProvider component");
+            }
 
             isInitialized = true;
             Debug.Log("[ConfigBootstrap] Initialization complete");
@@ -243,13 +243,12 @@ namespace QuestNav.WebServer
             server = new ConfigServer(
                 binding,
                 store,
-                null, // No auth token needed
                 serverPort,
                 enableCORSDevMode,
                 staticPath,
                 logger,
                 RestartApplication,
-                RequestPoseReset
+                poseResetProvider.RequestPoseReset
             );
 
             if (server == null)
@@ -419,6 +418,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Ensures static files directory exists and creates a fallback index.html if needed.
         /// Used on non-Android platforms where StreamingAssets can be accessed directly.
+        /// Copies fallback HTML from StreamingAssets if the UI directory doesn't exist.
         /// </summary>
         /// <param name="path">Path to static files directory</param>
         private void EnsureStaticFilesExist(string path)
@@ -427,28 +427,34 @@ namespace QuestNav.WebServer
             {
                 Directory.CreateDirectory(path);
 
-                // Create fallback HTML page
-                string defaultHtml =
-                    @"<!DOCTYPE html>
-<html>
-<head>
-    <title>Config UI</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #1a1a1a; color: #fff; }
-        h1 { color: #00d4ff; }
-        .info { background: #2a2a2a; padding: 20px; border-radius: 5px; border: 1px solid #444; }
-    </style>
-</head>
-<body>
-    <h1>QuestNav Configuration</h1>
-    <div class='info'>
-        <p><strong>Server is running!</strong></p>
-        <p>The Vue UI has not been built yet.</p>
-        <p>Build the Vue UI: <code>cd ui && pnpm build</code></p>
-    </div>
-</body>
-</html>";
-                File.WriteAllText(Path.Combine(path, "index.html"), defaultHtml);
+                // Copy fallback HTML page from StreamingAssets
+                string fallbackSourcePath = Path.Combine(
+                    Application.streamingAssetsPath,
+                    "ui",
+                    "fallback.html"
+                );
+                string fallbackTargetPath = Path.Combine(path, "index.html");
+
+                try
+                {
+                    if (File.Exists(fallbackSourcePath))
+                    {
+                        File.Copy(fallbackSourcePath, fallbackTargetPath);
+                        Debug.Log(
+                            $"[ConfigBootstrap] Copied fallback HTML from {fallbackSourcePath}"
+                        );
+                    }
+                    else
+                    {
+                        Debug.LogWarning(
+                            $"[ConfigBootstrap] Fallback HTML not found at {fallbackSourcePath}"
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[ConfigBootstrap] Failed to copy fallback HTML: {ex.Message}");
+                }
             }
         }
 
@@ -465,7 +471,6 @@ namespace QuestNav.WebServer
             Debug.Log($"║ Config Path: {store.GetConfigPath()}");
             Debug.Log("╠═══════════════════════════════════════════════════════════╣");
             Debug.Log($"║ Connect: http://<quest-ip>:{serverPort}/");
-            Debug.Log("║ No authentication required - open access");
             Debug.Log("╚═══════════════════════════════════════════════════════════╝");
         }
         #endregion
@@ -537,80 +542,6 @@ namespace QuestNav.WebServer
 #else
             UnityEngine.Application.Quit();
 #endif
-        }
-        #endregion
-
-        #region Pose Reset
-        /// <summary>
-        /// Requests pose reset. Called from background thread via ConfigServer.
-        /// Sets flag that will be checked on main thread in Update().
-        /// </summary>
-        private void RequestPoseReset()
-        {
-            poseResetRequested = true;
-        }
-
-        /// <summary>
-        /// Executes pose reset to origin by calling PoseResetCommand directly via reflection.
-        /// Uses reflection to avoid circular assembly dependencies between Config and QuestNav.
-        /// Recenters VR tracking to (0,0,0) with identity rotation.
-        /// </summary>
-        private void ExecutePoseReset()
-        {
-            Debug.Log("[ConfigBootstrap] Executing pose reset to origin");
-
-            // Find QuestNav instance via reflection
-            var questNavType = Type.GetType("QuestNav.Core.QuestNav, QuestNav");
-            if (questNavType == null)
-            {
-                Debug.LogError("[ConfigBootstrap] QuestNav.Core.QuestNav type not found");
-                return;
-            }
-
-            var questNav = FindFirstObjectByType(questNavType);
-            if (questNav != null)
-            {
-                // Get VR camera and camera root via reflection
-                var vrCameraField = questNavType.GetField(
-                    "vrCamera",
-                    BindingFlags.NonPublic | BindingFlags.Instance
-                );
-                var vrCameraRootField = questNavType.GetField(
-                    "vrCameraRoot",
-                    BindingFlags.NonPublic | BindingFlags.Instance
-                );
-
-                if (vrCameraField != null && vrCameraRootField != null)
-                {
-                    Transform vrCamera = vrCameraField.GetValue(questNav) as Transform;
-                    Transform vrCameraRoot = vrCameraRootField.GetValue(questNav) as Transform;
-
-                    if (vrCamera != null && vrCameraRoot != null)
-                    {
-                        // Recenter tracking using the same algorithm as PoseResetCommand
-                        // Target: position (0,0,0) with identity rotation
-
-                        Vector3 targetPosition = Vector3.zero;
-                        Quaternion targetRotation = Quaternion.identity;
-
-                        // Calculate rotation difference between current camera and target
-                        Quaternion newRotation =
-                            targetRotation * Quaternion.Inverse(vrCamera.localRotation);
-
-                        // Apply rotation to root
-                        vrCameraRoot.rotation = newRotation;
-
-                        // Recalculate position after rotation
-                        Vector3 newRootPosition =
-                            targetPosition - (newRotation * vrCamera.localPosition);
-
-                        // Apply position to root
-                        vrCameraRoot.position = newRootPosition;
-
-                        Debug.Log("[ConfigBootstrap] Tracking recentered to origin");
-                    }
-                }
-            }
         }
         #endregion
     }

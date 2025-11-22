@@ -6,26 +6,28 @@ namespace QuestNav.WebServer
     /// Runtime-configurable settings for QuestNav application.
     /// All fields are exposed to the web configuration interface via [Config] attributes.
     /// Changes are automatically saved to persistent storage and can be modified at runtime.
-    /// Access tunables via static fields (e.g., Tunables.defaultTeamNumber).
+    /// Access tunables via static fields (e.g., Tunables.webConfigTeamNumber).
     /// Values are automatically loaded on startup and persisted when changed via web interface.
     /// </summary>
     public static class Tunables
     {
         #region QuestNav Configuration
         /// <summary>
-        /// Default FRC team number for NetworkTables connection (1-9999).
+        /// FRC team number from web configuration interface (1-25599).
         /// Used to automatically resolve robot IP address via FRC team number convention.
+        /// Valid FRC team numbers range from 1 to 25599 as allocated by FIRST.
+        /// Synced bidirectionally with VR UI team number input.
         /// </summary>
         [Config(
-            DisplayName = "Default Team Number",
-            Description = "Default FRC team number for NetworkTables connection",
+            DisplayName = "Team Number",
+            Description = "FRC team number for NetworkTables connection (1-25599)",
             Category = "QuestNav",
             Min = 1,
-            Max = 9999,
+            Max = 25599,
             ControlType = "input",
             Order = 1
         )]
-        public static int defaultTeamNumber = 9999;
+        public static int webConfigTeamNumber = 9999;
 
         /// <summary>
         /// Debug IP address override for direct robot connection.

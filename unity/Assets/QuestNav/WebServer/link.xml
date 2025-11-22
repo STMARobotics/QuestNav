@@ -3,20 +3,15 @@
   <assembly fullname="QuestNav">
     <type fullname="QuestNav.WebServer.*" preserve="all" />
   </assembly>
-  
   <!-- Preserve Config assembly for reflection -->
-  <assembly fullname="Config" preserve="all"/>
-  
+  <assembly fullname="Config" preserve="all" />
   <!-- Preserve EmbedIO for HTTP server -->
-  <assembly fullname="EmbedIO" preserve="all"/>
-  <assembly fullname="Swan.Lite" preserve="all"/>
-  
+  <assembly fullname="EmbedIO" preserve="all" />
+  <assembly fullname="Swan.Lite" preserve="all" />
   <!-- Preserve JSON.NET for serialization (using this instead of Swan) -->
-  <assembly fullname="Newtonsoft.Json" preserve="all"/>
-  
+  <assembly fullname="Newtonsoft.Json" preserve="all" />
   <!-- Preserve System.ComponentModel for type converters -->
   <assembly fullname="System.ComponentModel.TypeConverter">
-    <type fullname="System.ComponentModel.UInt64Converter" preserve="all"/>
+    <type fullname="System.ComponentModel.UInt64Converter" preserve="all" />
   </assembly>
 </linker>
-

@@ -1,9 +1,9 @@
-using QuestNav.WebServer;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
+using QuestNav.WebServer;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -225,28 +225,23 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
     /// Checks Tunables.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
-    /// Forces disconnection when switching between IP override and team number modes.
+    /// NetworkTables automatically handles reconnection when server configuration changes.
     /// </summary>
     /// <param name="teamNumber">The FRC team number (ignored if debug IP override is set)</param>
     public void UpdateTeamNumber(int teamNumber)
     {
-        // Set team number/ip if in debug mode
+        // Check if using debug IP override or standard team number mode
         if (string.IsNullOrEmpty(Tunables.debugNTServerAddressOverride))
         {
-            // Force disconnect from any previous IP override by setting invalid address first
-            if (ipAddressSet)
-            {
-                QueuedLogger.Log("Clearing IP override, switching to team number mode...");
-                ntInstance.SetAddresses(new (string addr, int port)[] { ("0.0.0.0", 0) });
-                ipAddressSet = false;
-            }
-
+            // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
             ntInstance.SetTeamNumber(teamNumber, Tunables.ntServerPort);
             teamNumberSet = true;
+            ipAddressSet = false;
         }
         else
         {
+            // Debug mode: Use direct IP address (bypasses team number resolution)
             QueuedLogger.LogWarning(
                 $"[DEBUG MODE] Using IP Override: {Tunables.debugNTServerAddressOverride} - This should only be used for debugging!"
             );

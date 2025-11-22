@@ -116,11 +116,6 @@ namespace QuestNav.WebServer
         private readonly ConfigStore store;
 
         /// <summary>
-        /// Authentication token (currently unused)
-        /// </summary>
-        private readonly string authToken;
-
-        /// <summary>
         /// HTTP server port
         /// </summary>
         private readonly int port;
@@ -175,7 +170,6 @@ namespace QuestNav.WebServer
         /// </summary>
         /// <param name="binding">Reflection binding for configuration fields</param>
         /// <param name="store">Configuration persistence store</param>
-        /// <param name="authToken">Authentication token (currently unused)</param>
         /// <param name="port">HTTP server port</param>
         /// <param name="enableCORSDevMode">Enable CORS for development</param>
         /// <param name="staticPath">Path to static web UI files</param>
@@ -185,7 +179,6 @@ namespace QuestNav.WebServer
         public ConfigServer(
             ReflectionBinding binding,
             ConfigStore store,
-            string authToken,
             int port,
             bool enableCORSDevMode,
             string staticPath,
@@ -196,7 +189,6 @@ namespace QuestNav.WebServer
         {
             this.binding = binding;
             this.store = store;
-            this.authToken = authToken;
             this.port = port;
             this.enableCORSDevMode = enableCORSDevMode;
             this.staticPath = staticPath;
@@ -327,7 +319,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Handles all incoming API requests.
         /// Routes requests to appropriate handler methods.
-        /// Implements CORS support and authentication (currently disabled).
+        /// Implements CORS support for development.
         /// </summary>
         /// <param name="context">HTTP request context</param>
         private async Task HandleApiRequest(IHttpContext context)
@@ -340,10 +332,7 @@ namespace QuestNav.WebServer
                     context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
                 }
                 context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-                context.Response.Headers.Add(
-                    "Access-Control-Allow-Headers",
-                    "Content-Type, Authorization"
-                );
+                context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
 
                 // OPTIONS preflight
                 if (context.Request.HttpVerb == HttpVerbs.Options)
@@ -351,9 +340,6 @@ namespace QuestNav.WebServer
                     context.Response.StatusCode = 200;
                     return;
                 }
-
-                // No authentication required - open access
-                // Authentication is disabled for simplicity on local network
 
                 // Route requests to handlers
                 string path = context.Request.Url.AbsolutePath;

@@ -5,7 +5,7 @@ namespace QuestNav.WebServer
 {
     /// <summary>
     /// Configuration data container for persistent storage.
-    /// Contains all runtime-configurable values indexed by path (e.g., "Tunables/defaultTeamNumber").
+    /// Contains all runtime-configurable values indexed by path (e.g., "Tunables/webConfigTeamNumber").
     /// Serialized to JSON and saved to Application.persistentDataPath/config.json.
     /// </summary>
     [Serializable]
@@ -37,7 +37,7 @@ namespace QuestNav.WebServer
     public class ConfigFieldSchema
     {
         /// <summary>
-        /// Unique path to the field (e.g., "Tunables/defaultTeamNumber")
+        /// Unique path to the field (e.g., "Tunables/webConfigTeamNumber")
         /// </summary>
         public string path { get; set; }
 
@@ -141,7 +141,7 @@ namespace QuestNav.WebServer
     public class ConfigUpdateRequest
     {
         /// <summary>
-        /// Path to the field to update (e.g., "Tunables/defaultTeamNumber")
+        /// Path to the field to update (e.g., "Tunables/webConfigTeamNumber")
         /// </summary>
         public string path;
 
@@ -177,29 +177,6 @@ namespace QuestNav.WebServer
         /// New value after update
         /// </summary>
         public object newValue;
-    }
-
-    /// <summary>
-    /// Authentication token data (currently unused - authentication is disabled).
-    /// Reserved for future use if authentication is needed.
-    /// </summary>
-    [Serializable]
-    public class AuthToken
-    {
-        /// <summary>
-        /// Generated authentication token string
-        /// </summary>
-        public string token;
-
-        /// <summary>
-        /// Unix timestamp when token was created
-        /// </summary>
-        public long createdAt;
-
-        /// <summary>
-        /// Device identifier that created this token
-        /// </summary>
-        public string deviceId;
     }
 
     /// <summary>

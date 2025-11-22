@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
-using QuestNav.WebServer;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
+using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -142,7 +142,7 @@ namespace QuestNav.UI
             this.autoStartToggle = autoStartToggle;
 
             // Load team number from Tunables (synced with web config)
-            teamNumber = Tunables.defaultTeamNumber;
+            teamNumber = Tunables.webConfigTeamNumber;
             teamInput.text = teamNumber.ToString();
             setTeamNumberFromUI();
 
@@ -176,7 +176,7 @@ namespace QuestNav.UI
             teamNumber = int.Parse(teamInput.text);
 
             // Update Tunables (synced with web config)
-            Tunables.defaultTeamNumber = teamNumber;
+            Tunables.webConfigTeamNumber = teamNumber;
 
             updateTeamNumberInputBoxPlaceholder(teamNumber);
 
@@ -253,13 +253,19 @@ namespace QuestNav.UI
         }
 
         /// <summary>
-        /// Updates the auto start preference in PlayerPrefs.
+        /// Updates the auto start preference.
+        /// Saves to both Tunables (synced with web config) and PlayerPrefs (for Android boot receiver).
         /// </summary>
         /// <param name="newValue">new AutoStart value</param>
         void updateAutoStart(bool newValue)
         {
             // Update Tunables (synced with web config)
             Tunables.autoStartOnBoot = newValue;
+
+            // Save to PlayerPrefs for Android BootReceiver
+            // BootReceiver reads "AutoStart" from PlayerPrefs to determine if app should start on boot
+            PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
+            PlayerPrefs.Save();
         }
 
         public void UIPeriodic()
@@ -279,23 +285,25 @@ namespace QuestNav.UI
             // Check if debug IP override changed - triggers reconnection
             if (lastDebugIPOverride != Tunables.debugNTServerAddressOverride)
             {
-                string newValue = Tunables.debugNTServerAddressOverride ?? "";
+                string newDebugIPOverride = Tunables.debugNTServerAddressOverride ?? "";
 
                 // Only trigger reconnection if the value is empty (cleared) or a valid IP
-                bool shouldReconnect = string.IsNullOrEmpty(newValue) || IsValidIPAddress(newValue);
+                bool shouldReconnect =
+                    string.IsNullOrEmpty(newDebugIPOverride)
+                    || IsValidIPAddress(newDebugIPOverride);
 
                 if (shouldReconnect)
                 {
-                    lastDebugIPOverride = newValue;
+                    lastDebugIPOverride = newDebugIPOverride;
                     // Trigger reconnection with current team number (which checks debug override internally)
                     networkTableConnection.UpdateTeamNumber(teamNumber);
                 }
             }
 
             // Sync team number if changed via web interface
-            if (teamNumber != Tunables.defaultTeamNumber)
+            if (teamNumber != Tunables.webConfigTeamNumber)
             {
-                teamNumber = Tunables.defaultTeamNumber;
+                teamNumber = Tunables.webConfigTeamNumber;
                 teamInput.text = teamNumber.ToString();
                 updateTeamNumberInputBoxPlaceholder(teamNumber);
                 networkTableConnection.UpdateTeamNumber(teamNumber);
@@ -305,6 +313,10 @@ namespace QuestNav.UI
             if (autoStartToggle.isOn != Tunables.autoStartOnBoot)
             {
                 autoStartToggle.SetIsOnWithoutNotify(Tunables.autoStartOnBoot);
+
+                // Also save to PlayerPrefs to keep BootReceiver in sync
+                PlayerPrefs.SetInt("AutoStart", Tunables.autoStartOnBoot ? 1 : 0);
+                PlayerPrefs.Save();
             }
         }
 
