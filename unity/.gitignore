@@ -105,3 +105,8 @@ Packages/*
 
 # Secrets file for debugging CI builds
 .secrets
+DocFX/api
+
+# Generated files
+**/Generated/*.cs
+**/Generated/*.meta

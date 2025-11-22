@@ -105,15 +105,15 @@ const config: Config = {
           items: [
             {
               label: 'Protocol Buffers',
-              href: 'https://questnav.gg/api/proto/',
+              href: 'https://questnav.gg/static/api/proto/',
             },
             {
               label: 'Java API',
-              href: 'https://questnav.gg/api/java/',
+              href: 'https://questnav.gg/static/api/java/',
             },
             {
               label: 'C# API',
-              href: 'https://questnav.gg/api/csharp/',
+              href: 'https://questnav.gg/static/api/csharp/',
             },
           ],
         },
@@ -150,15 +150,15 @@ const config: Config = {
           items: [
             {
               label: 'Protocol Buffers',
-              href: 'https://questnav.gg/api/proto/',
+              href: 'https://questnav.gg/static/api/proto/',
             },
             {
               label: 'Java API',
-              href: 'https://questnav.gg/api/java/',
+              href: 'https://questnav.gg/static/api/java/',
             },
             {
               label: 'C# API',
-              href: 'https://questnav.gg/api/csharp/',
+              href: 'https://questnav.gg/static/api/csharp/',
             },
           ],
         },

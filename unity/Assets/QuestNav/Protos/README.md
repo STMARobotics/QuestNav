@@ -4,9 +4,10 @@ First, ensure you have the Protobuf Compiler installed.
 
 Next, generate the protobufs
 ```bash
-# Navigate to unity directory
-cd QuestNav/unity
+# Navigate to repo base directory
 
 # Build Protobufs with protoc
-protoc -I="../protos" --csharp_out=Assets/QuestNav/Protos/ "../protos/*.proto"
+protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
 ```
+
+## [See docs for more info](https://questnav.gg/docs/development/development-setup#step-7-build-protobufs)

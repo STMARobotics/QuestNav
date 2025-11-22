@@ -19,6 +19,11 @@ namespace QuestNav.UI
         /// Updates the connection state and ip address in the UI
         /// </summary>
         void UIPeriodic();
+
+        /// <summary>
+        /// Updates the position and rotation text in the UI.
+        /// </summary>
+        void UpdatePositionText(Vector3 position, Quaternion rotation);
     }
 
     /// <summary>

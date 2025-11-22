@@ -112,6 +112,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Reference to the VR camera transform
         /// </summary>
+        [Tooltip("Location of the user's head. Assign OVRCameraRig's CenterEyeAnchor.")]
         [SerializeField]
         private Transform vrCamera;
 
@@ -126,6 +127,13 @@ namespace QuestNav.Core
         /// </summary>
         [SerializeField]
         private Transform resetTransform;
+
+        /// <summary>
+        /// The UI transform to keep in view with Tagalong
+        /// </summary>
+        [Tooltip("The UI to be kept in view with the Tagalong feature.")]
+        [SerializeField]
+        private Transform tagalongUiTransform;
 
         /// <summary>
         /// Current battery percentage of the device
@@ -157,18 +165,25 @@ namespace QuestNav.Core
         /// <summary>
         /// Reference to the network table connection component
         /// </summary>
-        private NetworkTableConnection networkTableConnection;
+        private INetworkTableConnection networkTableConnection;
 
         /// <summary>
         /// Reference to the command processor component
         /// </summary>
-        private CommandProcessor commandProcessor;
+        private ICommandProcessor commandProcessor;
 
         /// <summary>
         /// Reference to the UI manager component
         /// </summary>
-        private UIManager uiManager;
+        private IUIManager uiManager;
+
+        /// <summary>
+        /// Reference to the tag-along UI component to keep the UI in view
+        /// </summary>
+        private ITagAlongUI tagAlongUI;
+
         #endregion
+
         #endregion
 
         #region Unity Lifecycle Methods
@@ -199,6 +214,7 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
+            tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -231,6 +247,9 @@ namespace QuestNav.Core
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
             commandProcessor.ProcessCommands();
+
+            // Update the UI position to keep it in view of the user
+            tagAlongUI.Periodic();
         }
 
         /// <summary>

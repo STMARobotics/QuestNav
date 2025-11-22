@@ -1,0 +1,88 @@
+name: Publish Docs
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    uses: ./.github/workflows/reusable-docs-docs.yml
+    with:
+      version: ${{ inputs.version }}
+  build-docfx:
+    uses: ./.github/workflows/reusable-docs-docfx.yml
+    with:
+      version: ${{ inputs.version }}
+  build-javadoc:
+    uses: ./.github/workflows/reusable-docs-javadoc.yml
+    with:
+      version: ${{ inputs.version }}
+  build-docs-proto:
+    uses: ./.github/workflows/reusable-docs-proto.yml
+    with:
+      version: ${{ inputs.version }}
+  publish:
+    needs: [build-docs, build-docfx, build-javadoc, build-docs-proto]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+          
+      - name: Restore Docs Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-docs-${{ steps.version-info.outputs.version }}'
+          path: docs
+
+      - name: Restore DocFX Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-docfx-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/csharp
+
+      - name: Restore Javadoc Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-javadocs-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/java
+
+      - name: Restore Proto Docs Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-proto-docs-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/proto
+      
+      - name: Upload Combined Docs Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
+          path: docs/
+
+      - name: Publish to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
