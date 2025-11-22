@@ -7,7 +7,7 @@ namespace QuestNav.WebServer
     /// <summary>
     /// Provides VR pose reset functionality for the configuration system.
     /// Handles recentering VR tracking to origin (0,0,0) with identity rotation.
-    /// Uses reflection to access PoseResetCommand directly, avoiding circular assembly dependencies.
+    /// Directly manipulates VR camera transforms instead of using PoseResetCommand.
     /// </summary>
     public class PoseResetProvider : MonoBehaviour
     {
@@ -18,20 +18,20 @@ namespace QuestNav.WebServer
         private bool poseResetRequested = false;
 
         /// <summary>
-        /// Cached PoseResetCommand instance (accessed via reflection)
+        /// Reference to VR camera transform
         /// </summary>
-        private object poseResetCommand;
+        private Transform vrCamera;
 
         /// <summary>
-        /// Cached Execute method from PoseResetCommand
+        /// Reference to VR camera root transform
         /// </summary>
-        private MethodInfo executeMethod;
+        private Transform vrCameraRoot;
         #endregion
 
         #region Unity Lifecycle
         /// <summary>
-        /// Initializes PoseResetCommand via reflection.
-        /// Finds QuestNav instance and creates PoseResetCommand with required transforms.
+        /// Initializes transform references via reflection.
+        /// Finds QuestNav instance and caches VR camera transforms.
         /// </summary>
         void Start()
         {
@@ -59,55 +59,23 @@ namespace QuestNav.WebServer
                 "vrCameraRoot",
                 BindingFlags.NonPublic | BindingFlags.Instance
             );
-            var resetTransformField = questNavType.GetField(
-                "resetTransform",
-                BindingFlags.NonPublic | BindingFlags.Instance
-            );
 
-            if (vrCameraField == null || vrCameraRootField == null || resetTransformField == null)
+            if (vrCameraField == null || vrCameraRootField == null)
             {
                 Debug.LogError("[PoseResetProvider] Failed to find VR camera transform fields");
                 return;
             }
 
-            Transform vrCamera = vrCameraField.GetValue(questNav) as Transform;
-            Transform vrCameraRoot = vrCameraRootField.GetValue(questNav) as Transform;
-            Transform resetTransform = resetTransformField.GetValue(questNav) as Transform;
+            vrCamera = vrCameraField.GetValue(questNav) as Transform;
+            vrCameraRoot = vrCameraRootField.GetValue(questNav) as Transform;
 
-            if (vrCamera == null || vrCameraRoot == null || resetTransform == null)
+            if (vrCamera == null || vrCameraRoot == null)
             {
                 Debug.LogError("[PoseResetProvider] VR camera transforms are null");
                 return;
             }
 
-            // Get PoseResetCommand type via reflection
-            var poseResetCommandType = Type.GetType(
-                "QuestNav.Commands.Commands.PoseResetCommand, QuestNav"
-            );
-            if (poseResetCommandType == null)
-            {
-                Debug.LogError("[PoseResetProvider] PoseResetCommand type not found");
-                return;
-            }
-
-            // Create PoseResetCommand instance
-            // Pass null for networkTableConnection since web-initiated resets don't use NetworkTables
-            poseResetCommand = Activator.CreateInstance(
-                poseResetCommandType,
-                new object[] { null, vrCamera, vrCameraRoot, resetTransform }
-            );
-
-            // Cache Execute method
-            executeMethod = poseResetCommandType.GetMethod("Execute");
-
-            if (poseResetCommand != null && executeMethod != null)
-            {
-                Debug.Log("[PoseResetProvider] Initialized with PoseResetCommand via reflection");
-            }
-            else
-            {
-                Debug.LogError("[PoseResetProvider] Failed to initialize PoseResetCommand");
-            }
+            Debug.Log("[PoseResetProvider] Initialized successfully");
         }
 
         /// <summary>
@@ -137,102 +105,67 @@ namespace QuestNav.WebServer
 
         #region Private Methods
         /// <summary>
-        /// Executes pose reset to origin using PoseResetCommand via reflection.
-        /// Creates a command protobuf to reset to (0,0,0) with identity rotation.
+        /// Executes pose reset to origin by directly manipulating VR transforms.
+        /// Uses the same algorithm as PoseResetCommand to make current position become (0,0,0).
+        /// This follows the pattern from PoseResetCommand.cs without needing protobuf dependencies.
         /// </summary>
         private void ExecutePoseReset()
         {
-            if (poseResetCommand == null || executeMethod == null)
+            // Validate transforms are initialized
+            if (vrCamera == null || vrCameraRoot == null)
             {
-                Debug.LogError("[PoseResetProvider] PoseResetCommand not initialized");
+                Debug.LogError("[PoseResetProvider] VR camera transforms not initialized");
                 return;
             }
 
-            Debug.Log("[PoseResetProvider] Executing pose reset to origin via PoseResetCommand");
+            Debug.Log("[PoseResetProvider] Executing pose reset - recentering tracking to origin");
 
             try
             {
-                // Create command protobuf to reset to origin via reflection
-                var commandType = Type.GetType(
-                    "QuestNav.Protos.Generated.ProtobufQuestNavCommand, QuestNav"
+                /*
+                 * RECENTER TRACKING ALGORITHM:
+                 *
+                 * Goal: Make the current camera position become the new origin (0,0,0) with no rotation.
+                 * This is the inverse of PoseResetCommand - instead of moving TO a position,
+                 * we make the current position BECOME the origin.
+                 *
+                 * VR Hierarchy:
+                 * - vrCameraRoot: The "world origin" that we can move/rotate
+                 * - vrCamera: The actual headset position (controlled by VR tracking, we can't move this directly)
+                 *
+                 * Algorithm (same as PoseResetCommand but with target = (0,0,0)):
+                 * 1. Target position = (0, 0, 0)
+                 * 2. Target rotation = Identity (no rotation)
+                 * 3. Calculate rotation difference between current camera and target
+                 * 4. Apply rotation to root
+                 * 5. Recalculate position after rotation
+                 * 6. Apply the new position to vrCameraRoot
+                 */
+
+                // Step 1: Define target position and rotation (origin with no rotation)
+                Vector3 targetCameraPosition = Vector3.zero;
+                Quaternion targetCameraRotation = Quaternion.identity;
+
+                // Step 2: Calculate rotation difference between current camera and target
+                // This compensates for the user's current head rotation
+                Quaternion newRotation =
+                    targetCameraRotation * Quaternion.Inverse(vrCamera.localRotation);
+
+                // Step 3: Apply rotation to root
+                vrCameraRoot.rotation = newRotation;
+
+                // Step 4: Recalculate position after rotation
+                // This formula ensures the camera ends up at targetCameraPosition
+                // Formula from PoseResetCommand.cs line 128
+                Vector3 newRootPosition =
+                    targetCameraPosition - (newRotation * vrCamera.localPosition);
+
+                // Step 5: Apply the new position to vrCameraRoot
+                vrCameraRoot.position = newRootPosition;
+
+                Debug.Log(
+                    $"[PoseResetProvider] Pose reset completed - camera recentered to origin"
                 );
-                var commandTypeEnum = Type.GetType(
-                    "QuestNav.Protos.Generated.QuestNavCommandType, QuestNav"
-                );
-                var payloadType = Type.GetType(
-                    "QuestNav.Protos.Generated.ProtobufPoseResetPayload, QuestNav"
-                );
-                var pose3dType = Type.GetType("QuestNav.Protos.Generated.ProtobufPose3d, QuestNav");
-                var translation3dType = Type.GetType(
-                    "QuestNav.Protos.Generated.ProtobufTranslation3d, QuestNav"
-                );
-                var rotation3dType = Type.GetType(
-                    "QuestNav.Protos.Generated.ProtobufRotation3d, QuestNav"
-                );
-                var quaternionType = Type.GetType(
-                    "QuestNav.Protos.Generated.ProtobufQuaternion, QuestNav"
-                );
-
-                if (
-                    commandType == null
-                    || commandTypeEnum == null
-                    || payloadType == null
-                    || pose3dType == null
-                    || translation3dType == null
-                    || rotation3dType == null
-                    || quaternionType == null
-                )
-                {
-                    Debug.LogError("[PoseResetProvider] Failed to find protobuf types");
-                    return;
-                }
-
-                // Create command instance
-                var command = Activator.CreateInstance(commandType);
-
-                // Set CommandId
-                commandType.GetProperty("CommandId")?.SetValue(command, Guid.NewGuid().ToString());
-
-                // Set Type = PoseReset
-                var poseResetValue = Enum.Parse(commandTypeEnum, "PoseReset");
-                commandType.GetProperty("Type")?.SetValue(command, poseResetValue);
-
-                // Create payload
-                var payload = Activator.CreateInstance(payloadType);
-
-                // Create pose (0,0,0 with identity rotation)
-                var pose = Activator.CreateInstance(pose3dType);
-
-                // Create translation (0,0,0)
-                var translation = Activator.CreateInstance(translation3dType);
-                translation3dType.GetProperty("X")?.SetValue(translation, 0.0);
-                translation3dType.GetProperty("Y")?.SetValue(translation, 0.0);
-                translation3dType.GetProperty("Z")?.SetValue(translation, 0.0);
-
-                // Create rotation (identity quaternion: w=1, x=0, y=0, z=0)
-                var rotation = Activator.CreateInstance(rotation3dType);
-                var quaternion = Activator.CreateInstance(quaternionType);
-                quaternionType.GetProperty("W")?.SetValue(quaternion, 1.0);
-                quaternionType.GetProperty("X")?.SetValue(quaternion, 0.0);
-                quaternionType.GetProperty("Y")?.SetValue(quaternion, 0.0);
-                quaternionType.GetProperty("Z")?.SetValue(quaternion, 0.0);
-
-                rotation3dType.GetProperty("Q")?.SetValue(rotation, quaternion);
-
-                // Assemble pose
-                pose3dType.GetProperty("Translation")?.SetValue(pose, translation);
-                pose3dType.GetProperty("Rotation")?.SetValue(pose, rotation);
-
-                // Set payload target pose
-                payloadType.GetProperty("TargetPose")?.SetValue(payload, pose);
-
-                // Set command payload
-                commandType.GetProperty("PoseResetPayload")?.SetValue(command, payload);
-
-                // Execute command via PoseResetCommand.Execute()
-                executeMethod.Invoke(poseResetCommand, new object[] { command });
-
-                Debug.Log("[PoseResetProvider] Pose reset completed");
             }
             catch (Exception ex)
             {
