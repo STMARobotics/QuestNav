@@ -15,6 +15,14 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
+      },
+      output: {
+        // Use consistent filenames (no hash) for easier Unity integration
+        // These filenames are referenced in ConfigBootstrap.cs for Android APK extraction
+        // If you change these, update ConfigBootstrap.cs ExtractAndroidUIFiles() method
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
       }
     }
   },

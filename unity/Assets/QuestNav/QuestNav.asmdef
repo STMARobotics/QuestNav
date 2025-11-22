@@ -5,7 +5,7 @@
         "Unity.TextMeshPro",
         "Unity.InputSystem",
         "Oculus.VR",
-        "QuestNav.Config"
+        "QuestNav.WebServer"
     ],
     "includePlatforms": [
         "Android",

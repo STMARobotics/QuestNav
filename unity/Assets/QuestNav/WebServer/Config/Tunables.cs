@@ -1,16 +1,17 @@
 using UnityEngine;
 
-namespace QuestNav.Config
+namespace QuestNav.WebServer
 {
     /// <summary>
     /// Runtime-configurable settings for QuestNav application.
     /// All fields are exposed to the web configuration interface via [Config] attributes.
     /// Changes are automatically saved to persistent storage and can be modified at runtime.
+    /// Access tunables via static fields (e.g., Tunables.defaultTeamNumber).
+    /// Values are automatically loaded on startup and persisted when changed via web interface.
     /// </summary>
     public static class Tunables
     {
-        // ===== QuestNav Configuration =====
-
+        #region QuestNav Configuration
         /// <summary>
         /// Default FRC team number for NetworkTables connection (1-9999).
         /// Used to automatically resolve robot IP address via FRC team number convention.
@@ -190,9 +191,9 @@ namespace QuestNav.Config
             Order = 11
         )]
         public static int ntLogLevelMin = 9;
+        #endregion
 
-        // ===== General Configuration =====
-
+        #region General Configuration
         /// <summary>
         /// HTTP server port for web configuration interface (default: 18080).
         /// Access the web UI at http://quest-ip:serverPort
@@ -223,5 +224,6 @@ namespace QuestNav.Config
             Order = 41
         )]
         public static bool enableCORSDevMode = false;
+        #endregion
     }
 }

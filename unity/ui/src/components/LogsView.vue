@@ -196,8 +196,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .controls-left,
@@ -205,30 +210,63 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .auto-scroll-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
+  gap: 0.6rem;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.auto-scroll-label:hover {
+  background: var(--border-color);
+  color: var(--primary-color);
+}
+
+.auto-scroll-label input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 .filter-select {
-  padding: 0.5rem 0.75rem;
-  background-color: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
   color: var(--text-primary);
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+.filter-select:focus {
+  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
 }
 
 .log-count {
   font-size: 0.9rem;
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--primary-color);
+  font-weight: 700;
+  background: rgba(51, 161, 253, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
 }
 
 .loading-container {
@@ -237,66 +275,126 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  gap: 1rem;
+  gap: 1.5rem;
+}
+
+.loading-container p {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .error-message {
-  padding: 1.5rem;
-  background-color: rgba(220, 53, 69, 0.1);
-  border: 1px solid var(--danger-color);
-  border-radius: 8px;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));
+  border: 2px solid var(--danger-color);
+  border-radius: 12px;
   color: var(--danger-color);
   text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
 }
 
 .logs-container {
   max-height: 600px;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.5rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.875rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--bg-tertiary);
+}
+
+.logs-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.logs-container::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 5px;
+}
+
+.logs-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 5px;
+}
+
+.logs-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
 }
 
 .empty-logs {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   color: var(--text-muted);
+  font-size: 1.1rem;
+  font-style: italic;
 }
 
 .log-entry {
-  margin-bottom: 0.75rem;
-  padding: 0.75rem;
-  border-left: 3px solid var(--border-color);
-  background-color: var(--bg-tertiary);
-  border-radius: 4px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-left: 4px solid var(--border-color);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.log-entry:hover {
+  background: var(--border-color);
+  transform: translateX(5px);
+}
+
+.log-entry.log-log {
+  border-left-color: var(--text-secondary);
 }
 
 .log-entry.log-warning {
   border-left-color: var(--warning-color);
-  background-color: rgba(255, 193, 7, 0.05);
+  background: rgba(255, 193, 7, 0.1);
 }
 
 .log-entry.log-error,
 .log-entry.log-exception,
 .log-entry.log-assert {
   border-left-color: var(--danger-color);
-  background-color: rgba(220, 53, 69, 0.05);
+  background: rgba(220, 53, 69, 0.1);
 }
 
 .log-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .log-type {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  background-color: var(--bg-color);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--border-color);
 }
 
 .type-log {
@@ -305,27 +403,35 @@ onUnmounted(() => {
 
 .type-warning {
   color: var(--warning-color);
+  background: rgba(255, 193, 7, 0.15);
 }
 
 .type-error,
 .type-exception,
 .type-assert {
   color: var(--danger-color);
+  background: rgba(220, 53, 69, 0.15);
 }
 
 .log-time {
   font-size: 0.8rem;
   color: var(--text-muted);
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  background: var(--bg-tertiary);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
 }
 
 .log-message {
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.6;
   word-break: break-word;
+  font-size: 0.9rem;
 }
 
 .log-stack {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .log-stack details {
@@ -333,25 +439,33 @@ onUnmounted(() => {
 }
 
 .log-stack summary {
-  color: var(--text-secondary);
+  color: var(--primary-color);
   font-size: 0.85rem;
-  padding: 0.25rem 0;
+  font-weight: 600;
+  padding: 0.5rem;
+  background: rgba(51, 161, 253, 0.1);
+  border-radius: 6px;
   user-select: none;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(51, 161, 253, 0.2);
 }
 
 .log-stack summary:hover {
-  color: var(--primary-color);
+  color: var(--primary-dark);
+  background: rgba(51, 161, 253, 0.15);
 }
 
 .log-stack pre {
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: var(--bg-color);
-  border-radius: 4px;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   overflow-x: auto;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.5;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 @media (max-width: 768px) {
@@ -363,6 +477,11 @@ onUnmounted(() => {
   .controls-left,
   .controls-right {
     justify-content: space-between;
+  }
+  
+  .logs-container {
+    max-height: 500px;
+    padding: 1rem;
   }
 }
 </style>

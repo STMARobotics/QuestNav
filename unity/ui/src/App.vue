@@ -6,10 +6,12 @@
       <header class="app-header">
         <div class="header-content">
           <div class="header-left">
-            <h1>🎮 QuestNav Config</h1>
+            <div class="logo-container">
+              <img src="/logo.svg" alt="QuestNav" class="logo" />
+            </div>
             <div class="header-info">
               <span v-if="configStore.lastUpdated" class="last-updated">
-                Last updated: {{ formatTime(configStore.lastUpdated) }}
+                <span class="info-icon">🕐</span> Updated {{ formatTime(configStore.lastUpdated) }}
               </span>
               <span :class="['connection-status', connectionStatus]">
                 <span class="status-dot"></span>
@@ -19,14 +21,17 @@
           </div>
           
           <div class="header-right">
-            <button class="secondary" @click="refreshData">
-              🔄 Refresh
+            <button class="secondary icon-button" @click="refreshData" title="Refresh">
+              <span class="button-icon">🔄</span>
+              <span class="button-text">Refresh</span>
             </button>
-            <button class="secondary" @click="showInfo">
-              ℹ️ Info
+            <button class="secondary icon-button" @click="showInfo" title="Server Info">
+              <span class="button-icon">ℹ️</span>
+              <span class="button-text">Info</span>
             </button>
-            <button class="danger" @click="handleRestart">
-              🔄 Restart App
+            <button class="danger icon-button" @click="handleRestart" title="Restart App">
+              <span class="button-icon">⚡</span>
+              <span class="button-text">Restart</span>
             </button>
           </div>
         </div>
@@ -39,10 +44,18 @@
 
       <!-- Footer -->
       <footer class="app-footer">
-        <p class="text-muted">
-          QuestNav Configuration UI • 
-          <a href="https://github.com/yourusername/questnav" target="_blank">GitHub</a>
-        </p>
+        <div class="footer-content">
+          <p class="footer-text">
+            QuestNav Configuration Interface • Built for Meta Quest
+          </p>
+          <div class="footer-links">
+            <a href="https://questnav.gg" target="_blank" rel="noopener noreferrer">Documentation</a>
+            <span class="separator">•</span>
+            <a href="https://github.com/QuestNav/QuestNav" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="separator">•</span>
+            <a href="https://discord.gg/hD3FtR7YAZ" target="_blank" rel="noopener noreferrer">Discord</a>
+          </div>
+        </div>
       </footer>
     </div>
 
@@ -210,46 +223,63 @@ async function handleRestart() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(to bottom, var(--bg-color) 0%, #1a1f21 100%);
 }
 
 .app-header {
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border-bottom: 2px solid var(--primary-color);
+  padding: 1.25rem 2rem;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
-.header-left h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  height: 48px;
+  width: auto;
+  filter: drop-shadow(0 2px 4px rgba(51, 161, 253, 0.2));
 }
 
 .header-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .last-updated {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.info-icon {
+  font-size: 0.9rem;
 }
 
 .connection-status {
@@ -257,7 +287,10 @@ async function handleRestart() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .connection-status .status-dot {
@@ -269,14 +302,17 @@ async function handleRestart() {
 
 .connection-status.connected {
   color: var(--success-color);
+  background: rgba(76, 175, 80, 0.15);
 }
 
 .connection-status.connected .status-dot {
   background-color: var(--success-color);
+  box-shadow: 0 0 8px var(--success-color);
 }
 
 .connection-status.disconnected {
   color: var(--danger-color);
+  background: rgba(220, 53, 69, 0.15);
 }
 
 .connection-status.disconnected .status-dot {
@@ -285,6 +321,7 @@ async function handleRestart() {
 
 .connection-status.connecting {
   color: var(--warning-color);
+  background: rgba(255, 193, 7, 0.15);
 }
 
 .connection-status.connecting .status-dot {
@@ -293,8 +330,14 @@ async function handleRestart() {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
 }
 
 .header-right {
@@ -302,25 +345,71 @@ async function handleRestart() {
   gap: 0.75rem;
 }
 
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+}
+
+.button-icon {
+  font-size: 1.1rem;
+}
+
 .app-content {
   flex: 1;
   padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .app-footer {
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+  border-top: 2px solid var(--primary-color);
   padding: 1.5rem 2rem;
-  text-align: center;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.app-footer a {
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-links a {
   color: var(--primary-color);
   text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
-.app-footer a:hover {
+.footer-links a:hover {
+  color: var(--primary-light);
   text-decoration: underline;
+}
+
+.separator {
+  color: var(--border-color);
+  font-size: 0.8rem;
 }
 
 .modal-overlay {
@@ -329,19 +418,48 @@ async function handleRestart() {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
-  max-width: 600px;
+  max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content h2 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
 }
 
 .info-grid {
@@ -352,36 +470,67 @@ async function handleRestart() {
 }
 
 .info-grid h3 {
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
   color: var(--primary-color);
-  font-size: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  font-size: 1.1rem;
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.info-grid h3:first-child {
+.info-grid h3::before {
+  content: '▶';
+  font-size: 0.8rem;
+}
+
+.info-grid h3:first-of-type {
   margin-top: 0;
 }
 
 .info-item {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  grid-template-columns: 160px 1fr;
   gap: 1rem;
-  padding: 0.75rem;
-  background-color: var(--bg-tertiary);
-  border-radius: 6px;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background: linear-gradient(135deg, var(--border-color) 0%, rgba(0, 0, 0, 0.3) 100%);
+  transform: translateX(5px);
 }
 
 .info-label {
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--primary-light);
+  font-size: 0.9rem;
 }
 
 .info-value {
   color: var(--text-primary);
   word-break: break-all;
-  font-family: monospace;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1024px) {
+  .header-content {
+    max-width: 100%;
+  }
+  
+  .app-content {
+    max-width: 100%;
+  }
+  
+  .footer-content {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
@@ -393,19 +542,40 @@ async function handleRestart() {
   .header-left {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
+  }
+  
+  .logo-container {
+    width: 100%;
   }
   
   .header-right {
     justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .icon-button .button-text {
+    display: none;
+  }
+  
+  .icon-button {
+    padding: 0.6rem;
+    flex: 1;
+    justify-content: center;
   }
   
   .app-content {
     padding: 1rem;
   }
   
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
   .info-item {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }
 </style>

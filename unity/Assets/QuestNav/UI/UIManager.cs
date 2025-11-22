@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using QuestNav.Config;
+using QuestNav.WebServer;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;

@@ -3,7 +3,7 @@ using UnityEditor;
 using System.IO;
 using UnityEngine;
 
-namespace QuestNav.Config
+namespace QuestNav.WebServer
 {
     /// <summary>
     /// Editor utility to install Android network security configuration.

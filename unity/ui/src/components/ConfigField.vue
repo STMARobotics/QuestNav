@@ -209,69 +209,118 @@ function formatColorRGBA(color: any): string {
 .config-field {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.config-field::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--teal));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.config-field:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.config-field:hover::before {
+  opacity: 1;
 }
 
 .config-field.field-warning {
-  padding: 1rem;
-  background-color: rgba(255, 193, 7, 0.1);
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
   border: 2px solid var(--warning-color);
-  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+}
+
+.config-field.field-warning::before {
+  background: var(--warning-color);
+  opacity: 1;
 }
 
 .field-header {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-}
-
-.field-label {
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
 }
 
+.field-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .restart-badge {
-  font-size: 0.75rem;
-  padding: 0.125rem 0.5rem;
-  background-color: var(--warning-color);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  background: linear-gradient(135deg, var(--warning-color), #ffa000);
   color: #000;
   border-radius: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
 }
 
 .debug-badge {
-  font-size: 0.75rem;
-  padding: 0.125rem 0.5rem;
-  background-color: var(--danger-color);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  background: linear-gradient(135deg, var(--danger-color), #c82333);
   color: #fff;
   border-radius: 12px;
-  font-weight: 600;
-  animation: pulse 2s ease-in-out infinite;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
+  }
 }
 
 .debug-warning {
   margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: rgba(255, 193, 7, 0.2);
+  padding: 1rem;
+  background: rgba(255, 193, 7, 0.1);
   border-left: 4px solid var(--warning-color);
-  border-radius: 4px;
-  color: var(--warning-color);
+  border-radius: 8px;
+  color: #ffc107;
   font-weight: 600;
   font-size: 0.9rem;
+  line-height: 1.5;
+  box-shadow: inset 0 2px 8px rgba(255, 193, 7, 0.1);
 }
 
 .field-description {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  line-height: 1.4;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .field-control {
@@ -281,18 +330,40 @@ function formatColorRGBA(color: any): string {
 .checkbox-control {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(51, 161, 253, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-control:hover {
+  background: rgba(51, 161, 253, 0.1);
+}
+
+.checkbox-control input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 .checkbox-label {
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
 }
 
 .slider-control {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+
+.slider-control input[type="range"] {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--primary-color), var(--teal));
 }
 
 .slider-value {
@@ -301,31 +372,94 @@ function formatColorRGBA(color: any): string {
 }
 
 .value-input {
-  width: 100px;
+  width: 120px;
   text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.6rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.value-input:focus {
+  border-color: var(--primary-color);
+  background: white;
+  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
 }
 
 .color-control {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  padding: 0.75rem;
+  background: rgba(51, 161, 253, 0.05);
+  border-radius: 8px;
+}
+
+.color-control input[type="color"] {
+  width: 80px;
+  height: 50px;
+  border: 3px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-control input[type="color"]:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.3);
 }
 
 .color-values {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.4rem;
 }
 
 .color-value {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  font-family: monospace;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-weight: 500;
 }
 
-.select-control select,
+.select-control select {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.select-control select:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+.select-control select:focus {
+  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
+}
+
 .input-control input {
   width: 100%;
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.input-control input:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+.input-control input:focus {
+  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
 }
 </style>
 

@@ -1,5 +1,5 @@
 ﻿using QuestNav.Commands;
-using QuestNav.Config;
+using QuestNav.WebServer;
 using QuestNav.Network;
 using QuestNav.UI;
 using QuestNav.Utils;

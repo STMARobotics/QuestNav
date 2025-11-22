@@ -15080,6 +15080,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1964602099}
   - component: {fileID: 1964602098}
+  - component: {fileID: 1964602100}
   m_Layer: 0
   m_Name: ConfigBootstrap
   m_TagString: Untagged
@@ -15099,9 +15100,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595c881968079ee4c8e5e2d462edd8d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: QuestNav.Config::QuestNav.Config.ConfigBootstrap
-  m_serverPort: 18080
-  m_enableCORSDevMode: 0
-  m_startOnAwake: 1
 --- !u!4 &1964602099
 Transform:
   m_ObjectHideFlags: 0
@@ -15117,6 +15115,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1964602100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964602097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70024c2cc46b5e9478872d3d956d0c1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuestNav.WebServer::QuestNav.WebServer.ConfigBootstrap
+  serverPort: 18080
+  enableCORSDevMode: 0
+  startOnAwake: 1
 --- !u!1 &1969476340
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 {
-    "name": "QuestNav.Config",
-    "rootNamespace": "QuestNav.Config",
+    "name": "QuestNav.WebServer",
+    "rootNamespace": "QuestNav.WebServer",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
