@@ -130,17 +130,209 @@ namespace QuestNav.WebServer
                 // Convert value to appropriate type
                 object convertedValue = ConvertValue(value, field.FieldType);
 
+                // Validate and sanitize value based on field name
+                if (!ValidateValue(path, field.Name, convertedValue, out object sanitizedValue))
+                {
+                    return false;
+                }
+
                 // Clamp value to min/max constraints
-                convertedValue = ClampValue(convertedValue, field.FieldType, attr.Min, attr.Max);
+                sanitizedValue = ClampValue(sanitizedValue, field.FieldType, attr.Min, attr.Max);
 
                 // Set the field value
-                field.SetValue(null, convertedValue);
+                field.SetValue(null, sanitizedValue);
                 return true;
             }
             catch
             {
                 return false;
             }
+        }
+        #endregion
+
+        #region Validation
+        /// <summary>
+        /// Validates and sanitizes input values based on field name and type.
+        /// Provides specific validation for sensitive fields like IP addresses and team numbers.
+        /// </summary>
+        /// <param name="path">Full path to the field</param>
+        /// <param name="fieldName">Name of the field</param>
+        /// <param name="value">Value to validate</param>
+        /// <param name="sanitizedValue">Output sanitized value</param>
+        /// <returns>True if value is valid, false otherwise</returns>
+        private bool ValidateValue(
+            string path,
+            string fieldName,
+            object value,
+            out object sanitizedValue
+        )
+        {
+            sanitizedValue = value;
+
+            if (value == null)
+                return true;
+
+            // Validate Debug IP Override field
+            if (fieldName == "debugNTServerAddressOverride" && value is string ipString)
+            {
+                // Allow empty string (disables override)
+                if (string.IsNullOrWhiteSpace(ipString))
+                {
+                    sanitizedValue = "";
+                    return true;
+                }
+
+                // Sanitize and validate IP address
+                if (!ValidateAndSanitizeIpAddress(ipString, out string sanitizedIp))
+                {
+                    return false;
+                }
+
+                sanitizedValue = sanitizedIp;
+                return true;
+            }
+
+            // Validate Team Number field
+            if (fieldName == "webConfigTeamNumber" && value is int teamNumber)
+            {
+                // Valid FRC team numbers: 1-25599
+                if (teamNumber < 1 || teamNumber > 25599)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Validates and sanitizes an IP address string.
+        /// Accepts IPv4 addresses, IPv6 addresses, and hostnames.
+        /// Removes potentially dangerous characters and validates format.
+        /// </summary>
+        /// <param name="input">Input IP address or hostname</param>
+        /// <param name="sanitized">Output sanitized value</param>
+        /// <returns>True if valid, false otherwise</returns>
+        private bool ValidateAndSanitizeIpAddress(string input, out string sanitized)
+        {
+            sanitized = input.Trim();
+
+            // Empty string is valid (disables override)
+            if (string.IsNullOrWhiteSpace(sanitized))
+            {
+                sanitized = "";
+                return true;
+            }
+
+            // Check for dangerous characters
+            char[] dangerousChars = { ';', '|', '&', '$', '`', '\n', '\r', '<', '>', '\'', '"' };
+            if (sanitized.IndexOfAny(dangerousChars) >= 0)
+            {
+                return false;
+            }
+
+            // Allow partial IPv4 addresses during typing (e.g., "192.", "192.168.", "10.0.")
+            // This regex matches: digits, dots, and incomplete octets
+            if (System.Text.RegularExpressions.Regex.IsMatch(sanitized, @"^[\d\.]+$"))
+            {
+                // Check if it looks like an in-progress or complete IPv4 address
+                string[] parts = sanitized.Split('.');
+
+                // Allow up to 4 parts (octets) for IPv4
+                if (parts.Length <= 4)
+                {
+                    // Validate each part that exists
+                    foreach (string part in parts)
+                    {
+                        // Empty parts are OK during typing (e.g., "192." or "192.168.")
+                        if (string.IsNullOrEmpty(part))
+                            continue;
+
+                        // Each octet must be a number
+                        if (!int.TryParse(part, out int value))
+                        {
+                            return false;
+                        }
+
+                        // Validate range 0-255 for all non-empty parts
+                        if (value < 0 || value > 255)
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            // IPv4 validation (e.g., 192.168.1.100)
+            if (System.Text.RegularExpressions.Regex.IsMatch(sanitized, @"^(\d{1,3}\.){3}\d{1,3}$"))
+            {
+                string[] octets = sanitized.Split('.');
+                foreach (string octet in octets)
+                {
+                    if (!int.TryParse(octet, out int value) || value < 0 || value > 255)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // IPv6 validation (basic - allows standard IPv6 format)
+            if (
+                System.Text.RegularExpressions.Regex.IsMatch(
+                    sanitized,
+                    @"^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$"
+                )
+            )
+            {
+                return true;
+            }
+
+            // Allow partial IPv6 during typing (contains colons and hex digits)
+            if (System.Text.RegularExpressions.Regex.IsMatch(sanitized, @"^[0-9a-fA-F:]+$"))
+            {
+                return true;
+            }
+
+            // Hostname validation (e.g., roborio-9999-frc.local, localhost)
+            // Allow alphanumeric, dots, hyphens, underscores
+            if (
+                System.Text.RegularExpressions.Regex.IsMatch(
+                    sanitized,
+                    @"^[a-zA-Z0-9][a-zA-Z0-9\-\._]*[a-zA-Z0-9]$"
+                )
+            )
+            {
+                // Additional checks for valid hostname format
+                if (sanitized.Length > 253)
+                    return false;
+
+                string[] labels = sanitized.Split('.');
+                foreach (string label in labels)
+                {
+                    if (label.Length > 63 || label.StartsWith("-") || label.EndsWith("-"))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Single word hostnames (e.g., "localhost")
+            if (
+                System.Text.RegularExpressions.Regex.IsMatch(
+                    sanitized,
+                    @"^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$"
+                ) || System.Text.RegularExpressions.Regex.IsMatch(sanitized, @"^[a-zA-Z0-9]$")
+            )
+            {
+                if (sanitized.Length <= 63)
+                    return true;
+            }
+
+            return false;
         }
         #endregion
 

@@ -153,7 +153,8 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Dictionary tracking last activity time for each client IP
         /// </summary>
-        private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients = new System.Collections.Generic.Dictionary<string, DateTime>();
+        private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
+            new System.Collections.Generic.Dictionary<string, DateTime>();
 
         /// <summary>
         /// Lock object for thread-safe access to activeClients dictionary
@@ -593,7 +594,7 @@ namespace QuestNav.WebServer
         {
             // Update connected clients count in StatusProvider
             StatusProvider.Instance.UpdateConnectedClients(GetActiveClientCount());
-            
+
             var status = StatusProvider.Instance.GetStatus();
             await SendJsonResponse(context, status);
         }

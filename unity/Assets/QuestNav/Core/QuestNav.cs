@@ -382,10 +382,26 @@ namespace QuestNav.Core
             statusProvider.UpdatePose(frcPosition, frcRotation);
             statusProvider.UpdateTracking(currentlyTracking, trackingLostEvents);
             statusProvider.UpdateBattery(SystemInfo.batteryLevel, SystemInfo.batteryStatus);
+
+            // Get robot IP address from configuration
+            string robotIp = "";
+            if (!string.IsNullOrEmpty(Tunables.debugNTServerAddressOverride))
+            {
+                // Using debug IP override
+                robotIp = Tunables.debugNTServerAddressOverride;
+            }
+            else if (uiManager.TeamNumber > 0)
+            {
+                // Calculate from team number using FRC convention
+                int team = uiManager.TeamNumber;
+                robotIp = $"10.{team / 100}.{team % 100}.2"; // roboRIO-2 standard address
+            }
+
             statusProvider.UpdateNetwork(
                 networkTableConnection.IsConnected,
                 uiManager.IPAddress,
-                uiManager.TeamNumber
+                uiManager.TeamNumber,
+                robotIp
             );
         }
         #endregion

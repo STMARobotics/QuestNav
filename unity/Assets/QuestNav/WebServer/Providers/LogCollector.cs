@@ -118,6 +118,7 @@ namespace QuestNav.WebServer
         /// Handles log messages from Unity's logging system.
         /// Adds new entries to circular buffer and maintains size limit.
         /// Thread-safe implementation using lock for queue access.
+        /// Strips full file paths from both messages and stack traces for cleaner display.
         /// </summary>
         /// <param name="message">The log message</param>
         /// <param name="stackTrace">Stack trace (for errors)</param>
@@ -126,8 +127,8 @@ namespace QuestNav.WebServer
         {
             var entry = new LogEntry
             {
-                message = message,
-                stackTrace = stackTrace,
+                message = CleanFilePaths(message),
+                stackTrace = CleanStackTrace(stackTrace),
                 type = type.ToString(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             };
@@ -142,6 +143,46 @@ namespace QuestNav.WebServer
                     logQueue.Dequeue();
                 }
             }
+        }
+
+        /// <summary>
+        /// Cleans file paths in messages by replacing full paths with just filenames.
+        /// Example: [C:\Users\...\NetworkTableConnection.cs] -> [NetworkTableConnection.cs]
+        /// </summary>
+        /// <param name="message">Original message with potential full paths</param>
+        /// <returns>Cleaned message with only filenames</returns>
+        private string CleanFilePaths(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+                return message;
+
+            // Replace full paths in square brackets [C:\path\to\File.cs] -> [File.cs]
+            // This handles paths from QueuedLogger which adds [filepath] prefix
+            return System.Text.RegularExpressions.Regex.Replace(
+                message,
+                @"\[([A-Za-z]:[/\\](?:[^/\\:\]]+[/\\])*)?([^/\\:\]]+\.cs)\]",
+                "[$2]"
+            );
+        }
+
+        /// <summary>
+        /// Cleans stack trace by replacing full file paths with just filenames.
+        /// Example: C:\Users\...\NetworkTableConnection.cs -> NetworkTableConnection.cs
+        /// </summary>
+        /// <param name="stackTrace">Original stack trace with full paths</param>
+        /// <returns>Cleaned stack trace with only filenames</returns>
+        private string CleanStackTrace(string stackTrace)
+        {
+            if (string.IsNullOrEmpty(stackTrace))
+                return stackTrace;
+
+            // Replace full paths with just filenames using regex
+            // Matches patterns like: C:\path\to\File.cs:123 or /path/to/File.cs:123
+            return System.Text.RegularExpressions.Regex.Replace(
+                stackTrace,
+                @"[A-Za-z]:[/\\](?:[^/\\:]+[/\\])*([^/\\:]+\.cs)",
+                "$1"
+            );
         }
         #endregion
 

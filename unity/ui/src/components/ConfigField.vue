@@ -1,16 +1,23 @@
 <template>
-  <div class="config-field" :class="{ 'field-warning': isDebugIPField && localValue }">
+  <div class="config-field" :class="{ 
+    'field-warning': isDebugIPField && localValue,
+    'field-disabled': isTeamNumberField && isDebugIPActive
+  }">
     <div class="field-header">
       <label :for="field.path" class="field-label">
         {{ field.displayName }}
         <span v-if="field.requiresRestart" class="restart-badge">Requires Restart</span>
         <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG MODE ACTIVE</span>
+        <span v-if="isTeamNumberField && isDebugIPActive" class="override-badge">OVERRIDDEN</span>
       </label>
       <span v-if="field.description" class="field-description">
         {{ field.description }}
       </span>
       <div v-if="isDebugIPField && localValue" class="debug-warning">
         WARNING: Team number is being overridden. Connection will use IP: {{ localValue }}
+      </div>
+      <div v-if="isTeamNumberField && isDebugIPActive" class="override-notice">
+        This setting is currently overridden by Debug IP Override
       </div>
     </div>
 
@@ -84,19 +91,28 @@
           :type="getInputType(field.type)"
           :value="localValue"
           @input="handleTextInput"
+          @keyup.enter="handleSubmit"
         />
+        <button 
+          v-if="(isTeamNumberField && hasTeamNumberChanged) || (isDebugIPField && hasDebugIPChanged)"
+          @click="handleSubmit"
+          class="submit-button"
+        >
+          Apply
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import type { ConfigFieldSchema } from '../types'
 
 const props = defineProps<{
   field: ConfigFieldSchema
   value: any
+  debugIPOverride?: string
 }>()
 
 const emit = defineEmits<{
@@ -104,11 +120,29 @@ const emit = defineEmits<{
 }>()
 
 const localValue = ref(props.value)
+const pendingTeamNumber = ref<number | null>(null)
+const pendingDebugIP = ref<string | null>(null)
 
 const isDebugIPField = computed(() => props.field.path === 'Tunables/debugNTServerAddressOverride')
+const isTeamNumberField = computed(() => props.field.path === 'Tunables/webConfigTeamNumber')
+const isDebugIPActive = computed(() => {
+  return props.debugIPOverride !== undefined && props.debugIPOverride !== null && props.debugIPOverride !== ''
+})
+const hasTeamNumberChanged = computed(() => {
+  return isTeamNumberField.value && pendingTeamNumber.value !== null && pendingTeamNumber.value !== props.value
+})
+const hasDebugIPChanged = computed(() => {
+  return isDebugIPField.value && pendingDebugIP.value !== null && pendingDebugIP.value !== props.value
+})
 
 watch(() => props.value, (newValue) => {
   localValue.value = newValue
+  if (isTeamNumberField.value) {
+    pendingTeamNumber.value = null // Reset pending when server value changes
+  }
+  if (isDebugIPField.value) {
+    pendingDebugIP.value = null // Reset pending when server value changes
+  }
 })
 
 function handleCheckboxChange(event: Event) {
@@ -155,7 +189,74 @@ function handleSelectChange(event: Event) {
 function handleTextInput(event: Event) {
   const target = event.target as HTMLInputElement
   localValue.value = target.value
+  
+  // For Team Number field, store pending value but don't emit yet
+  if (isTeamNumberField.value) {
+    const numValue = parseInt(target.value)
+    if (!isNaN(numValue)) {
+      pendingTeamNumber.value = numValue
+    }
+    // Don't emit - wait for submit button
+    return
+  }
+  
+  // For Debug IP Override field, store pending value but don't emit yet
+  if (isDebugIPField.value) {
+    pendingDebugIP.value = target.value
+    // Don't emit - wait for submit button
+    return
+  }
+  
+  // For other text fields, emit immediately
   emit('update', props.field.path, target.value)
+}
+
+function handleSubmit() {
+  if (isTeamNumberField.value && pendingTeamNumber.value !== null) {
+    emit('update', props.field.path, pendingTeamNumber.value)
+    pendingTeamNumber.value = null
+  } else if (isDebugIPField.value && pendingDebugIP.value !== null) {
+    // Validate before submitting
+    if (isValidIPOrHostname(pendingDebugIP.value) || pendingDebugIP.value === '') {
+      emit('update', props.field.path, pendingDebugIP.value)
+      pendingDebugIP.value = null
+    } else {
+      // Show error or don't submit invalid IP
+      alert('Please enter a valid IP address, hostname, or leave empty')
+    }
+  }
+}
+
+function isValidIPOrHostname(value: string): boolean {
+  if (!value || value.trim() === '') return true
+  
+  const trimmed = value.trim()
+  
+  // Check for complete IPv4 (xxx.xxx.xxx.xxx)
+  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
+  const ipv4Match = trimmed.match(ipv4Regex)
+  if (ipv4Match) {
+    // Validate each octet is 0-255
+    for (let i = 1; i <= 4; i++) {
+      const octet = parseInt(ipv4Match[i])
+      if (octet < 0 || octet > 255) return false
+    }
+    return true
+  }
+  
+  // Check for IPv6 (basic check - contains colons and hex)
+  const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/
+  if (ipv6Regex.test(trimmed)) {
+    return true
+  }
+  
+  // Check for hostname (alphanumeric with dots, hyphens, underscores)
+  const hostnameRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-\._]{0,251}[a-zA-Z0-9])?$/
+  if (hostnameRegex.test(trimmed)) {
+    return true
+  }
+  
+  return false
 }
 
 function getInputType(type: string): string {
@@ -252,6 +353,18 @@ function formatColorRGBA(color: any): string {
   opacity: 1;
 }
 
+.config-field.field-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(128, 128, 128, 0.1) 0%, rgba(128, 128, 128, 0.05) 100%);
+  border-color: #999;
+}
+
+.config-field.field-disabled::before {
+  background: #999;
+  opacity: 0.5;
+}
+
 .field-header {
   display: flex;
   flex-direction: column;
@@ -302,6 +415,30 @@ function formatColorRGBA(color: any): string {
     opacity: 0.8;
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
   }
+}
+
+.override-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.4);
+}
+
+.override-notice {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: rgba(108, 117, 125, 0.1);
+  border-left: 4px solid #6c757d;
+  border-radius: 8px;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .debug-warning {
@@ -443,14 +580,45 @@ function formatColorRGBA(color: any): string {
   box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
 }
 
+.input-control {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
 .input-control input {
-  width: 100%;
+  flex: 1;
   padding: 0.75rem;
   background: white;
   border: 2px solid var(--border-color);
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.2s ease;
+}
+
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--teal));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.3);
+}
+
+.submit-button:hover {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(51, 161, 253, 0.4);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(51, 161, 253, 0.3);
 }
 
 .input-control input:hover {

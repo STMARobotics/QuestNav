@@ -30,7 +30,7 @@
       {{ error }}
     </div>
 
-    <div v-else class="logs-container card" ref="logsContainer">
+    <div v-else class="logs-container terminal" ref="logsContainer">
       <div v-if="filteredLogs.length === 0" class="empty-logs">
         No logs to display
       </div>
@@ -38,21 +38,12 @@
       <div
         v-for="(log, index) in filteredLogs"
         :key="index"
-        :class="['log-entry', `log-${log.type.toLowerCase()}`]"
+        :class="['log-line', `log-${log.type.toLowerCase()}`]"
       >
-        <div class="log-header">
-          <span :class="['log-type', `type-${log.type.toLowerCase()}`]">
-            {{ getLogIcon(log.type) }} {{ log.type }}
-          </span>
-          <span class="log-time">{{ formatTime(log.timestamp) }}</span>
-        </div>
-        <div class="log-message">{{ log.message }}</div>
-        <div v-if="log.stackTrace && log.type !== 'Log'" class="log-stack">
-          <details>
-            <summary>Stack Trace</summary>
-            <pre>{{ log.stackTrace }}</pre>
-          </details>
-        </div>
+        <span class="log-timestamp">{{ formatTime(log.timestamp) }}</span>
+        <span :class="['log-level', `level-${log.type.toLowerCase()}`]">{{ getLogPrefix(log.type) }}</span>
+        <span class="log-text">{{ log.message }}</span>
+        <pre v-if="log.stackTrace && log.type !== 'Log'" class="log-stacktrace">{{ log.stackTrace }}</pre>
       </div>
     </div>
   </div>
@@ -149,18 +140,35 @@ function scrollToBottom() {
   }
 }
 
-function formatTime(timestamp: number): string {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString() + '.' + String(date.getMilliseconds()).padStart(3, '0')
+function handleScroll() {
+  if (!logsContainer.value) return
+  
+  // Check if user has scrolled up from the bottom
+  const { scrollTop, scrollHeight, clientHeight } = logsContainer.value
+  const isAtBottom = scrollHeight - scrollTop - clientHeight < 10 // 10px threshold
+  
+  // If user scrolled up and auto-scroll is on, disable it
+  if (!isAtBottom && autoScroll.value) {
+    autoScroll.value = false
+  }
 }
 
-function getLogIcon(type: string): string {
+function formatTime(timestamp: number): string {
+  const date = new Date(timestamp)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const ms = String(date.getMilliseconds()).padStart(3, '0')
+  return `${hours}:${minutes}:${seconds}.${ms}`
+}
+
+function getLogPrefix(type: string): string {
   switch (type) {
-    case 'Error': return '❌'
-    case 'Warning': return '⚠️'
-    case 'Assert': return '🛑'
-    case 'Exception': return '💥'
-    default: return '📝'
+    case 'Error': return '[ERROR]'
+    case 'Warning': return '[WARN ]'
+    case 'Assert': return '[ASSRT]'
+    case 'Exception': return '[EXCPT]'
+    default: return '[INFO ]'
   }
 }
 
@@ -173,11 +181,22 @@ watch(filteredLogs, async () => {
 
 onMounted(async () => {
   await loadLogs()
+  
+  // Attach scroll listener to detect manual scrolling
+  if (logsContainer.value) {
+    logsContainer.value.addEventListener('scroll', handleScroll)
+  }
+  
   // Poll logs every 2 seconds
   intervalId = setInterval(loadLogs, 2000) as unknown as number
 })
 
 onUnmounted(() => {
+  // Remove scroll listener
+  if (logsContainer.value) {
+    logsContainer.value.removeEventListener('scroll', handleScroll)
+  }
+  
   if (intervalId !== null) {
     clearInterval(intervalId)
   }
@@ -301,12 +320,18 @@ onUnmounted(() => {
   padding: 1.5rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.875rem;
-  background: white;
+  background: #1e1e1e;
+  color: #d4d4d4;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) var(--bg-tertiary);
+  scrollbar-color: #555 #2a2a2a;
+  line-height: 1.6;
+}
+
+.logs-container.terminal {
+  background: #1e1e1e;
 }
 
 .logs-container::-webkit-scrollbar {
@@ -314,158 +339,84 @@ onUnmounted(() => {
 }
 
 .logs-container::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
+  background: #2a2a2a;
   border-radius: 5px;
 }
 
 .logs-container::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
+  background: #555;
   border-radius: 5px;
 }
 
 .logs-container::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-light);
+  background: #666;
 }
 
 .empty-logs {
   text-align: center;
   padding: 3rem;
-  color: var(--text-muted);
+  color: #666;
   font-size: 1.1rem;
   font-style: italic;
 }
 
-.log-entry {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border-left: 4px solid var(--border-color);
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  animation: slideIn 0.2s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.log-entry:hover {
-  background: var(--border-color);
-  transform: translateX(5px);
-}
-
-.log-entry.log-log {
-  border-left-color: var(--text-secondary);
-}
-
-.log-entry.log-warning {
-  border-left-color: var(--warning-color);
-  background: rgba(255, 193, 7, 0.1);
-}
-
-.log-entry.log-error,
-.log-entry.log-exception,
-.log-entry.log-assert {
-  border-left-color: var(--danger-color);
-  background: rgba(220, 53, 69, 0.1);
-}
-
-.log-header {
+.log-line {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  gap: 1rem;
   flex-wrap: wrap;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.log-type {
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  background: var(--bg-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid var(--border-color);
+.log-line:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.type-log {
-  color: var(--text-secondary);
-}
-
-.type-warning {
-  color: var(--warning-color);
-  background: rgba(255, 193, 7, 0.15);
-}
-
-.type-error,
-.type-exception,
-.type-assert {
-  color: var(--danger-color);
-  background: rgba(220, 53, 69, 0.15);
-}
-
-.log-time {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  background: var(--bg-tertiary);
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-}
-
-.log-message {
-  color: var(--text-primary);
-  line-height: 1.6;
-  word-break: break-word;
-  font-size: 0.9rem;
-}
-
-.log-stack {
-  margin-top: 0.75rem;
-}
-
-.log-stack details {
-  cursor: pointer;
-}
-
-.log-stack summary {
-  color: var(--primary-color);
-  font-size: 0.85rem;
+.log-timestamp {
+  color: #6a9955;
+  margin-right: 0.75rem;
   font-weight: 600;
-  padding: 0.5rem;
-  background: rgba(51, 161, 253, 0.1);
-  border-radius: 6px;
+  flex-shrink: 0;
   user-select: none;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(51, 161, 253, 0.2);
 }
 
-.log-stack summary:hover {
-  color: var(--primary-dark);
-  background: rgba(51, 161, 253, 0.15);
+.log-level {
+  margin-right: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
 }
 
-.log-stack pre {
-  margin-top: 0.75rem;
-  padding: 1rem;
-  background-color: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  overflow-x: auto;
+.level-log {
+  color: #4ec9b0;
+}
+
+.level-warning {
+  color: #dcdcaa;
+}
+
+.level-error,
+.level-exception,
+.level-assert {
+  color: #f48771;
+}
+
+.log-text {
+  color: #d4d4d4;
+  flex: 1;
+  word-break: break-word;
+}
+
+.log-stacktrace {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 3px solid #f48771;
+  color: #ce9178;
   font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  line-height: 1.4;
+  overflow-x: auto;
+  border-radius: 4px;
 }
 
 @media (max-width: 768px) {

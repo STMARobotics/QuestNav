@@ -32,14 +32,14 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Debug IP address override for direct robot connection.
         /// When set, bypasses team number resolution and connects directly to specified IP.
-        /// Leave empty to use team number. WARNING: Debugging purposes only!
+        /// Leave empty to use team number.
         /// </summary>
         [Config(
             DisplayName = "Debug IP Override",
-            Description = "Override team number and connect to specific IP address (leave empty to use team number). WARNING: Debugging only!",
-            Category = "QuestNav",
+            Description = "Override team number and connect to specific IP address (leave empty to use team number)",
+            Category = "General",
             ControlType = "input",
-            Order = 2
+            Order = 43
         )]
         public static string debugNTServerAddressOverride = "";
 
@@ -49,13 +49,13 @@ namespace QuestNav.WebServer
         /// </summary>
         [Config(
             DisplayName = "NetworkTables Server Port",
-            Description = "Port for NetworkTables server connection",
-            Category = "QuestNav",
+            Description = "Port for NetworkTables server connection (Default: 5810)",
+            Category = "General",
             Min = 1024,
             Max = 65535,
             ControlType = "input",
             RequiresRestart = true,
-            Order = 3
+            Order = 44
         )]
         public static int ntServerPort = 5810;
 
@@ -73,7 +73,7 @@ namespace QuestNav.WebServer
             Step = 10,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 4
+            Order = 2
         )]
         public static int mainUpdateHz = 100;
 
@@ -91,7 +91,7 @@ namespace QuestNav.WebServer
             Step = 1,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 5
+            Order = 3
         )]
         public static int slowUpdateHz = 3;
 
@@ -109,7 +109,7 @@ namespace QuestNav.WebServer
             Step = 1f,
             ControlType = "slider",
             RequiresRestart = true,
-            Order = 6
+            Order = 4
         )]
         public static float displayFrequency = 120.0f;
 
@@ -123,7 +123,7 @@ namespace QuestNav.WebServer
             Description = "Automatically start NetworkTables connection on app launch",
             Category = "QuestNav",
             ControlType = "checkbox",
-            Order = 7
+            Order = 5
         )]
         public static bool autoStartOnBoot = false;
 
@@ -140,7 +140,7 @@ namespace QuestNav.WebServer
             Max = 1000,
             Step = 10,
             ControlType = "slider",
-            Order = 8
+            Order = 6
         )]
         public static int poseResetTtlMs = 50;
 
@@ -156,7 +156,7 @@ namespace QuestNav.WebServer
             Max = 10,
             Step = 1,
             ControlType = "slider",
-            Order = 9
+            Order = 7
         )]
         public static int maxPoseReadRetries = 3;
 
@@ -173,7 +173,7 @@ namespace QuestNav.WebServer
             Max = 0.1f,
             Step = 0.001f,
             ControlType = "slider",
-            Order = 10
+            Order = 8
         )]
         public static float positionErrorThreshold = 0.01f;
 
@@ -185,33 +185,33 @@ namespace QuestNav.WebServer
         [Config(
             DisplayName = "NetworkTables Log Level",
             Description = "Minimum log level for NetworkTables (lower = more verbose)",
-            Category = "QuestNav",
+            Category = "General",
             Min = 6,
             Max = 50,
             Step = 1,
             ControlType = "slider",
-            Order = 11
+            Order = 45
         )]
         public static int ntLogLevelMin = 9;
         #endregion
 
         #region General Configuration
         /// <summary>
-        /// HTTP server port for web configuration interface (default: 18080).
+        /// HTTP server port for web configuration interface (default: 5801).
         /// Access the web UI at http://quest-ip:serverPort
         /// Change if port conflicts with other services.
         /// </summary>
         [Config(
-            DisplayName = "Server Port",
-            Description = "HTTP server port for configuration UI",
+            DisplayName = "Web Server Port",
+            Description = "HTTP server port for the webconfiguration UI (Default: 5801)",
             Category = "General",
-            Min = 1024,
-            Max = 65535,
+            Min = 5801,
+            Max = 5810,
             ControlType = "input",
             RequiresRestart = true,
             Order = 40
         )]
-        public static int serverPort = 18080;
+        public static int serverPort = 5801;
 
         /// <summary>
         /// Enable CORS for localhost development (default: false).
@@ -220,12 +220,27 @@ namespace QuestNav.WebServer
         /// </summary>
         [Config(
             DisplayName = "Enable CORS Dev Mode",
-            Description = "Allow localhost connections for development",
+            Description = "Allow web UI development from your computer (only enable if developing the UI)",
             Category = "General",
             ControlType = "checkbox",
             Order = 41
         )]
         public static bool enableCORSDevMode = false;
+
+        /// <summary>
+        /// Enable verbose debug logging (default: false).
+        /// When enabled, shows detailed NetworkTables connection attempts and debug messages.
+        /// When disabled, only shows warnings and errors for cleaner logs.
+        /// Useful for troubleshooting connection issues.
+        /// </summary>
+        [Config(
+            DisplayName = "Enable Debug Logging",
+            Description = "Show verbose debug messages (connection attempts, detailed diagnostics)",
+            Category = "General",
+            ControlType = "checkbox",
+            Order = 42
+        )]
+        public static bool enableDebugLogging = false;
         #endregion
     }
 }

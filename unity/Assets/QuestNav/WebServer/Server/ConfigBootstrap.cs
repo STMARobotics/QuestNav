@@ -58,6 +58,11 @@ namespace QuestNav.WebServer
         private bool isInitialized = false;
 
         /// <summary>
+        /// Flag indicating if initialization is currently in progress
+        /// </summary>
+        private bool isInitializing = false;
+
+        /// <summary>
         /// Flag for app restart request from background thread
         /// </summary>
         private bool restartRequested = false;
@@ -79,9 +84,21 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Initializes configuration system on app startup.
         /// Reads tunables, starts initialization coroutine if configured.
+        /// Implements singleton pattern to prevent multiple instances.
         /// </summary>
         private void Awake()
         {
+            // Singleton pattern - ensure only one ConfigBootstrap exists
+            var existingBootstraps = FindObjectsByType<ConfigBootstrap>(FindObjectsSortMode.None);
+            if (existingBootstraps.Length > 1)
+            {
+                Debug.LogWarning(
+                    $"[ConfigBootstrap] Multiple ConfigBootstrap instances detected ({existingBootstraps.Length}). Destroying duplicate."
+                );
+                Destroy(gameObject);
+                return;
+            }
+
             // Load server settings from Tunables if available
             if (typeof(Tunables).GetField("serverPort") != null)
             {
@@ -152,8 +169,20 @@ namespace QuestNav.WebServer
         private IEnumerator InitializeCoroutine()
         {
             if (isInitialized)
+            {
+                Debug.Log("[ConfigBootstrap] Already initialized, skipping");
                 yield break;
+            }
 
+            if (isInitializing)
+            {
+                Debug.LogWarning(
+                    "[ConfigBootstrap] Initialization already in progress, skipping duplicate call"
+                );
+                yield break;
+            }
+
+            isInitializing = true;
             Debug.Log("[ConfigBootstrap] Initializing configuration system...");
 
             // Initialize reflection binding to scan for [Config] attributes
@@ -195,6 +224,7 @@ namespace QuestNav.WebServer
             }
 
             isInitialized = true;
+            isInitializing = false;
             Debug.Log("[ConfigBootstrap] Initialization complete");
 
             // Start HTTP server

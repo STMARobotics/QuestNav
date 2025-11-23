@@ -83,6 +83,11 @@ namespace QuestNav.WebServer
         private int teamNumber;
 
         /// <summary>
+        /// Current robot IP address (resolved from team number or debug override)
+        /// </summary>
+        private string robotIpAddress = "";
+
+        /// <summary>
         /// Current frames per second
         /// </summary>
         private float fps;
@@ -170,11 +175,13 @@ namespace QuestNav.WebServer
         /// <param name="connected">Whether connected to NetworkTables</param>
         /// <param name="ip">Current IP address of headset</param>
         /// <param name="team">Current team number for connection</param>
-        public void UpdateNetwork(bool connected, string ip, int team)
+        /// <param name="robotIp">Robot IP address (from debug override or calculated from team number)</param>
+        public void UpdateNetwork(bool connected, string ip, int team, string robotIp = "")
         {
             isConnected = connected;
             ipAddress = ip;
             teamNumber = team;
+            robotIpAddress = robotIp;
         }
 
         /// <summary>
@@ -237,6 +244,7 @@ namespace QuestNav.WebServer
                 networkConnected = isConnected,
                 ipAddress = ipAddress,
                 teamNumber = teamNumber,
+                robotIpAddress = robotIpAddress,
 
                 // Performance
                 fps = Mathf.Round(fps),

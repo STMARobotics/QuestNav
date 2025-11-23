@@ -21,7 +21,11 @@
             </span>
           </div>
           <div class="status-item">
-            <span class="label">IP Address:</span>
+            <span class="label">Robot IP Address:</span>
+            <span class="value mono">{{ status.robotIpAddress || 'N/A' }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Headset IP Address:</span>
             <span class="value mono">{{ status.ipAddress }}</span>
           </div>
           <div class="status-item">

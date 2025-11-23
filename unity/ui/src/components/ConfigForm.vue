@@ -56,6 +56,7 @@
             :key="field.path"
             :field="field"
             :value="configStore.values[field.path]"
+            :debugIPOverride="configStore.values['Tunables/debugNTServerAddressOverride']"
             @update="handleUpdate"
           />
             </div>

@@ -375,16 +375,27 @@ public class NetworkTableConnection : INetworkTableConnection
     #region Logging
 
     /// <summary>
-    /// Processes and logs any pending NetworkTables internal messages
+    /// Processes and logs any pending NetworkTables internal messages.
+    /// Respects the enableDebugLogging tunable - when disabled, only WARNING and above are logged.
     /// </summary>
     public void LoggerPeriodic()
     {
         var messages = ntInstanceLogger.PollForMessages();
         if (messages == null)
             return;
+
+        // Determine minimum log level based on debug logging setting
+        int minLevel = Tunables.enableDebugLogging
+            ? QuestNavConstants.Logging.NTLogLevel.DEBUG1 // Show all debug messages
+            : QuestNavConstants.Logging.NTLogLevel.WARNING; // Only show warnings and errors
+
         foreach (var message in messages)
         {
-            QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
+            // Filter messages based on log level
+            if (message.level >= minLevel)
+            {
+                QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
+            }
         }
     }
 

@@ -82,6 +82,7 @@ export interface HeadsetStatus {
   networkConnected: boolean
   ipAddress: string
   teamNumber: number
+  robotIpAddress: string
   
   // Performance
   fps: number
