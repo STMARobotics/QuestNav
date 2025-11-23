@@ -97,6 +97,9 @@ crashlytics-build.properties
 **/[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # NuGetForUnity Packages
+Assets/Packages/*
+!Assets/Packages/*.json
+!Assets/packages.config
 Packages/*
 !Packages/*.json
 
