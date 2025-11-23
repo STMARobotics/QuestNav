@@ -9,7 +9,7 @@ export default defineConfig({
   
   // Build configuration
   build: {
-    outDir: '../Assets/StreamingAssets/ui',
+    outDir: '../unity/Assets/StreamingAssets/ui',
     emptyOutDir: true,
     assetsDir: 'assets',
     rollupOptions: {
