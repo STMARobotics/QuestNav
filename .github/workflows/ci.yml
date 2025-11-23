@@ -1,7 +1,8 @@
 name: CI
 
 on:
-  pull_request:
+  pull_request_target:
+    branches: [main]
   push:
     branches: [main]
 
@@ -26,13 +27,13 @@ jobs:
         with:
           filters: |
             java:
-              - 'questnav-lib/**.java'
-              - 'questnav-lib/**.gradle'
+              - 'questnav-lib/**/*.java'
+              - 'questnav-lib/**/*.gradle'
             csharp:
-              - 'unity/**.cs'
-              - 'unity/**.json'
-              - 'unity/**.unity'
-              - 'unity/**.meta'
+              - 'unity/**/*.cs'
+              - 'unity/**/*.json'
+              - 'unity/**/*.unity'
+              - 'unity/**/*.meta'
             proto:
               - 'protos/*.proto'
             docs:
