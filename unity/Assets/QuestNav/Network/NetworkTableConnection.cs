@@ -224,18 +224,18 @@ public class NetworkTableConnection : INetworkTableConnection
 
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
-    /// Checks Tunables.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
+    /// Checks WebServerConstants.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
     /// NetworkTables automatically handles reconnection when server configuration changes.
     /// </summary>
     /// <param name="teamNumber">The FRC team number (ignored if debug IP override is set)</param>
     public void UpdateTeamNumber(int teamNumber)
     {
         // Check if using debug IP override or standard team number mode
-        if (string.IsNullOrEmpty(Tunables.debugNTServerAddressOverride))
+        if (string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
         {
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber, Tunables.ntServerPort);
+            ntInstance.SetTeamNumber(teamNumber, WebServerConstants.ntServerPort);
             teamNumberSet = true;
             ipAddressSet = false;
         }
@@ -243,12 +243,12 @@ public class NetworkTableConnection : INetworkTableConnection
         {
             // Debug mode: Use direct IP address (bypasses team number resolution)
             QueuedLogger.LogWarning(
-                $"[DEBUG MODE] Using IP Override: {Tunables.debugNTServerAddressOverride} - This should only be used for debugging!"
+                $"[DEBUG MODE] Using IP Override: {WebServerConstants.debugNTServerAddressOverride} - This should only be used for debugging!"
             );
             ntInstance.SetAddresses(
                 new (string addr, int port)[]
                 {
-                    (Tunables.debugNTServerAddressOverride, Tunables.ntServerPort),
+                    (WebServerConstants.debugNTServerAddressOverride, WebServerConstants.ntServerPort),
                 }
             );
             ipAddressSet = true;
@@ -385,7 +385,7 @@ public class NetworkTableConnection : INetworkTableConnection
             return;
 
         // Determine minimum log level based on debug logging setting
-        int minLevel = Tunables.enableDebugLogging
+        int minLevel = WebServerConstants.enableDebugLogging
             ? QuestNavConstants.Logging.NTLogLevel.DEBUG1 // Show all debug messages
             : QuestNavConstants.Logging.NTLogLevel.WARNING; // Only show warnings and errors
 

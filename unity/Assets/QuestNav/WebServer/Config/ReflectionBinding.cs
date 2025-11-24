@@ -94,7 +94,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Gets the current value of a configuration field.
         /// </summary>
-        /// <param name="path">Path to the field (e.g., "Tunables/defaultTeamNumber")</param>
+        /// <param name="path">Path to the field (e.g., "WebServerConstants/webConfigTeamNumber")</param>
         /// <returns>Current value of the field</returns>
         /// <exception cref="ArgumentException">Thrown if path is invalid</exception>
         public object GetValue(string path)
@@ -110,7 +110,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Sets the value of a configuration field with type conversion and clamping.
         /// </summary>
-        /// <param name="path">Path to the field (e.g., "Tunables/defaultTeamNumber")</param>
+        /// <param name="path">Path to the field (e.g., "WebServerConstants/webConfigTeamNumber")</param>
         /// <param name="value">New value to set (will be converted to field type)</param>
         /// <returns>True if value was set successfully, false otherwise</returns>
         public bool SetValue(string path, object value)

@@ -46,34 +46,9 @@ namespace QuestNav.WebServer
         public string deviceModel;
 
         /// <summary>
-        /// Device friendly name
-        /// </summary>
-        public string deviceName;
-
-        /// <summary>
         /// Operating system version
         /// </summary>
         public string operatingSystem;
-
-        /// <summary>
-        /// CPU processor type
-        /// </summary>
-        public string processorType;
-
-        /// <summary>
-        /// Number of processor cores
-        /// </summary>
-        public int processorCount;
-
-        /// <summary>
-        /// Total system RAM in MB
-        /// </summary>
-        public int systemMemorySize;
-
-        /// <summary>
-        /// Graphics device name
-        /// </summary>
-        public string graphicsDeviceName;
     }
     #endregion
 
@@ -151,6 +126,16 @@ namespace QuestNav.WebServer
         private MainThreadAction poseResetCallback;
 
         /// <summary>
+        /// Status provider instance (injected)
+        /// </summary>
+        private readonly StatusProvider statusProvider;
+
+        /// <summary>
+        /// Log collector instance (injected)
+        /// </summary>
+        private readonly LogCollector logCollector;
+
+        /// <summary>
         /// Dictionary tracking last activity time for each client IP
         /// </summary>
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
@@ -192,6 +177,8 @@ namespace QuestNav.WebServer
         /// <param name="logger">Logger implementation for background thread</param>
         /// <param name="restartCallback">Callback to restart application</param>
         /// <param name="poseResetCallback">Callback to reset VR pose</param>
+        /// <param name="statusProvider">Status provider instance for runtime data</param>
+        /// <param name="logCollector">Log collector instance for log messages</param>
         public ConfigServer(
             ReflectionBinding binding,
             ConfigStore store,
@@ -200,7 +187,9 @@ namespace QuestNav.WebServer
             string staticPath,
             ILogger logger,
             MainThreadAction restartCallback,
-            MainThreadAction poseResetCallback
+            MainThreadAction poseResetCallback,
+            StatusProvider statusProvider,
+            LogCollector logCollector
         )
         {
             this.binding = binding;
@@ -211,6 +200,8 @@ namespace QuestNav.WebServer
             this.logger = logger;
             this.restartCallback = restartCallback;
             this.poseResetCallback = poseResetCallback;
+            this.statusProvider = statusProvider;
+            this.logCollector = logCollector;
 
             // Cache server info on main thread (before server starts on background thread)
             CacheServerInfo();
@@ -237,14 +228,7 @@ namespace QuestNav.WebServer
                 // Platform Information
                 platform = UnityEngine.Application.platform.ToString(),
                 deviceModel = UnityEngine.SystemInfo.deviceModel,
-                deviceName = UnityEngine.SystemInfo.deviceName,
                 operatingSystem = UnityEngine.SystemInfo.operatingSystem,
-
-                // System Information
-                processorType = UnityEngine.SystemInfo.processorType,
-                processorCount = UnityEngine.SystemInfo.processorCount,
-                systemMemorySize = UnityEngine.SystemInfo.systemMemorySize,
-                graphicsDeviceName = UnityEngine.SystemInfo.graphicsDeviceName,
             };
         }
 
@@ -571,12 +555,7 @@ namespace QuestNav.WebServer
                 buildDate = cachedServerInfo.buildDate,
                 platform = cachedServerInfo.platform,
                 deviceModel = cachedServerInfo.deviceModel,
-                deviceName = cachedServerInfo.deviceName,
                 operatingSystem = cachedServerInfo.operatingSystem,
-                processorType = cachedServerInfo.processorType,
-                processorCount = cachedServerInfo.processorCount,
-                systemMemorySize = cachedServerInfo.systemMemorySize,
-                graphicsDeviceName = cachedServerInfo.graphicsDeviceName,
 
                 // Runtime information (safe on background thread)
                 connectedClients = GetActiveClientCount(),
@@ -593,9 +572,9 @@ namespace QuestNav.WebServer
         private async Task HandleGetStatus(IHttpContext context)
         {
             // Update connected clients count in StatusProvider
-            StatusProvider.Instance.UpdateConnectedClients(GetActiveClientCount());
+            statusProvider.UpdateConnectedClients(GetActiveClientCount());
 
-            var status = StatusProvider.Instance.GetStatus();
+            var status = statusProvider.GetStatus();
             await SendJsonResponse(context, status);
         }
 
@@ -610,7 +589,7 @@ namespace QuestNav.WebServer
                 int.TryParse(context.Request.QueryString["count"], out count);
             }
 
-            var logs = LogCollector.Instance.GetRecentLogs(count);
+            var logs = logCollector.GetRecentLogs(count);
             await SendJsonResponse(context, new LogsResponse { success = true, logs = logs });
         }
 
@@ -619,7 +598,7 @@ namespace QuestNav.WebServer
         /// </summary>
         private async Task HandleClearLogs(IHttpContext context)
         {
-            LogCollector.Instance.ClearLogs();
+            logCollector.ClearLogs();
             await SendJsonResponse(
                 context,
                 new SimpleResponse { success = true, message = "Logs cleared" }

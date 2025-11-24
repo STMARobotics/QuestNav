@@ -89,30 +89,8 @@
             <span class="info-value">{{ serverInfo.deviceModel }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Device Name:</span>
-            <span class="info-value">{{ serverInfo.deviceName }}</span>
-          </div>
-          <div class="info-item">
             <span class="info-label">Operating System:</span>
             <span class="info-value">{{ serverInfo.operatingSystem }}</span>
-          </div>
-          
-          <h3>System</h3>
-          <div class="info-item">
-            <span class="info-label">Processor:</span>
-            <span class="info-value">{{ serverInfo.processorType }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">CPU Cores:</span>
-            <span class="info-value">{{ serverInfo.processorCount }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">System Memory:</span>
-            <span class="info-value">{{ serverInfo.systemMemorySize }} MB</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Graphics:</span>
-            <span class="info-value">{{ serverInfo.graphicsDeviceName }}</span>
           </div>
           
           <h3>Server</h3>

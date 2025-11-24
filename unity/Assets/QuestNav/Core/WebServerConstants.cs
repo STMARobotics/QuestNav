@@ -1,15 +1,16 @@
+using QuestNav.WebServer;
 using UnityEngine;
 
-namespace QuestNav.WebServer
+namespace QuestNav.Core
 {
     /// <summary>
     /// Runtime-configurable settings for QuestNav application.
     /// All fields are exposed to the web configuration interface via [Config] attributes.
     /// Changes are automatically saved to persistent storage and can be modified at runtime.
-    /// Access tunables via static fields (e.g., Tunables.webConfigTeamNumber).
+    /// Access settings via static fields (e.g., WebServerConstants.webConfigTeamNumber).
     /// Values are automatically loaded on startup and persisted when changed via web interface.
     /// </summary>
-    public static class Tunables
+    public static class WebServerConstants
     {
         #region QuestNav Configuration
         /// <summary>

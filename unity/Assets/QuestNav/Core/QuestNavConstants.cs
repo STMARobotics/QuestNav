@@ -159,31 +159,31 @@ namespace QuestNav.Core
             public static class NTLogLevel
             {
                 /// <summary>Critical level logging</summary>
-                public const int CRITICAL = 50;
+                internal const int CRITICAL = 50;
 
                 /// <summary>Error level logging</summary>
-                public const int ERROR = 40;
+                internal const int ERROR = 40;
 
                 /// <summary>Warning level logging</summary>
-                public const int WARNING = 30;
+                internal const int WARNING = 30;
 
                 /// <summary>Info level logging</summary>
-                public const int INFO = 20;
+                internal const int INFO = 20;
 
                 /// <summary>Debug level logging</summary>
-                public const int DEBUG = 10;
+                internal const int DEBUG = 10;
 
                 /// <summary>Debug1 level logging</summary>
-                public const int DEBUG1 = 9;
+                internal const int DEBUG1 = 9;
 
                 /// <summary>Debug2 level logging</summary>
-                public const int DEBUG2 = 8;
+                internal const int DEBUG2 = 8;
 
                 /// <summary>Debug3 level logging</summary>
-                public const int DEBUG3 = 7;
+                internal const int DEBUG3 = 7;
 
                 /// <summary>Debug4 level logging</summary>
-                public const int DEBUG4 = 6;
+                internal const int DEBUG4 = 6;
             }
 
             /// <summary>

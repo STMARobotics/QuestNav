@@ -179,5 +179,31 @@ namespace QuestNav.Utils
                 },
             };
         }
+
+        /// <summary>
+        /// Converts a protobuf Pose3d to Unity Vector3 and Quaternion types.
+        /// This is a utility method for extracting Unity-native types from the protobuf message structure.
+        /// </summary>
+        /// <param name="pose">Protobuf pose containing translation and rotation</param>
+        /// <returns>Tuple of Unity position and rotation</returns>
+        public static (Vector3 position, Quaternion rotation) ProtobufPose3dToUnity(
+            ProtobufPose3d pose
+        )
+        {
+            Vector3 position = new Vector3(
+                (float)pose.Translation.X,
+                (float)pose.Translation.Y,
+                (float)pose.Translation.Z
+            );
+
+            Quaternion rotation = new Quaternion(
+                (float)pose.Rotation.Q.X,
+                (float)pose.Rotation.Q.Y,
+                (float)pose.Rotation.Q.Z,
+                (float)pose.Rotation.Q.W
+            );
+
+            return (position, rotation);
+        }
     }
 }

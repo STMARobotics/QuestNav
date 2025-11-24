@@ -9,10 +9,10 @@ namespace QuestNav.WebServer
     /// Maintains a circular buffer of the 500 most recent log entries.
     /// Subscribes to Application.logMessageReceived for real-time capture.
     /// Served via /api/logs endpoint with filtering and export capabilities.
-    /// Must be initialized on main thread before ConfigServer starts.
-    /// Implemented as a singleton MonoBehaviour for lifecycle management.
+    /// Plain C# class designed for dependency injection with explicit lifecycle management.
+    /// Implements IDisposable for proper cleanup.
     /// </summary>
-    public class LogCollector : MonoBehaviour
+    public class LogCollector : System.IDisposable
     {
         #region Constants
         /// <summary>
@@ -21,36 +21,16 @@ namespace QuestNav.WebServer
         private const int MAX_LOGS = 500;
         #endregion
 
-        #region Static Instance
-        /// <summary>
-        /// Singleton instance of LogCollector
-        /// </summary>
-        private static LogCollector instance;
-
-        /// <summary>
-        /// Gets the singleton instance of LogCollector.
-        /// Creates a new instance if one doesn't exist.
-        /// </summary>
-        public static LogCollector Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    var go = new GameObject("LogCollector");
-                    instance = go.AddComponent<LogCollector>();
-                    DontDestroyOnLoad(go);
-                }
-                return instance;
-            }
-        }
-        #endregion
-
         #region Fields
         /// <summary>
         /// Circular buffer queue of log entries
         /// </summary>
         private readonly Queue<LogEntry> logQueue = new Queue<LogEntry>();
+
+        /// <summary>
+        /// Flag indicating if disposal has been performed
+        /// </summary>
+        private bool disposed = false;
         #endregion
 
         #region Nested Types
@@ -83,33 +63,28 @@ namespace QuestNav.WebServer
         }
         #endregion
 
-        #region Unity Lifecycle Methods
+        #region Lifecycle Methods
         /// <summary>
         /// Initializes the log collector and subscribes to Unity log events.
-        /// Ensures singleton pattern is maintained.
+        /// Must be called on Unity main thread.
         /// </summary>
-        private void Awake()
+        public void Initialize()
         {
-            if (instance != null && instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-
             // Subscribe to Unity log callbacks
             Application.logMessageReceived += HandleLog;
         }
 
         /// <summary>
-        /// Unsubscribes from Unity log events when destroyed.
-        /// Ensures no memory leaks from event handlers.
+        /// Disposes of the log collector and unsubscribes from Unity log events.
+        /// Implements IDisposable pattern for proper resource cleanup.
         /// </summary>
-        private void OnDestroy()
+        public void Dispose()
         {
-            Application.logMessageReceived -= HandleLog;
+            if (!disposed)
+            {
+                Application.logMessageReceived -= HandleLog;
+                disposed = true;
+            }
         }
         #endregion
 
@@ -190,6 +165,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Gets the most recent log entries.
         /// Returns logs in chronological order (oldest first).
+        /// Thread-safe for access from background thread (ConfigServer).
         /// </summary>
         /// <param name="count">Maximum number of logs to return (default: 100)</param>
         /// <returns>List of recent log entries</returns>
@@ -208,6 +184,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Clears all collected logs.
         /// Useful for resetting log history via web interface.
+        /// Thread-safe for access from background thread (ConfigServer).
         /// </summary>
         public void ClearLogs()
         {

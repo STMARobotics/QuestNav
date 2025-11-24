@@ -156,15 +156,15 @@ namespace QuestNav.UI
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
 
-            // Load team number from Tunables (synced with web config)
-            teamNumber = Tunables.webConfigTeamNumber;
+            // Load team number from WebServerConstants (synced with web config)
+            teamNumber = WebServerConstants.webConfigTeamNumber;
             teamInput.text = teamNumber.ToString();
             setTeamNumberFromUI();
 
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
 
-            // Load auto start from Tunables (synced with web config)
-            autoStartToggle.isOn = Tunables.autoStartOnBoot;
+            // Load auto start from WebServerConstants (synced with web config)
+            autoStartToggle.isOn = WebServerConstants.autoStartOnBoot;
 
             autoStartToggle.onValueChanged.AddListener(updateAutoStart);
         }
@@ -190,8 +190,8 @@ namespace QuestNav.UI
             QueuedLogger.Log("Updating Team Number");
             teamNumber = int.Parse(teamInput.text);
 
-            // Update Tunables (synced with web config)
-            Tunables.webConfigTeamNumber = teamNumber;
+            // Update WebServerConstants (synced with web config)
+            WebServerConstants.webConfigTeamNumber = teamNumber;
 
             updateTeamNumberInputBoxPlaceholder(teamNumber);
 
@@ -269,13 +269,13 @@ namespace QuestNav.UI
 
         /// <summary>
         /// Updates the auto start preference.
-        /// Saves to both Tunables (synced with web config) and PlayerPrefs (for Android boot receiver).
+        /// Saves to both WebServerConstants (synced with web config) and PlayerPrefs (for Android boot receiver).
         /// </summary>
         /// <param name="newValue">new AutoStart value</param>
         void updateAutoStart(bool newValue)
         {
-            // Update Tunables (synced with web config)
-            Tunables.autoStartOnBoot = newValue;
+            // Update WebServerConstants (synced with web config)
+            WebServerConstants.autoStartOnBoot = newValue;
 
             // Save to PlayerPrefs for Android BootReceiver
             // BootReceiver reads "AutoStart" from PlayerPrefs to determine if app should start on boot
@@ -287,20 +287,20 @@ namespace QuestNav.UI
         {
             updateConStateText();
             updateIPAddressText();
-            syncFromTunables();
+            syncFromWebServerConstants();
         }
 
         private string lastDebugIPOverride = "";
 
         /// <summary>
-        /// Syncs UI elements with Tunables values (updated via web config)
+        /// Syncs UI elements with WebServerConstants values (updated via web config)
         /// </summary>
-        private void syncFromTunables()
+        private void syncFromWebServerConstants()
         {
             // Check if debug IP override changed - triggers reconnection
-            if (lastDebugIPOverride != Tunables.debugNTServerAddressOverride)
+            if (lastDebugIPOverride != WebServerConstants.debugNTServerAddressOverride)
             {
-                string newDebugIPOverride = Tunables.debugNTServerAddressOverride ?? "";
+                string newDebugIPOverride = WebServerConstants.debugNTServerAddressOverride ?? "";
 
                 // Only trigger reconnection if the value is empty (cleared) or a valid IP
                 bool shouldReconnect =
@@ -316,21 +316,21 @@ namespace QuestNav.UI
             }
 
             // Sync team number if changed via web interface
-            if (teamNumber != Tunables.webConfigTeamNumber)
+            if (teamNumber != WebServerConstants.webConfigTeamNumber)
             {
-                teamNumber = Tunables.webConfigTeamNumber;
+                teamNumber = WebServerConstants.webConfigTeamNumber;
                 teamInput.text = teamNumber.ToString();
                 updateTeamNumberInputBoxPlaceholder(teamNumber);
                 networkTableConnection.UpdateTeamNumber(teamNumber);
             }
 
             // Sync auto-start toggle if changed via web interface
-            if (autoStartToggle.isOn != Tunables.autoStartOnBoot)
+            if (autoStartToggle.isOn != WebServerConstants.autoStartOnBoot)
             {
-                autoStartToggle.SetIsOnWithoutNotify(Tunables.autoStartOnBoot);
+                autoStartToggle.SetIsOnWithoutNotify(WebServerConstants.autoStartOnBoot);
 
                 // Also save to PlayerPrefs to keep BootReceiver in sync
-                PlayerPrefs.SetInt("AutoStart", Tunables.autoStartOnBoot ? 1 : 0);
+                PlayerPrefs.SetInt("AutoStart", WebServerConstants.autoStartOnBoot ? 1 : 0);
                 PlayerPrefs.Save();
             }
         }

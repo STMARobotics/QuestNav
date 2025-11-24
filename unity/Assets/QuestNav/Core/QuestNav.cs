@@ -1,11 +1,14 @@
 ﻿using QuestNav.Commands;
+using QuestNav.Commands.Commands;
 using QuestNav.Network;
+using QuestNav.Protos.Generated;
 using QuestNav.UI;
 using QuestNav.Utils;
 using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Wpi.Proto;
 
 namespace QuestNav.Core
 {
@@ -182,6 +185,11 @@ namespace QuestNav.Core
         /// </summary>
         private ITagAlongUI tagAlongUI;
 
+        /// <summary>
+        /// Reference to the web server manager component
+        /// </summary>
+        private IWebServerManager webServerManager;
+
         #endregion
 
         #endregion
@@ -215,6 +223,17 @@ namespace QuestNav.Core
                 autoStartToggle
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
+
+            // Initialize web server manager with settings from WebServerConstants
+            webServerManager = new WebServerManager(
+                vrCamera,
+                vrCameraRoot,
+                this,
+                WebServerConstants.serverPort,
+                WebServerConstants.enableCORSDevMode,
+                ExecutePoseResetToOrigin // Pass callback for web-initiated pose resets
+            );
+            webServerManager.Initialize();
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -286,9 +305,21 @@ namespace QuestNav.Core
             // Update status provider for web interface
             UpdateStatusProvider();
 
+            // Update web server manager periodic operations
+            webServerManager?.Periodic();
+
             // Flush queued log messages to Unity console
             // Batching log output improves performance and reduces console spam
             QueuedLogger.Flush();
+        }
+
+        /// <summary>
+        /// Cleans up resources on application shutdown.
+        /// Stops the web server and releases resources.
+        /// </summary>
+        private void OnDestroy()
+        {
+            webServerManager?.Shutdown();
         }
 
         #endregion
@@ -356,6 +387,59 @@ namespace QuestNav.Core
         }
 
         /// <summary>
+        /// Executes pose reset to origin (0,0,0) with no rotation.
+        /// Called from web interface via WebServerManager callback.
+        /// Uses the existing PoseResetCommand implementation to ensure single source of truth.
+        /// This avoids duplicating the pose reset algorithm in PoseResetProvider.
+        /// </summary>
+        public void ExecutePoseResetToOrigin()
+        {
+            QueuedLogger.Log("[QuestNav] Web interface requested pose reset to origin");
+
+            // Create a protobuf command payload for origin reset in FRC coordinates
+            var resetPose = new ProtobufPose3d
+            {
+                Translation = new ProtobufTranslation3d
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+                Rotation = new ProtobufRotation3d
+                {
+                    Q = new ProtobufQuaternion
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1,
+                    },
+                },
+            };
+
+            var command = new ProtobufQuestNavCommand
+            {
+                Type = QuestNavCommandType.PoseReset,
+                CommandId = (uint)System.DateTime.UtcNow.Ticks,
+                PoseResetPayload = new ProtobufQuestNavPoseResetPayload { TargetPose = resetPose },
+            };
+
+            // Create a temporary command instance for web-initiated reset
+            // Pass null for networkTableConnection since web resets don't use NetworkTables
+            var webPoseResetCommand = new PoseResetCommand(
+                null, // No NetworkTables response for web-initiated resets
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
+
+            // Execute the pose reset using the existing command implementation
+            webPoseResetCommand.Execute(command);
+
+            QueuedLogger.Log("[QuestNav] Pose reset to origin completed");
+        }
+
+        /// <summary>
         /// Updates the status provider with current runtime data for the web interface.
         /// Converts Unity coordinates to FRC robot coordinates before passing to StatusProvider.
         /// </summary>
@@ -365,30 +449,14 @@ namespace QuestNav.Core
             var frcPose = Conversions.UnityToFrc3d(position, rotation);
 
             // Convert protobuf pose to Unity types for StatusProvider
-            Vector3 frcPosition = new Vector3(
-                (float)frcPose.Translation.X,
-                (float)frcPose.Translation.Y,
-                (float)frcPose.Translation.Z
-            );
-
-            Quaternion frcRotation = new Quaternion(
-                (float)frcPose.Rotation.Q.X,
-                (float)frcPose.Rotation.Q.Y,
-                (float)frcPose.Rotation.Q.Z,
-                (float)frcPose.Rotation.Q.W
-            );
-
-            var statusProvider = StatusProvider.Instance;
-            statusProvider.UpdatePose(frcPosition, frcRotation);
-            statusProvider.UpdateTracking(currentlyTracking, trackingLostEvents);
-            statusProvider.UpdateBattery(SystemInfo.batteryLevel, SystemInfo.batteryStatus);
+            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
 
             // Get robot IP address from configuration
             string robotIp = "";
-            if (!string.IsNullOrEmpty(Tunables.debugNTServerAddressOverride))
+            if (!string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
             {
                 // Using debug IP override
-                robotIp = Tunables.debugNTServerAddressOverride;
+                robotIp = WebServerConstants.debugNTServerAddressOverride;
             }
             else if (uiManager.TeamNumber > 0)
             {
@@ -397,11 +465,23 @@ namespace QuestNav.Core
                 robotIp = $"10.{team / 100}.{team % 100}.2"; // roboRIO-2 standard address
             }
 
-            statusProvider.UpdateNetwork(
+            // Calculate current FPS
+            float currentFps = 1f / Time.deltaTime;
+
+            // Update web server manager with current status
+            webServerManager?.UpdateStatus(
+                frcPosition,
+                frcRotation,
+                currentlyTracking,
+                trackingLostEvents,
+                SystemInfo.batteryLevel,
+                SystemInfo.batteryStatus,
                 networkTableConnection.IsConnected,
                 uiManager.IPAddress,
                 uiManager.TeamNumber,
-                robotIp
+                robotIp,
+                currentFps,
+                Time.frameCount
             );
         }
         #endregion

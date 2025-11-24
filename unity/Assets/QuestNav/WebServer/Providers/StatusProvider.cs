@@ -4,46 +4,26 @@ namespace QuestNav.WebServer
 {
     /// <summary>
     /// Provides access to runtime status information for the web interface.
-    /// Singleton that collects headset pose, tracking, battery, and network status.
+    /// Collects headset pose, tracking, battery, and network status.
     /// Updated at 3Hz from QuestNav.SlowUpdate() and served via /api/status endpoint.
-    /// Must be initialized on main thread before ConfigServer starts.
-    /// Implemented as a singleton MonoBehaviour for lifecycle management.
+    /// Plain C# class designed for dependency injection.
+    /// Thread-safe for concurrent access from main thread (UpdateStatus) and background thread (GetStatus).
     /// </summary>
-    public class StatusProvider : MonoBehaviour
+    public class StatusProvider
     {
-        #region Static Instance
-        /// <summary>
-        /// Singleton instance of StatusProvider
-        /// </summary>
-        private static StatusProvider instance;
-
-        /// <summary>
-        /// Gets the singleton instance of StatusProvider.
-        /// Creates a new instance if one doesn't exist.
-        /// </summary>
-        public static StatusProvider Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    var go = new GameObject("StatusProvider");
-                    instance = go.AddComponent<StatusProvider>();
-                    DontDestroyOnLoad(go);
-                }
-                return instance;
-            }
-        }
-        #endregion
-
         #region Fields
         /// <summary>
-        /// Current position of VR headset
+        /// Lock object for thread-safe access to status fields
+        /// </summary>
+        private readonly object statusLock = new object();
+
+        /// <summary>
+        /// Current position of VR headset (FRC coordinates)
         /// </summary>
         private Vector3 position;
 
         /// <summary>
-        /// Current rotation of VR headset
+        /// Current rotation of VR headset (FRC coordinates)
         /// </summary>
         private Quaternion rotation;
 
@@ -103,95 +83,67 @@ namespace QuestNav.WebServer
         private int connectedClients;
         #endregion
 
-        #region Unity Lifecycle Methods
-        /// <summary>
-        /// Initializes the status provider and ensures singleton pattern.
-        /// </summary>
-        private void Awake()
-        {
-            if (instance != null && instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        /// <summary>
-        /// Updates performance metrics (FPS and frame count).
-        /// Called every frame by Unity.
-        /// </summary>
-        private void Update()
-        {
-            // Update FPS calculation
-            fps = 1f / Time.deltaTime;
-            frameCount = Time.frameCount;
-        }
-        #endregion
-
         #region Public Update Methods
         /// <summary>
-        /// Updates the current headset pose data.
-        /// Called from QuestNav.SlowUpdate() at 3Hz.
+        /// Updates all status information at once.
+        /// Called from WebServerManager.UpdateStatus() which is invoked from QuestNav.SlowUpdate() at 3Hz.
         /// </summary>
-        /// <param name="pos">Current position of VR headset</param>
-        /// <param name="rot">Current rotation of VR headset</param>
-        public void UpdatePose(Vector3 pos, Quaternion rot)
-        {
-            position = pos;
-            rotation = rot;
-        }
-
-        /// <summary>
-        /// Updates the current tracking status.
-        /// Called from QuestNav.SlowUpdate() at 3Hz.
-        /// </summary>
+        /// <param name="pos">Current position of VR headset (FRC coordinates)</param>
+        /// <param name="rot">Current rotation of VR headset (FRC coordinates)</param>
         /// <param name="tracking">Whether headset is currently tracking</param>
         /// <param name="lostEvents">Number of tracking loss events this session</param>
-        public void UpdateTracking(bool tracking, int lostEvents)
-        {
-            isTracking = tracking;
-            trackingLostEvents = lostEvents;
-        }
-
-        /// <summary>
-        /// Updates the current battery status.
-        /// Called from QuestNav.SlowUpdate() at 3Hz.
-        /// </summary>
-        /// <param name="level">Battery level (0.0 to 1.0)</param>
+        /// <param name="battery">Battery level (0.0 to 1.0)</param>
         /// <param name="status">Battery charging status</param>
-        public void UpdateBattery(float level, BatteryStatus status)
-        {
-            batteryLevel = level;
-            batteryStatus = status;
-        }
-
-        /// <summary>
-        /// Updates the current network connection status.
-        /// Called from QuestNav.SlowUpdate() at 3Hz.
-        /// </summary>
         /// <param name="connected">Whether connected to NetworkTables</param>
         /// <param name="ip">Current IP address of headset</param>
         /// <param name="team">Current team number for connection</param>
         /// <param name="robotIp">Robot IP address (from debug override or calculated from team number)</param>
-        public void UpdateNetwork(bool connected, string ip, int team, string robotIp = "")
+        /// <param name="currentFps">Current frames per second</param>
+        /// <param name="currentFrameCount">Unity frame count</param>
+        public void UpdateStatus(
+            Vector3 pos,
+            Quaternion rot,
+            bool tracking,
+            int lostEvents,
+            float battery,
+            BatteryStatus status,
+            bool connected,
+            string ip,
+            int team,
+            string robotIp,
+            float currentFps,
+            int currentFrameCount
+        )
         {
-            isConnected = connected;
-            ipAddress = ip;
-            teamNumber = team;
-            robotIpAddress = robotIp;
+            lock (statusLock)
+            {
+                position = pos;
+                rotation = rot;
+                isTracking = tracking;
+                trackingLostEvents = lostEvents;
+                batteryLevel = battery;
+                batteryStatus = status;
+                isConnected = connected;
+                ipAddress = ip;
+                teamNumber = team;
+                robotIpAddress = robotIp;
+                fps = currentFps;
+                frameCount = currentFrameCount;
+            }
         }
 
         /// <summary>
         /// Updates the number of connected web clients.
         /// Can be called from ConfigServer background thread.
+        /// Thread-safe.
         /// </summary>
         /// <param name="clients">Number of active web clients</param>
         public void UpdateConnectedClients(int clients)
         {
-            connectedClients = clients;
+            lock (statusLock)
+            {
+                connectedClients = clients;
+            }
         }
         #endregion
 
@@ -201,61 +153,65 @@ namespace QuestNav.WebServer
         /// Called from ConfigServer background thread via /api/status endpoint.
         /// Returns anonymous object suitable for JSON.NET serialization.
         /// Position and rotation are provided in FRC robot coordinates.
+        /// Thread-safe.
         /// </summary>
         /// <returns>Status data object with all current values</returns>
         public object GetStatus()
         {
-            var eulerAngles = rotation.eulerAngles;
-
-            return new
+            lock (statusLock)
             {
-                // Pose (in FRC coordinates, converted by QuestNav before passing)
-                position = new
+                var eulerAngles = rotation.eulerAngles;
+
+                return new
                 {
-                    x = position.x,
-                    y = position.y,
-                    z = position.z,
-                },
-                rotation = new
-                {
-                    x = rotation.x,
-                    y = rotation.y,
-                    z = rotation.z,
-                    w = rotation.w,
-                },
-                eulerAngles = new
-                {
-                    pitch = eulerAngles.z,
-                    yaw = eulerAngles.y,
-                    roll = eulerAngles.x,
-                },
+                    // Pose (in FRC coordinates, converted by QuestNav before passing)
+                    position = new
+                    {
+                        x = position.x,
+                        y = position.y,
+                        z = position.z,
+                    },
+                    rotation = new
+                    {
+                        x = rotation.x,
+                        y = rotation.y,
+                        z = rotation.z,
+                        w = rotation.w,
+                    },
+                    eulerAngles = new
+                    {
+                        pitch = eulerAngles.z,
+                        yaw = eulerAngles.y,
+                        roll = eulerAngles.x,
+                    },
 
-                // Tracking
-                isTracking = isTracking,
-                trackingLostEvents = trackingLostEvents,
+                    // Tracking
+                    isTracking = isTracking,
+                    trackingLostEvents = trackingLostEvents,
 
-                // Battery
-                batteryPercent = (int)(batteryLevel * 100),
-                batteryLevel = batteryLevel,
-                batteryStatus = batteryStatus.ToString(),
-                batteryCharging = batteryStatus == BatteryStatus.Charging,
+                    // Battery
+                    batteryPercent = (int)(batteryLevel * 100),
+                    batteryLevel = batteryLevel,
+                    batteryStatus = batteryStatus.ToString(),
+                    batteryCharging = batteryStatus == BatteryStatus.Charging,
 
-                // Network
-                networkConnected = isConnected,
-                ipAddress = ipAddress,
-                teamNumber = teamNumber,
-                robotIpAddress = robotIpAddress,
+                    // Network
+                    networkConnected = isConnected,
+                    ipAddress = ipAddress,
+                    teamNumber = teamNumber,
+                    robotIpAddress = robotIpAddress,
 
-                // Performance
-                fps = Mathf.Round(fps),
-                frameCount = frameCount,
+                    // Performance
+                    fps = Mathf.Round(fps),
+                    frameCount = frameCount,
 
-                // Web Interface
-                connectedClients = connectedClients,
+                    // Web Interface
+                    connectedClients = connectedClients,
 
-                // Timestamp
-                timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            };
+                    // Timestamp
+                    timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                };
+            }
         }
         #endregion
     }

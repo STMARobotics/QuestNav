@@ -1,42 +1,19 @@
 using System;
 using System.Collections;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 
 namespace QuestNav.WebServer
 {
     /// <summary>
-    /// Bootstraps the QuestNav configuration system on app startup.
-    /// Initializes reflection binding, loads saved config, starts HTTP server, and extracts web UI files.
-    /// Runs on Unity main thread using coroutines for proper thread safety.
-    /// Handles server lifecycle management (start, stop, restart) and Android APK file extraction.
-    /// Provides web interface access at http://quest-ip:18080/ (default port).
+    /// Main orchestrator for the WebServer subsystem.
+    /// Manages configuration server, status provider, log collector, and pose reset provider.
+    /// Designed for dependency injection from QuestNav.cs, replacing ConfigBootstrap MonoBehaviour.
+    /// Handles server lifecycle, file extraction on Android, and main thread coordination.
     /// </summary>
-    public class ConfigBootstrap : MonoBehaviour
+    public class WebServerManager : IWebServerManager
     {
-        #region Serialized Fields
-        /// <summary>
-        /// HTTP server port for configuration UI
-        /// </summary>
-        [Header("Server Settings")]
-        [SerializeField]
-        private int serverPort = 18080;
-
-        /// <summary>
-        /// Enable CORS for localhost development
-        /// </summary>
-        [SerializeField]
-        private bool enableCORSDevMode = false;
-
-        /// <summary>
-        /// Whether to start the server on Awake
-        /// </summary>
-        [SerializeField]
-        private bool startOnAwake = true;
-        #endregion
-
-        #region Private Fields
+        #region Fields
         /// <summary>
         /// HTTP configuration server instance
         /// </summary>
@@ -53,14 +30,34 @@ namespace QuestNav.WebServer
         private ConfigStore store;
 
         /// <summary>
+        /// Status provider for web interface
+        /// </summary>
+        private StatusProvider statusProvider;
+
+        /// <summary>
+        /// Log collector for web interface
+        /// </summary>
+        private LogCollector logCollector;
+
+        /// <summary>
+        /// Callback for pose reset requests from web interface
+        /// </summary>
+        private MainThreadAction poseResetCallback;
+
+        /// <summary>
+        /// HTTP server port for configuration UI
+        /// </summary>
+        private readonly int serverPort;
+
+        /// <summary>
+        /// Enable CORS for localhost development
+        /// </summary>
+        private readonly bool enableCORSDevMode;
+
+        /// <summary>
         /// Flag indicating if initialization is complete
         /// </summary>
         private bool isInitialized = false;
-
-        /// <summary>
-        /// Flag indicating if initialization is currently in progress
-        /// </summary>
-        private bool isInitializing = false;
 
         /// <summary>
         /// Flag for app restart request from background thread
@@ -68,9 +65,14 @@ namespace QuestNav.WebServer
         private bool restartRequested = false;
 
         /// <summary>
-        /// Pose reset provider component
+        /// Flag for pose reset request from background thread
         /// </summary>
-        private PoseResetProvider poseResetProvider;
+        private volatile bool poseResetRequested = false;
+
+        /// <summary>
+        /// MonoBehaviour for coroutine execution
+        /// </summary>
+        private readonly MonoBehaviour coroutineHost;
         #endregion
 
         #region Properties
@@ -80,125 +82,163 @@ namespace QuestNav.WebServer
         public bool IsServerRunning => server != null && server.IsRunning;
         #endregion
 
-        #region Unity Lifecycle Methods
+        #region Constructor
         /// <summary>
-        /// Initializes configuration system on app startup.
-        /// Reads tunables, starts initialization coroutine if configured.
-        /// Implements singleton pattern to prevent multiple instances.
+        /// Initializes a new WebServerManager with injected dependencies.
         /// </summary>
-        private void Awake()
+        /// <param name="vrCamera">Transform of the VR camera (center eye anchor)</param>
+        /// <param name="vrCameraRoot">Transform of the VR camera root</param>
+        /// <param name="coroutineHost">MonoBehaviour to use for coroutine execution</param>
+        /// <param name="serverPort">HTTP server port for web interface</param>
+        /// <param name="enableCORSDevMode">Enable CORS for localhost development</param>
+        /// <param name="poseResetCallback">Callback to execute pose reset on main thread</param>
+        public WebServerManager(
+            Transform vrCamera,
+            Transform vrCameraRoot,
+            MonoBehaviour coroutineHost,
+            int serverPort,
+            bool enableCORSDevMode,
+            MainThreadAction poseResetCallback
+        )
         {
-            // Singleton pattern - ensure only one ConfigBootstrap exists
-            var existingBootstraps = FindObjectsByType<ConfigBootstrap>(FindObjectsSortMode.None);
-            if (existingBootstraps.Length > 1)
-            {
-                Debug.LogWarning(
-                    $"[ConfigBootstrap] Multiple ConfigBootstrap instances detected ({existingBootstraps.Length}). Destroying duplicate."
-                );
-                Destroy(gameObject);
-                return;
-            }
+            this.coroutineHost = coroutineHost;
+            this.serverPort = serverPort;
+            this.enableCORSDevMode = enableCORSDevMode;
+            this.poseResetCallback = poseResetCallback;
 
-            // Load server settings from Tunables if available
-            if (typeof(Tunables).GetField("serverPort") != null)
-            {
-                serverPort = Tunables.serverPort;
-                enableCORSDevMode = Tunables.enableCORSDevMode;
-            }
-
-            if (startOnAwake)
-            {
-                StartCoroutine(InitializeCoroutine());
-            }
-        }
-
-        /// <summary>
-        /// Checks for restart request flag on main thread.
-        /// This flag is set from background thread via ConfigServer callback.
-        /// </summary>
-        private void Update()
-        {
-            if (restartRequested)
-            {
-                restartRequested = false;
-                Debug.Log("[ConfigBootstrap] Executing restart on main thread");
-                RestartApp();
-            }
-        }
-
-        /// <summary>
-        /// Handles app pause/resume events. Stops server on pause, restarts on resume.
-        /// Important for Quest headset sleep/wake cycles.
-        /// </summary>
-        /// <param name="pauseStatus">True if app is pausing, false if resuming</param>
-        private void OnApplicationPause(bool pauseStatus)
-        {
-            if (pauseStatus)
-            {
-                StopServer();
-            }
-            else if (isInitialized)
-            {
-                StartCoroutine(RestartServerCoroutine());
-            }
-        }
-
-        /// <summary>
-        /// Stops server on app quit to clean up resources.
-        /// </summary>
-        private void OnApplicationQuit()
-        {
-            StopServer();
-        }
-
-        /// <summary>
-        /// Stops server on component destruction to clean up resources.
-        /// </summary>
-        private void OnDestroy()
-        {
-            StopServer();
+            // Initialize services
+            statusProvider = new StatusProvider();
+            logCollector = new LogCollector();
         }
         #endregion
 
-        #region Initialization
+        #region Public Methods
         /// <summary>
-        /// Initializes the configuration system: reflection binding, config store, and singletons.
+        /// Initializes the web server system.
+        /// Must be called on Unity main thread during application startup.
+        /// </summary>
+        public void Initialize()
+        {
+            if (isInitialized)
+            {
+                Debug.Log("[WebServerManager] Already initialized, skipping");
+                return;
+            }
+
+            Debug.Log("[WebServerManager] Initializing configuration system...");
+
+            // Initialize log collector (subscribes to Unity log events)
+            logCollector.Initialize();
+
+            // Start initialization coroutine
+            coroutineHost.StartCoroutine(InitializeCoroutine());
+        }
+
+        /// <summary>
+        /// Periodic update method for web server operations.
+        /// Should be called from QuestNav.SlowUpdate() at 3Hz.
+        /// Handles pending operations that need to run on the main thread.
+        /// </summary>
+        public void Periodic()
+        {
+            // Check for restart request from web interface
+            if (restartRequested)
+            {
+                restartRequested = false;
+                Debug.Log("[WebServerManager] Executing restart on main thread");
+                RestartApp();
+            }
+
+            // Check for pose reset request from web interface
+            if (poseResetRequested)
+            {
+                poseResetRequested = false;
+                Debug.Log("[WebServerManager] Executing pose reset on main thread");
+                poseResetCallback?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Updates status information for the web interface.
+        /// Should be called from QuestNav.SlowUpdate() at 3Hz.
+        /// </summary>
+        public void UpdateStatus(
+            Vector3 position,
+            Quaternion rotation,
+            bool isTracking,
+            int trackingLostEvents,
+            float batteryLevel,
+            BatteryStatus batteryStatus,
+            bool isConnected,
+            string ipAddress,
+            int teamNumber,
+            string robotIpAddress,
+            float fps,
+            int frameCount
+        )
+        {
+            statusProvider?.UpdateStatus(
+                position,
+                rotation,
+                isTracking,
+                trackingLostEvents,
+                batteryLevel,
+                batteryStatus,
+                isConnected,
+                ipAddress,
+                teamNumber,
+                robotIpAddress,
+                fps,
+                frameCount
+            );
+        }
+
+        /// <summary>
+        /// Stops the web server and cleans up resources.
+        /// Should be called on application shutdown.
+        /// </summary>
+        public void Shutdown()
+        {
+            Debug.Log("[WebServerManager] Shutting down...");
+
+            // Stop HTTP server
+            if (server != null)
+            {
+                server.Stop();
+                server = null;
+            }
+
+            // Dispose log collector
+            logCollector?.Dispose();
+
+            Debug.Log("[WebServerManager] Shutdown complete");
+        }
+        #endregion
+
+        #region Private Methods - Initialization
+        /// <summary>
+        /// Initializes the configuration system: reflection binding, config store, and HTTP server.
         /// Loads saved configuration and applies values to tunables.
         /// Must run on main thread for Unity API access.
         /// </summary>
         private IEnumerator InitializeCoroutine()
         {
-            if (isInitialized)
-            {
-                Debug.Log("[ConfigBootstrap] Already initialized, skipping");
-                yield break;
-            }
-
-            if (isInitializing)
-            {
-                Debug.LogWarning(
-                    "[ConfigBootstrap] Initialization already in progress, skipping duplicate call"
-                );
-                yield break;
-            }
-
-            isInitializing = true;
-            Debug.Log("[ConfigBootstrap] Initializing configuration system...");
+            Debug.Log("[WebServerManager] Starting initialization coroutine...");
 
             // Initialize reflection binding to scan for [Config] attributes
             binding = new ReflectionBinding();
             if (binding == null)
             {
-                Debug.LogError("[ConfigBootstrap] Failed to create ReflectionBinding");
+                Debug.LogError("[WebServerManager] Failed to create ReflectionBinding");
                 yield break;
             }
-            Debug.Log($"[ConfigBootstrap] Found {binding.FieldCount} configurable fields");
+            Debug.Log($"[WebServerManager] Found {binding.FieldCount} configurable fields");
 
             // Initialize configuration store for persistence
             store = new ConfigStore();
             if (store == null)
             {
-                Debug.LogError("[ConfigBootstrap] Failed to create ConfigStore");
+                Debug.LogError("[WebServerManager] Failed to create ConfigStore");
                 yield break;
             }
 
@@ -206,33 +246,17 @@ namespace QuestNav.WebServer
             var savedConfig = store.LoadConfig();
             if (savedConfig != null && savedConfig.values != null && savedConfig.values.Count > 0)
             {
-                Debug.Log($"[ConfigBootstrap] Applying {savedConfig.values.Count} saved values");
+                Debug.Log($"[WebServerManager] Applying {savedConfig.values.Count} saved values");
                 binding.ApplyValues(savedConfig.values);
             }
 
-            // Initialize singletons on main thread before server starts
-            // This ensures they're available when server starts on background thread
-            var statusProvider = StatusProvider.Instance;
-            var logCollector = LogCollector.Instance;
-
-            // Initialize PoseResetProvider component
-            poseResetProvider = gameObject.GetComponent<PoseResetProvider>();
-            if (poseResetProvider == null)
-            {
-                poseResetProvider = gameObject.AddComponent<PoseResetProvider>();
-                Debug.Log("[ConfigBootstrap] Added PoseResetProvider component");
-            }
-
             isInitialized = true;
-            isInitializing = false;
-            Debug.Log("[ConfigBootstrap] Initialization complete");
+            Debug.Log("[WebServerManager] Initialization complete");
 
             // Start HTTP server
             yield return StartServerCoroutine();
         }
-        #endregion
 
-        #region Server Lifecycle
         /// <summary>
         /// Starts the HTTP configuration server.
         /// Extracts web UI files on Android, then starts EmbedIO server.
@@ -241,22 +265,23 @@ namespace QuestNav.WebServer
         {
             if (!isInitialized)
             {
-                yield return InitializeCoroutine();
+                Debug.LogError("[WebServerManager] Cannot start server - not initialized");
+                yield break;
             }
 
             if (server != null && server.IsRunning)
             {
-                Debug.LogWarning("[ConfigBootstrap] Server already running");
+                Debug.LogWarning("[WebServerManager] Server already running");
                 yield break;
             }
 
-            Debug.Log("[ConfigBootstrap] Starting configuration server...");
+            Debug.Log("[WebServerManager] Starting configuration server...");
 
             // Get static files path
             string staticPath = GetStaticFilesPath();
             if (string.IsNullOrEmpty(staticPath))
             {
-                Debug.LogError("[ConfigBootstrap] Failed to get static files path");
+                Debug.LogError("[WebServerManager] Failed to get static files path");
                 yield break;
             }
 
@@ -278,12 +303,14 @@ namespace QuestNav.WebServer
                 staticPath,
                 logger,
                 RestartApplication,
-                poseResetProvider.RequestPoseReset
+                RequestPoseReset, // Pass flag-setter method instead of direct callback
+                statusProvider,
+                logCollector
             );
 
             if (server == null)
             {
-                Debug.LogError("[ConfigBootstrap] Failed to create ConfigServer");
+                Debug.LogError("[WebServerManager] Failed to create ConfigServer");
                 yield break;
             }
 
@@ -295,43 +322,16 @@ namespace QuestNav.WebServer
 
             if (!server.IsRunning)
             {
-                Debug.LogError("[ConfigBootstrap] Server did not start successfully");
+                Debug.LogError("[WebServerManager] Server did not start successfully");
                 yield break;
             }
 
             ShowConnectionInfo();
-            Debug.Log("[ConfigBootstrap] Server started successfully");
-        }
-
-        /// <summary>
-        /// Restarts the HTTP server after a brief delay.
-        /// Used when resuming from app pause.
-        /// </summary>
-        private IEnumerator RestartServerCoroutine()
-        {
-            Debug.Log("[ConfigBootstrap] Restarting server...");
-
-            // Wait a moment for the old server to fully stop and release the port
-            yield return new WaitForSeconds(0.5f);
-
-            yield return StartServerCoroutine();
-        }
-
-        /// <summary>
-        /// Stops the HTTP server and releases resources.
-        /// </summary>
-        private void StopServer()
-        {
-            if (server == null)
-                return;
-
-            Debug.Log("[ConfigBootstrap] Stopping configuration server...");
-            server.Stop();
-            Debug.Log("[ConfigBootstrap] Server stopped");
+            Debug.Log("[WebServerManager] Server started successfully");
         }
         #endregion
 
-        #region Static Files Management
+        #region Private Methods - Static Files Management
         /// <summary>
         /// Gets the appropriate static files path for the current platform.
         /// On Android: Application.persistentDataPath/ui (extracted from APK)
@@ -343,11 +343,11 @@ namespace QuestNav.WebServer
 #if UNITY_ANDROID && !UNITY_EDITOR
             // On Android, must extract from APK to persistentDataPath
             string persistentPath = Path.Combine(Application.persistentDataPath, "ui");
-            Debug.Log($"[ConfigBootstrap] Using persistent path for Android: {persistentPath}");
+            Debug.Log($"[WebServerManager] Using persistent path for Android: {persistentPath}");
             return persistentPath;
 #else
             string streamingPath = Path.Combine(Application.streamingAssetsPath, "ui");
-            Debug.Log($"[ConfigBootstrap] Using StreamingAssets path: {streamingPath}");
+            Debug.Log($"[WebServerManager] Using StreamingAssets path: {streamingPath}");
             return streamingPath;
 #endif
         }
@@ -363,7 +363,7 @@ namespace QuestNav.WebServer
             // Force delete old UI files to ensure fresh extraction
             if (Directory.Exists(targetPath))
             {
-                Debug.Log("[ConfigBootstrap] Clearing old UI files...");
+                Debug.Log("[WebServerManager] Clearing old UI files...");
                 Directory.Delete(targetPath, true);
             }
 
@@ -376,7 +376,7 @@ namespace QuestNav.WebServer
                 File.Delete(indexPath);
             }
 
-            Debug.Log("[ConfigBootstrap] Extracting UI files from APK to persistent storage...");
+            Debug.Log("[WebServerManager] Extracting UI files from APK to persistent storage...");
 
             if (!Directory.Exists(targetPath))
             {
@@ -392,7 +392,7 @@ namespace QuestNav.WebServer
                 Directory.CreateDirectory(assetsDir);
             }
 
-            Debug.Log($"[ConfigBootstrap] Extracting assets to: {assetsDir}");
+            Debug.Log($"[WebServerManager] Extracting assets to: {assetsDir}");
 
             // Extract Vite output files (using consistent naming without hashes)
             yield return ExtractAndroidFile(
@@ -411,7 +411,7 @@ namespace QuestNav.WebServer
                 Path.Combine(targetPath, "logo-dark.svg")
             );
 
-            Debug.Log("[ConfigBootstrap] UI extraction complete");
+            Debug.Log("[WebServerManager] UI extraction complete");
         }
 
         /// <summary>
@@ -434,12 +434,12 @@ namespace QuestNav.WebServer
                 if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
                 {
                     File.WriteAllBytes(targetAbsolute, www.downloadHandler.data);
-                    Debug.Log($"[ConfigBootstrap] Extracted: {sourceRelative}");
+                    Debug.Log($"[WebServerManager] Extracted: {sourceRelative}");
                 }
                 else
                 {
                     Debug.LogWarning(
-                        $"[ConfigBootstrap] Failed to extract {sourceRelative}: {www.error}"
+                        $"[WebServerManager] Failed to extract {sourceRelative}: {www.error}"
                     );
                 }
             }
@@ -471,19 +471,21 @@ namespace QuestNav.WebServer
                     {
                         File.Copy(fallbackSourcePath, fallbackTargetPath);
                         Debug.Log(
-                            $"[ConfigBootstrap] Copied fallback HTML from {fallbackSourcePath}"
+                            $"[WebServerManager] Copied fallback HTML from {fallbackSourcePath}"
                         );
                     }
                     else
                     {
                         Debug.LogWarning(
-                            $"[ConfigBootstrap] Fallback HTML not found at {fallbackSourcePath}"
+                            $"[WebServerManager] Fallback HTML not found at {fallbackSourcePath}"
                         );
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[ConfigBootstrap] Failed to copy fallback HTML: {ex.Message}");
+                    Debug.LogError(
+                        $"[WebServerManager] Failed to copy fallback HTML: {ex.Message}"
+                    );
                 }
             }
         }
@@ -505,15 +507,26 @@ namespace QuestNav.WebServer
         }
         #endregion
 
-        #region Application Restart
+        #region Private Methods - Application Restart
         /// <summary>
         /// Restarts the application. Called from background thread via ConfigServer callback.
-        /// Sets flag that will be checked on main thread in Update().
+        /// Sets flag that will be checked on main thread in Periodic().
         /// </summary>
         private void RestartApplication()
         {
-            Debug.Log("[ConfigBootstrap] Restart requested from web interface");
+            Debug.Log("[WebServerManager] Restart requested from web interface");
             restartRequested = true;
+        }
+
+        /// <summary>
+        /// Requests pose reset to origin. Called from background thread via ConfigServer callback.
+        /// Sets flag that will be checked on main thread in Periodic().
+        /// Uses volatile flag for thread-safe communication between background and main threads.
+        /// </summary>
+        private void RequestPoseReset()
+        {
+            Debug.Log("[WebServerManager] Pose reset requested from web interface");
+            poseResetRequested = true;
         }
 
         /// <summary>
@@ -553,7 +566,9 @@ namespace QuestNav.WebServer
                     );
                     activity.Call("startActivity", intent);
 
-                    Debug.Log("[ConfigBootstrap] New instance started, killing current process...");
+                    Debug.Log(
+                        "[WebServerManager] New instance started, killing current process..."
+                    );
                 }
 
                 // Kill current process immediately after starting new instance
@@ -565,12 +580,12 @@ namespace QuestNav.WebServer
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[ConfigBootstrap] Failed to restart: {ex.Message}");
+                Debug.LogError($"[WebServerManager] Failed to restart: {ex.Message}");
                 // Fallback to normal quit
-                UnityEngine.Application.Quit();
+                Application.Quit();
             }
 #else
-            UnityEngine.Application.Quit();
+            Application.Quit();
 #endif
         }
         #endregion

@@ -19,3 +19,4 @@ unity/Assets/StreamingAssets/RuntimeActionBindings.*
 /.cursor
 /unity/Assets/XR/Resources/*
 /unity/.cursor
+unity/ProjectSettings/ProjectSettings.asset

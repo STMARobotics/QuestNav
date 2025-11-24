@@ -5,7 +5,7 @@ namespace QuestNav.WebServer
 {
     /// <summary>
     /// Configuration data container for persistent storage.
-    /// Contains all runtime-configurable values indexed by path (e.g., "Tunables/webConfigTeamNumber").
+    /// Contains all runtime-configurable values indexed by path (e.g., "WebServerConstants/webConfigTeamNumber").
     /// Serialized to JSON and saved to Application.persistentDataPath/config.json.
     /// </summary>
     [Serializable]
@@ -37,7 +37,7 @@ namespace QuestNav.WebServer
     public class ConfigFieldSchema
     {
         /// <summary>
-        /// Unique path to the field (e.g., "Tunables/webConfigTeamNumber")
+        /// Unique path to the field (e.g., "WebServerConstants/webConfigTeamNumber")
         /// </summary>
         public string path { get; set; }
 
@@ -141,7 +141,7 @@ namespace QuestNav.WebServer
     public class ConfigUpdateRequest
     {
         /// <summary>
-        /// Path to the field to update (e.g., "Tunables/webConfigTeamNumber")
+        /// Path to the field to update (e.g., "WebServerConstants/webConfigTeamNumber")
         /// </summary>
         public string path;
 
@@ -272,34 +272,9 @@ namespace QuestNav.WebServer
         public string deviceModel;
 
         /// <summary>
-        /// Device name
-        /// </summary>
-        public string deviceName;
-
-        /// <summary>
         /// Operating system
         /// </summary>
         public string operatingSystem;
-
-        /// <summary>
-        /// Processor type
-        /// </summary>
-        public string processorType;
-
-        /// <summary>
-        /// Number of processor cores
-        /// </summary>
-        public int processorCount;
-
-        /// <summary>
-        /// System memory in MB
-        /// </summary>
-        public int systemMemorySize;
-
-        /// <summary>
-        /// Graphics device name
-        /// </summary>
-        public string graphicsDeviceName;
 
         /// <summary>
         /// Number of connected clients

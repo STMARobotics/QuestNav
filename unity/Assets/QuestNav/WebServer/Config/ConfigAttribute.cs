@@ -5,7 +5,7 @@ namespace QuestNav.WebServer
     /// <summary>
     /// Attribute for marking static fields as runtime-configurable via the web interface.
     /// Decorated fields are automatically discovered via reflection and exposed in the configuration API.
-    /// Apply this attribute to static fields in classes like Tunables to make them editable at runtime.
+    /// Apply this attribute to static fields in classes like WebServerConstants to make them editable at runtime.
     /// Example: [Config(DisplayName = "Team Number", Min = 1, Max = 9999)] public static int teamNumber = 9999;
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
