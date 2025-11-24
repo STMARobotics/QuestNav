@@ -19,11 +19,6 @@ namespace QuestNav.Core
             public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
 
             /// <summary>
-            /// Tells NT4 to connect to this IP instead of via team number if not empty. DEBUGGING PURPOSES ONLY!
-            /// </summary>
-            public const string DEBUG_NT_SERVER_ADDRESS_OVERRIDE = "";
-
-            /// <summary>
             /// NetworkTables server port
             /// </summary>
             public const int NT_SERVER_PORT = 5810;
@@ -161,7 +156,7 @@ namespace QuestNav.Core
             /// <summary>
             /// NetworkTables logging levels constants
             /// </summary>
-            static class NTLogLevel
+            public static class NTLogLevel
             {
                 /// <summary>Critical level logging</summary>
                 internal const int CRITICAL = 50;
