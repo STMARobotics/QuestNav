@@ -34,6 +34,7 @@ jobs:
               - 'unity/**/*.json'
               - 'unity/**/*.unity'
               - 'unity/**/*.meta'
+              - 'questnav-web-ui/**'
             proto:
               - 'protos/*.proto'
             docs:
