@@ -89,7 +89,7 @@ jobs:
   publish-docs:
     if: |
       needs.determine-publishable-changes.outputs.docs-changed == 'true'
-    needs: [build-proto-java, build-proto-csharp, determine-publishable-changes]
+    needs: [build-proto-java, build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
       contents: write
