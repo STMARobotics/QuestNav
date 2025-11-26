@@ -114,7 +114,7 @@ jobs:
       needs.detect-changes.outputs.web-ui-changed == 'true') &&
       (needs.format-csharp.result != 'failure' &&
       needs.docs-csharp.result != 'failure')
-    needs: [detect-changes, docs-csharp, format-csharp]
+    needs: [detect-changes, docs-csharp, format-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-build-csharp.yml
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
