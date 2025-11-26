@@ -97,12 +97,12 @@ jobs:
     
   format-csharp:
     if: needs.detect-changes.outputs.csharp-changed == 'true'
-    needs: [detect-changes, build-proto-csharp]
+    needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-format-csharp.yml
 
   docs-csharp:
     if: needs.detect-changes.outputs.csharp-changed == 'true'
-    needs: [detect-changes, build-proto-csharp]
+    needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-docs-docfx.yml
 
   build-csharp:
@@ -112,9 +112,8 @@ jobs:
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&
       (needs.format-csharp.result != 'failure' &&
-      needs.docs-csharp.result != 'failure' &&
-      needs.build-web-ui.result != 'failure')
-    needs: [detect-changes, docs-csharp, format-csharp, build-web-ui]
+      needs.docs-csharp.result != 'failure')
+    needs: [detect-changes, docs-csharp, format-csharp]
     uses: ./.github/workflows/reusable-build-csharp.yml
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -158,6 +157,7 @@ jobs:
       - build-proto-csharp
       - docs-proto
       - build-docs
+      - build-web-ui
     runs-on: ubuntu-latest
     steps:
       - name: Generate CI Summary
