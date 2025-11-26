@@ -214,7 +214,7 @@ namespace QuestNav.UI
         }
 
         /// <summary>
-        /// Updates the default IP address shown in the UI with the current HMD IP address and web UI port
+        /// Updates the default IP address shown in the UI with the current HMD IP address
         /// </summary>
         private void updateIPAddressText()
         {
@@ -234,8 +234,7 @@ namespace QuestNav.UI
                     }
                     else
                     {
-                        // Display IP address with web UI port from WebServerConstants
-                        ipText.text = $"{myAddressLocal}:{WebServerConstants.serverPort}";
+                        ipText.text = myAddressLocal;
                         ipText.color = Color.green;
                     }
                 }
