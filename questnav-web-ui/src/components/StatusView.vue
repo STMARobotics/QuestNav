@@ -5,10 +5,6 @@
       <p>Loading status...</p>
     </div>
 
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
-
     <div v-else-if="status" class="status-grid">
       <!-- Network Status -->
       <div class="status-card card">
@@ -20,9 +16,12 @@
               {{ status.networkConnected ? 'Connected' : 'Disconnected' }}
             </span>
           </div>
-          <div class="status-item">
+          <div class="status-item" :class="{ 'debug-override-active': isDebugIPActive }">
             <span class="label">Robot IP Address:</span>
-            <span class="value mono">{{ status.robotIpAddress || 'N/A' }}</span>
+            <div class="value-with-badge">
+              <span class="value mono">{{ status.robotIpAddress || 'N/A' }}</span>
+              <span v-if="isDebugIPActive" class="debug-override-badge">DEBUG OVERRIDE ENABLED</span>
+            </div>
           </div>
           <div class="status-item">
             <span class="label">Headset IP Address:</span>
@@ -131,22 +130,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { configApi } from '../api/config'
+import { useConfigStore } from '../stores/config'
+import { useConnectionState } from '../composables/useConnectionState'
 import type { HeadsetStatus } from '../types'
 
+const configStore = useConfigStore()
+const { isConnected } = useConnectionState()
 const status = ref<HeadsetStatus | null>(null)
 const loading = ref(true)
-const error = ref<string | null>(null)
 let intervalId: number | null = null
 
+// Check if debug IP override is active
+const isDebugIPActive = computed(() => {
+  const debugIP = configStore.values['WebServerConstants/debugNTServerAddressOverride']
+  return debugIP !== undefined && debugIP !== null && debugIP !== ''
+})
+
 async function loadStatus() {
+  // Skip loading if disconnected
+  if (!isConnected.value) {
+    return
+  }
+  
   try {
-    error.value = null
     status.value = await configApi.getHeadsetStatus()
     loading.value = false
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load status'
+    // Silently fail - don't show error, keep old data visible
+    // Connection state overlay will handle showing disconnect status
     loading.value = false
   }
 }
@@ -166,13 +179,21 @@ async function handleResetPose() {
 
 onMounted(async () => {
   await loadStatus()
-  // Update every second
+  // Update every second, but only when connected
   intervalId = setInterval(loadStatus, 1000) as unknown as number
 })
 
 onUnmounted(() => {
   if (intervalId !== null) {
     clearInterval(intervalId)
+  }
+})
+
+// Watch connection state and reload when reconnected
+watch(isConnected, async (connected, wasConnected) => {
+  if (connected && !wasConnected) {
+    console.log('[StatusView] Connection restored, reloading status')
+    await loadStatus()
   }
 })
 </script>
@@ -311,6 +332,51 @@ onUnmounted(() => {
   color: var(--danger-color);
   text-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
 }
+
+.status-item.debug-override-active {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+  border: 2px solid var(--warning-color);
+  border-left: 3px solid var(--warning-color);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.status-item.debug-override-active:hover {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+  border-left-color: var(--warning-color);
+}
+
+.value-with-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.debug-override-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  background: linear-gradient(135deg, var(--danger-color), #c82333);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+  white-space: nowrap;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
+  }
+}
+
 
 .battery-bar {
   flex: 1;

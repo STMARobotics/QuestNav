@@ -7,7 +7,7 @@
       <label :for="field.path" class="field-label">
         {{ field.displayName }}
         <span v-if="field.requiresRestart" class="restart-badge">Requires Restart</span>
-        <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG MODE ACTIVE</span>
+        <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG OVERRIDE ENABLED</span>
         <span v-if="isTeamNumberField && isDebugIPActive" class="override-badge">OVERRIDDEN</span>
       </label>
       <span v-if="field.description" class="field-description">

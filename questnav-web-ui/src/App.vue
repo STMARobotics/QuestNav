@@ -1,5 +1,29 @@
 <template>
   <div id="app">
+    <!-- Disconnected Overlay -->
+    <transition name="fade">
+      <div v-if="isDisconnected" class="disconnect-overlay">
+        <div class="disconnect-card card">
+          <div class="disconnect-icon">📡</div>
+          <h2>Connection Lost</h2>
+          <p>Lost connection to QuestNav</p>
+          <div class="reconnect-info">
+            <div v-if="secondsUntilRetry > 0" class="retry-countdown">
+              <span class="spinner-small"></span>
+              Retrying in {{ secondsUntilRetry }} second{{ secondsUntilRetry !== 1 ? 's' : '' }}...
+            </div>
+            <div v-else class="retry-countdown">
+              <span class="spinner-small"></span>
+              Reconnecting...
+            </div>
+          </div>
+          <button @click="manualRetry" class="retry-button">
+            Retry Now
+          </button>
+        </div>
+      </div>
+    </transition>
+
     <!-- Main Application -->
     <div class="app-container">
       <!-- Header -->
@@ -31,7 +55,7 @@
             </button>
             <button class="danger icon-button" @click="handleRestart" title="Restart App">
               <span class="button-icon">⚡</span>
-              <span class="button-text">Restart</span>
+              <span class="button-text">Restart App</span>
             </button>
           </div>
         </div>
@@ -113,14 +137,23 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from './stores/config'
+import { useConnectionState } from './composables/useConnectionState'
 import { configApi } from './api/config'
 import ConfigForm from './components/ConfigForm.vue'
 import type { ServerInfo } from './types'
 
 const configStore = useConfigStore()
+const { 
+  connectionStatus, 
+  isConnected, 
+  isDisconnected, 
+  secondsUntilRetry,
+  checkConnection, 
+  getReconnectDelay 
+} = useConnectionState()
+
 const showInfoModal = ref(false)
 const serverInfo = ref<ServerInfo | null>(null)
-const connectionStatus = ref<'connected' | 'disconnected' | 'connecting'>('connecting')
 
 const connectionStatusText = computed(() => {
   switch (connectionStatus.value) {
@@ -135,34 +168,44 @@ function formatTime(timestamp: number): string {
   return date.toLocaleTimeString()
 }
 
-// Monitor connection status
+// Monitor connection status with exponential backoff
 let statusCheckInterval: number | null = null
 
-onMounted(() => {
-  // Check connection every 3 seconds
-  statusCheckInterval = setInterval(async () => {
-    try {
-      await configApi.getSchema()
-      connectionStatus.value = 'connected'
-    } catch {
-      connectionStatus.value = 'disconnected'
-    }
-  }, 3000) as unknown as number
+async function scheduleNextCheck() {
+  const connected = await checkConnection(false) // Automatic retry
   
+  // Schedule next check based on connection state
+  const delay = connected ? 3000 : getReconnectDelay()
+  
+  if (statusCheckInterval !== null) {
+    clearTimeout(statusCheckInterval)
+  }
+  
+  statusCheckInterval = setTimeout(scheduleNextCheck, delay) as unknown as number
+}
+
+async function manualRetry() {
+  // Cancel the scheduled automatic retry
+  if (statusCheckInterval !== null) {
+    clearTimeout(statusCheckInterval)
+  }
+  
+  // Try to connect immediately with manual flag (doesn't increment backoff)
+  const connected = await checkConnection(true) // Manual retry
+  
+  // Schedule next automatic check based on result
+  const delay = connected ? 3000 : getReconnectDelay()
+  statusCheckInterval = setTimeout(scheduleNextCheck, delay) as unknown as number
+}
+
+onMounted(async () => {
   // Initial check
-  setTimeout(async () => {
-    try {
-      await configApi.getSchema()
-      connectionStatus.value = 'connected'
-    } catch {
-      connectionStatus.value = 'disconnected'
-    }
-  }, 500)
+  await scheduleNextCheck()
 })
 
 onUnmounted(() => {
   if (statusCheckInterval !== null) {
-    clearInterval(statusCheckInterval)
+    clearTimeout(statusCheckInterval)
   }
 })
 
@@ -197,6 +240,132 @@ async function handleRestart() {
 </script>
 
 <style scoped>
+/* Disconnect Overlay */
+.disconnect-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+}
+
+.disconnect-card {
+  max-width: 500px;
+  padding: 3rem;
+  text-align: center;
+  background: rgba(220, 53, 69, 0.65);
+  border: 2px solid var(--danger-color);
+  box-shadow: 0 20px 60px rgba(220, 53, 69, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+.disconnect-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  filter: grayscale(100%) brightness(0.8);
+  animation: disconnectPulse 2s ease-in-out infinite;
+}
+
+@keyframes disconnectPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.disconnect-card h2 {
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.disconnect-card > p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.reconnect-info {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.retry-countdown {
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.retry-button {
+  padding: 1rem 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.retry-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
 .app-container {
   min-height: 100vh;
   display: flex;
