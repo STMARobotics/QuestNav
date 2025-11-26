@@ -35,7 +35,6 @@ jobs:
               - 'unity/**/*.json'
               - 'unity/**/*.unity'
               - 'unity/**/*.meta'
-              - 'questnav-web-ui/**'
             proto:
               - 'protos/*.proto'
             docs:
@@ -113,7 +112,8 @@ jobs:
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&
       (needs.format-csharp.result != 'failure' &&
-      needs.docs-csharp.result != 'failure')
+      needs.docs-csharp.result != 'failure' &&
+      needs.build-web-ui.result != 'failure')
     needs: [detect-changes, docs-csharp, format-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-build-csharp.yml
     secrets:

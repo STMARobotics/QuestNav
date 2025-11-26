@@ -41,7 +41,7 @@ jobs:
         with:
           node-version: '22'  # Using Node.js 22 LTS (Jod)
           cache: 'npm'
-          cache-dependency-path: 'docs/package-lock.json'
+          cache-dependency-path: 'questnav-web-ui/package-lock.json'
           
       - name: Install dependencies
         working-directory: ./questnav-web-ui
