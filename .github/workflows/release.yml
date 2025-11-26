@@ -71,6 +71,8 @@ jobs:
       needs.determine-publishable-changes.outputs.java-changed == 'true'
     needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-web-ui.yml
+    with:
+      version: ${{inputs.version}}
 
   build-apk:
     if: |
