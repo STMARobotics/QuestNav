@@ -19,6 +19,7 @@ jobs:
       csharp-changed: ${{ steps.changes.outputs.csharp }}
       proto-changed: ${{ steps.changes.outputs.proto }}
       docs-changed: ${{ steps.changes.outputs.docs }}
+      web-ui-changed: ${{ steps.changes.outputs.web-ui }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -46,6 +47,9 @@ jobs:
               - 'protos/*.proto'
             docs:
               - 'docs/**'
+            web-ui:
+              - 'questnav-web-ui/**'
+              - 'unity/Assets/StreamingAssets/ui/**'
           base: ${{ steps.get-last-release.outputs.tag }}
 
   build-proto-java:
@@ -63,7 +67,8 @@ jobs:
   build-apk:
     if: |
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.java-changed == 'true'
+      needs.determine-publishable-changes.outputs.java-changed == 'true' ||
+      needs.determine-publishable-changes.outputs.web-ui-changed
     needs: [build-proto-csharp, determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
@@ -88,7 +93,8 @@ jobs:
   publish-java:
     if: |
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.csharp-changed == 'true'
+      needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      needs.determine-publishable-changes.outputs.web-ui-changed
     needs: [build-proto-java, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
@@ -100,7 +106,8 @@ jobs:
   github-release:
     if: |
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.java-changed == 'true'
+      needs.determine-publishable-changes.outputs.java-changed == 'true' ||
+      needs.determine-publishable-changes.outputs.web-ui-changed
     runs-on: ubuntu-latest
     permissions:
       contents: write
