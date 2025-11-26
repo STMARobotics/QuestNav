@@ -41,9 +41,6 @@
             @click="activeTab = tab"
           >
             {{ tab }}
-            <span v-if="tab !== 'Status' && tab !== 'Logs'" class="tab-count">
-              {{ configStore.fieldsByCategory[tab]?.length || 0 }}
-            </span>
           </button>
         </div>
 
@@ -170,12 +167,11 @@ async function handleRestart() {
   top: 0;
   z-index: 100;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(255, 152, 0, 0.95));
+  background: rgba(255, 193, 7, 0.1);
   border: 2px solid var(--warning-color);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(255, 193, 7, 0.4);
+  border-left: 4px solid var(--warning-color);
+  border-radius: 6px;
   animation: slideDown 0.4s ease;
-  backdrop-filter: blur(10px);
 }
 
 @keyframes slideDown {
@@ -208,69 +204,53 @@ async function handleRestart() {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.25rem 1.75rem;
+  padding: 0.875rem 1rem;
 }
 
 .restart-icon {
-  font-size: 2.5rem;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 .restart-message {
   flex: 1;
-  color: #000;
+  color: var(--text-primary);
 }
 
 .restart-message strong {
   display: block;
-  font-size: 1.2rem;
+  font-size: 1rem; /* Base text: 16px */
   font-weight: 700;
   margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .restart-message p {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 500;
-  opacity: 0.9;
+  font-size: 0.875rem; /* Small text: 14px */
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .restart-button {
-  padding: 0.85rem 2rem;
-  background: linear-gradient(135deg, #000, #333);
-  color: #fff;
-  border: 2px solid #000;
-  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  background: var(--warning-color);
+  color: #000;
+  border: none;
+  border-radius: 6px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.875rem; /* Small text: 14px */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .restart-button:hover {
-  background: linear-gradient(135deg, #222, #555);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  background: var(--amber-dark);
 }
 
 .restart-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -285,7 +265,7 @@ async function handleRestart() {
 
 .loading-container p {
   color: var(--primary-color);
-  font-size: 1.1rem;
+  font-size: 1rem; /* Base body text: 16px */
   font-weight: 500;
 }
 
@@ -297,7 +277,7 @@ async function handleRestart() {
 
 .error-container h3 {
   color: var(--danger-color);
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Consistent h2 size: 24px */
   margin-bottom: 1rem;
 }
 
@@ -309,14 +289,15 @@ async function handleRestart() {
 .tabs-container {
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
 }
 
 .tabs-nav {
   display: flex;
   gap: 0;
-  background: linear-gradient(to right, rgba(51, 161, 253, 0.05), rgba(0, 188, 212, 0.05));
+  background: var(--bg-tertiary);
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -339,15 +320,15 @@ async function handleRestart() {
 .tab-button {
   flex: 1;
   min-width: 120px;
-  padding: 1.2rem 1.5rem;
+  padding: 1rem 1.5rem;
   background-color: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-secondary);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 1rem; /* Base text: 16px (increased from 14px) */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -359,23 +340,23 @@ async function handleRestart() {
 .tab-button::before {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: -3px;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--teal));
+  background: var(--primary-color);
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
 
 .tab-button:hover {
-  background: linear-gradient(180deg, rgba(51, 161, 253, 0.1), transparent);
-  color: var(--primary-light);
+  background: var(--card-bg);
+  color: var(--primary-color);
 }
 
 .tab-button.active {
-  color: var(--primary-color);
-  background: linear-gradient(180deg, rgba(51, 161, 253, 0.15), transparent);
+  color: var(--text-primary);
+  background: var(--card-bg);
 }
 
 .tab-button.active::before {
@@ -385,7 +366,7 @@ async function handleRestart() {
 .tab-count {
   font-size: 0.75rem;
   padding: 0.2rem 0.6rem;
-  background: var(--primary-color);
+  background: var(--text-secondary);
   border-radius: 12px;
   color: white;
   font-weight: 700;
@@ -394,15 +375,14 @@ async function handleRestart() {
 }
 
 .tab-button.active .tab-count {
-  background: white;
-  color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(51, 161, 253, 0.4);
+  background: var(--primary-color);
+  color: white;
 }
 
 .tab-content {
-  padding: 2.5rem;
+  padding: 2rem;
   min-height: 500px;
-  background: var(--bg-secondary);
+  background: var(--card-bg);
 }
 
 .tab-panel {
