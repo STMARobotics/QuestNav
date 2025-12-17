@@ -74,41 +74,41 @@ namespace QuestNav.Native.NTCore
 
             public unsafe struct NtValueRaw
             {
-                public byte* data;
-                public UIntPtr size;
+                public byte* Data;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueBooleanArray
             {
-                public int* arr;
-                public UIntPtr size;
+                public int* Arr;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueDoubleArray
             {
-                public double* arr;
+                public double* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueFloatArray
             {
-                public float* arr;
+                public float* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueIntArray
             {
-                public long* arr;
+                public long* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueStringArray
             {
-                public WpiString* arr;
-                public UIntPtr size;
+                public WpiString* Arr;
+                public UIntPtr Size;
             }
         }
     }
@@ -274,6 +274,14 @@ namespace QuestNav.Native.NTCore
         public static extern uint NT_GetDefaultInstance();
 
         [DllImport("ntcore")]
+        public static extern uint NT_GetEntryEx(
+            uint topic,
+            NtType type,
+            WpiString* typeStr,
+            NativePubSubOptions* options
+        );
+
+        [DllImport("ntcore")]
         public static extern void NT_StartClient4(uint inst, WpiString* identity);
 
         [DllImport("ntcore")]
@@ -284,6 +292,12 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern uint NT_GetTopic(uint inst, WpiString* name);
+
+        [DllImport("ntcore")]
+        public static extern int NT_SetBoolean(uint publisher, long time, bool value);
+
+        [DllImport("ntcore")]
+        public static extern int NT_GetBoolean(uint subscriber, bool defaultValue);
 
         [DllImport("ntcore")]
         public static extern int NT_SetInteger(uint publisher, long time, long value);
@@ -311,6 +325,24 @@ namespace QuestNav.Native.NTCore
             float* defaultValue,
             UIntPtr defaultLen,
             UIntPtr* len
+        );
+
+        [DllImport("ntcore")]
+        public static extern int NT_SetString(uint publisher, long time, WpiString* value);
+
+        [DllImport("ntcore")]
+        public static extern void NT_GetString(
+            uint publisher,
+            WpiString* defaultValue,
+            WpiString* value
+        );
+
+        [DllImport("ntcore")]
+        public static extern int NT_SetStringArray(
+            uint publisher,
+            long time,
+            WpiString* value,
+            UIntPtr len
         );
 
         [DllImport("ntcore")]
@@ -350,7 +382,7 @@ namespace QuestNav.Native.NTCore
         public static extern void NT_SetServerMulti(
             uint inst,
             UIntPtr count,
-            WpiString* server_names,
+            WpiString* serverNames,
             uint* ports
         );
 
