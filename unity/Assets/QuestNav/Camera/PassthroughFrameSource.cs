@@ -240,6 +240,7 @@ namespace QuestNav.Camera
                         );
                         yield break;
                     }
+                    
 
                     CurrentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
                 }
