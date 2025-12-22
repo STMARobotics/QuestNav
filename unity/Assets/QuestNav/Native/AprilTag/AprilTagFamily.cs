@@ -3,65 +3,158 @@ using System.Runtime.InteropServices;
 
 namespace QuestNav.Native.AprilTag
 {
-    public abstract class AprilTagFamily
+    /// <summary>
+    /// Base class for AprilTag family wrappers.
+    /// Tag families define the specific tag encoding schemes (e.g., tag36h11, tag25h9).
+    /// </summary>
+    public unsafe abstract class AprilTagFamily : IDisposable
     {
         /// <summary>
-        /// Gets the nice name of the family
+        /// The native family pointer
         /// </summary>
-        /// <returns>The nice name of the family</returns>
-        /// <exception cref="InvalidOperationException">If the family has already been disposed</exception>
-        public string Name()
-        {
-            ThrowIfDisposed();
-
-            var native = Marshal.PtrToStructure<ApriltagFamilyNative>(Handle);
-            return native.name;
-        }
-
-        /// <summary>
-        /// The handle/IntPtr of the family
-        /// </summary>
-        public abstract IntPtr Handle { get; set;  }
+        internal abstract AprilTagFamilyNative* Handle { get; private protected set; }
 
         /// <summary>
         /// Tracks if the native structure has been disposed
         /// </summary>
-        public bool Disposed { get; private protected set; }
-        
+        protected bool Disposed { get; set; }
+
         /// <summary>
-        /// Throws if the family native object has already been disposed
+        /// Gets the human-readable name of the family (e.g., "tag36h11")
         /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
+        public string Name
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Marshal.PtrToStringAnsi(Handle->name);
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of codes in this tag family
+        /// </summary>
+        public uint CodeCount
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->ncodes;
+            }
+        }
+
+        /// <summary>
+        /// Gets the width of the tag at the border (in bits)
+        /// </summary>
+        public int WidthAtBorder
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->width_at_border;
+            }
+        }
+
+        /// <summary>
+        /// Gets the total width of the tag (in bits)
+        /// </summary>
+        public int TotalWidth
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->total_width;
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the border is reversed (black on white vs white on black)
+        /// </summary>
+        public bool ReversedBorder
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->reversed_border;
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of data bits encoded in the tag
+        /// </summary>
+        public uint BitCount
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->nbits;
+            }
+        }
+
+        /// <summary>
+        /// Gets the minimum Hamming distance between any two codes in the family.
+        /// Higher values mean better error correction (e.g., tag36h11 has h=11).
+        /// </summary>
+        public uint HammingDistance
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->h;
+            }
+        }
+
+        /// <summary>
+        /// Throws ObjectDisposedException if the family has been disposed
+        /// </summary>
         private void ThrowIfDisposed()
         {
             if (Disposed)
-                throw new InvalidOperationException("Family has already been disposed");
+                throw new ObjectDisposedException(GetType().Name);
         }
-    }
-    
-    /// <summary>
-    /// Creates a new tag36h11 family
-    /// </summary>
-    public class Tag36H11 : AprilTagFamily, IDisposable
-    {
-        /// <inheritdoc/>
-        public override IntPtr Handle { get; set; } = AprilTagNatives.tag36h11_create();
-        
+
         /// <summary>
-        /// Disposes of tag family
+        /// Disposes of the tag family native resources
         /// </summary>
-        public void Dispose()
+        public abstract void Dispose();
+    }
+
+    /// <summary>
+    /// The tag36h11 family contains 587 unique tags with 11-bit Hamming distance error correction.
+    /// This is one of the most commonly used AprilTag families, offering a good balance 
+    /// between the number of unique tags and error robustness.
+    /// </summary>
+    public unsafe class Tag36h11 : AprilTagFamily
+    {
+        /// <summary>
+        /// The native family pointer
+        /// </summary>
+        internal override AprilTagFamilyNative* Handle { get; private protected set; }
+
+        /// <summary>
+        /// Creates a new tag36h11 family instance
+        /// </summary>
+        public Tag36h11()
+        {
+            Handle = AprilTagNatives.tag36h11_create();
+            if (Handle == null)
+                throw new InvalidOperationException("Failed to create tag36h11 family");
+        }
+
+        /// <summary>
+        /// Disposes of the tag36h11 family native resources
+        /// </summary>
+        public override void Dispose()
         {
             if (!Disposed)
             {
-                if (!Handle.Equals(IntPtr.Zero))
+                if (Handle != null)
                 {
                     AprilTagNatives.tag36h11_destroy(Handle);
-                    Handle = IntPtr.Zero;
+                    Handle = null;
                 }
                 Disposed = true;
             }
         }
     }
-    
 }

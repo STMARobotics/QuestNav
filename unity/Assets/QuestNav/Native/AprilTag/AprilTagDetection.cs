@@ -6,47 +6,142 @@ namespace QuestNav.Native.AprilTag
     /// <summary>
     /// Represents an AprilTag detection returned by a detector
     /// </summary>
-    public class AprilTagDetection
+    public unsafe class AprilTagDetection : IDisposable
     {
         /// <summary>
-        /// The ID of the detected tag
+        /// The native detector pointer
         /// </summary>
-        public int Id { get; set; }
+        internal AprilTagDetectionNative* Handle { get; private set; }
+        
         /// <summary>
-        /// How many error bits were corrected
+        /// Tracks if the native structure has been disposed
         /// </summary>
-        public int Hamming { get; set; }
+        private bool disposed;
+        
+        public AprilTagDetection(AprilTagDetectionNative* handle)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            Handle = handle;
+        }
+        
         /// <summary>
-        /// The confidence of the detection (higher = better)
+        /// Gets the decoded ID of the detected tag
         /// </summary>
-        public float DecisionMargin { get; set; }
-        /// <summary>
-        /// The center of the tag in image coordinates
-        /// </summary>
-        public (double X, double Y) Center { get; set; }
-        /// <summary>
-        /// The corners of the tag in image coordinates
-        /// </summary>
-        public (double X, double Y)[] Corners { get; set; }
+        public int Id
+        {
+            get { ThrowIfDisposed(); return Handle->id; }
+        }
 
         /// <summary>
-        /// Converts a native AprilTagDetection into a managed one
+        /// Gets the number of error bits that were corrected during decoding.
+        /// Higher values indicate lower confidence. Values > 2 greatly increase false positive rates.
         /// </summary>
-        /// <param name="native">The native struct to use</param>
-        /// <returns></returns>
-        public unsafe static AprilTagDetection FromNative(AprilTagDetectionNative native)
+        public int Hamming
         {
-            return new AprilTagDetection
+            get { ThrowIfDisposed(); return Handle->hamming; }
+        }
+
+        /// <summary>
+        /// Gets the decision margin - a measure of decoding quality.
+        /// Higher numbers indicate better decodes. Most reliable for small tags.
+        /// </summary>
+        public float DecisionMargin
+        {
+            get { ThrowIfDisposed(); return Handle->decision_margin; }
+        }
+
+        /// <summary>
+        /// Gets the center point of the detection in image pixel coordinates
+        /// </summary>
+        public Point2D Center
+        {
+            get { ThrowIfDisposed(); return Handle->center; }
+        }
+
+        /// <summary>
+        /// Gets corner 0 of the tag in image pixel coordinates.
+        /// Corners wrap counter-clockwise around the tag.
+        /// </summary>
+        public Point2D Corner0
+        {
+            get { ThrowIfDisposed(); return Handle->corner0; }
+        }
+
+        /// <summary>
+        /// Gets corner 1 of the tag in image pixel coordinates.
+        /// Corners wrap counter-clockwise around the tag.
+        /// </summary>
+        public Point2D Corner1
+        {
+            get { ThrowIfDisposed(); return Handle->corner1; }
+        }
+
+        /// <summary>
+        /// Gets corner 2 of the tag in image pixel coordinates.
+        /// Corners wrap counter-clockwise around the tag.
+        /// </summary>
+        public Point2D Corner2
+        {
+            get { ThrowIfDisposed(); return Handle->corner2; }
+        }
+
+        /// <summary>
+        /// Gets corner 3 of the tag in image pixel coordinates.
+        /// Corners wrap counter-clockwise around the tag.
+        /// </summary>
+        public Point2D Corner3
+        {
+            get { ThrowIfDisposed(); return Handle->corner3; }
+        }
+
+        /// <summary>
+        /// Gets all four corners as an array.
+        /// Corners wrap counter-clockwise around the tag.
+        /// </summary>
+        public Point2D[] GetCorners()
+        {
+            ThrowIfDisposed();
+            return new Point2D[] { Corner0, Corner1, Corner2, Corner3 };
+        }
+
+        /// <summary>
+        /// Gets the name of the tag family this detection belongs to
+        /// </summary>
+        public string FamilyName
+        {
+            get
             {
-                Center = (native.c[0], native.c[1]),
-                Corners = new[]
+                ThrowIfDisposed();
+                if (Handle->family == IntPtr.Zero)
+                    return null;
+                
+                var family = (AprilTagFamilyNative*)Handle->family;
+                return Marshal.PtrToStringAnsi(family->name);
+            }
+        }
+        
+        /// <summary>
+        /// Throws ObjectDisposedException if the detection has been disposed
+        /// </summary>
+        private void ThrowIfDisposed()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(AprilTagDetection));
+        }
+
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                if (Handle != null)
                 {
-                    (native.p[0], native.p[1]),
-                    (native.p[2], native.p[3]),
-                    (native.p[4], native.p[5]),
-                    (native.p[6], native.p[7]),
-                },
-            };
+                    AprilTagNatives.apriltag_detection_destroy(Handle);
+                    Handle = null;
+                }
+                disposed = true;
+            }
         }
     }
 }
