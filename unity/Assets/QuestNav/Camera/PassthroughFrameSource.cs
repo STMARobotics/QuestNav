@@ -192,16 +192,7 @@ namespace QuestNav.Camera
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
                     // Arbitrarily pick the first, I guess?
                     // TODO: This should be stored in playerPrefs so that it doesn't reset
-                    cameraSource.Mode = cameraSource.Modes[27];
-                    
-                    //DEBUG:
-                    
-                    foreach (var mode in modes)
-                    {
-                        Debug.Log($"Mode: {mode.PixelFormat}, {mode.Width}x{mode.Height} @ {mode.Fps}fps");
-                    }
-                    
-                    // END DEBUG
+                    cameraSource.Mode = cameraSource.Modes[76];
 
                     // Start initialization coroutine
                     frameCaptureCoroutine = coroutineHost.StartCoroutine(FrameCaptureCoroutine());
@@ -291,7 +282,6 @@ namespace QuestNav.Camera
                     }
                     // Debug.Log("Cleaning up frames");
                     // pJpegImg.Dispose();
-                    nativeImg.Dispose();
                 }
                 catch (NullReferenceException ex)
                 {
