@@ -121,7 +121,7 @@ namespace QuestNav.Native.AprilTag
 
     /// <summary>
     /// The tag36h11 family contains 587 unique tags with 11-bit Hamming distance error correction.
-    /// This is one of the most commonly used AprilTag families, offering a good balance 
+    /// This is one of the most commonly used AprilTag families, offering a good balance
     /// between the number of unique tags and error robustness.
     /// </summary>
     public unsafe class Tag36h11 : AprilTagFamily

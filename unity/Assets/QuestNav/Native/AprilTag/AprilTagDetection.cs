@@ -12,12 +12,12 @@ namespace QuestNav.Native.AprilTag
         /// The native detector pointer
         /// </summary>
         internal AprilTagDetectionNative* Handle { get; private set; }
-        
+
         /// <summary>
         /// Tracks if the native structure has been disposed
         /// </summary>
         private bool disposed;
-        
+
         public AprilTagDetection(AprilTagDetectionNative* handle)
         {
             if (handle == null)
@@ -25,13 +25,17 @@ namespace QuestNav.Native.AprilTag
 
             Handle = handle;
         }
-        
+
         /// <summary>
         /// Gets the decoded ID of the detected tag
         /// </summary>
         public int Id
         {
-            get { ThrowIfDisposed(); return Handle->id; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->id;
+            }
         }
 
         /// <summary>
@@ -40,7 +44,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public int Hamming
         {
-            get { ThrowIfDisposed(); return Handle->hamming; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->hamming;
+            }
         }
 
         /// <summary>
@@ -49,7 +57,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public float DecisionMargin
         {
-            get { ThrowIfDisposed(); return Handle->decision_margin; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->decision_margin;
+            }
         }
 
         /// <summary>
@@ -57,7 +69,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public Point2D Center
         {
-            get { ThrowIfDisposed(); return Handle->center; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->center;
+            }
         }
 
         /// <summary>
@@ -66,7 +82,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public Point2D Corner0
         {
-            get { ThrowIfDisposed(); return Handle->corner0; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->corner0;
+            }
         }
 
         /// <summary>
@@ -75,7 +95,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public Point2D Corner1
         {
-            get { ThrowIfDisposed(); return Handle->corner1; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->corner1;
+            }
         }
 
         /// <summary>
@@ -84,7 +108,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public Point2D Corner2
         {
-            get { ThrowIfDisposed(); return Handle->corner2; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->corner2;
+            }
         }
 
         /// <summary>
@@ -93,7 +121,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public Point2D Corner3
         {
-            get { ThrowIfDisposed(); return Handle->corner3; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->corner3;
+            }
         }
 
         /// <summary>
@@ -116,12 +148,12 @@ namespace QuestNav.Native.AprilTag
                 ThrowIfDisposed();
                 if (Handle->family == IntPtr.Zero)
                     return null;
-                
+
                 var family = (AprilTagFamilyNative*)Handle->family;
                 return Marshal.PtrToStringAnsi(family->name);
             }
         }
-        
+
         /// <summary>
         /// Throws ObjectDisposedException if the detection has been disposed
         /// </summary>
@@ -137,12 +169,12 @@ namespace QuestNav.Native.AprilTag
         /// <returns>A friendly string with data formatted</returns>
         public override string ToString()
         {
-            return $"Id: {Id}\n" +
-                   $"Family: {FamilyName}\n" +
-                   $"Hamming: {Hamming}\n" +
-                   $"DecisionMargin: {DecisionMargin}\n" +
-                   $"Center: X: {Center.x}, Y: {Center.y}\n" +
-                   $"Corners: {GetCorners()}";
+            return $"Id: {Id}\n"
+                + $"Family: {FamilyName}\n"
+                + $"Hamming: {Hamming}\n"
+                + $"DecisionMargin: {DecisionMargin}\n"
+                + $"Center: X: {Center.x}, Y: {Center.y}\n"
+                + $"Corners: {GetCorners()}";
         }
 
         public void Dispose()

@@ -1,10 +1,10 @@
 using System;
 using QuestNav.Camera;
+using QuestNav.Utils;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
-using QuestNav.Utils;
 
 namespace QuestNav.Native.AprilTag
 {
@@ -27,7 +27,12 @@ namespace QuestNav.Native.AprilTag
         /// <summary>
         /// Creates an ImageU8 from PassthroughCameraAccess.GetColors()
         /// </summary>
-        public static ImageU8 FromPassthroughCamera(NativeArray<Color32> colors, int width, int height, bool flipVertically = true)
+        public static ImageU8 FromPassthroughCamera(
+            NativeArray<Color32> colors,
+            int width,
+            int height,
+            bool flipVertically = true
+        )
         {
             if (!colors.IsCreated || colors.Length == 0)
             {
@@ -55,15 +60,19 @@ namespace QuestNav.Native.AprilTag
             }
 
             // Wrap destination buffer
-            NativeArray<byte> destData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(
-                (void*)cachedImage->buf,
-                height * cachedImage->stride,
-                Allocator.None
-            );
+            NativeArray<byte> destData =
+                NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(
+                    (void*)cachedImage->buf,
+                    height * cachedImage->stride,
+                    Allocator.None
+                );
 
-            #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref destData, AtomicSafetyHandle.GetTempMemoryHandle());
-            #endif
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(
+                ref destData,
+                AtomicSafetyHandle.GetTempMemoryHandle()
+            );
+#endif
 
             // Run parallel grayscale conversion
             var job = new GrayscaleConversionJob
@@ -73,7 +82,7 @@ namespace QuestNav.Native.AprilTag
                 Width = width,
                 Height = height,
                 Stride = cachedImage->stride,
-                FlipVertically = flipVertically
+                FlipVertically = flipVertically,
             };
 
             job.Schedule(height, 32).Complete();
@@ -92,7 +101,8 @@ namespace QuestNav.Native.AprilTag
 
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed)
+                return;
 
             if (Handle != null && ownsHandle)
             {

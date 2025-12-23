@@ -9,7 +9,7 @@ namespace QuestNav.Native.AprilTag
         public double x;
         public double y;
     }
-    
+
     /// <summary>
     /// Represents coordinates of a AprilTag detection
     /// </summary>
@@ -27,11 +27,11 @@ namespace QuestNav.Native.AprilTag
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct QuadNative
     {
-        public Point2D corner0;     // p[0], p[1]
-        public Point2D corner1;     // p[2], p[3]
-        public Point2D corner2;     // p[4], p[5]
-        public Point2D corner3;     // p[6], p[7]
-        
+        public Point2D corner0; // p[0], p[1]
+        public Point2D corner1; // p[2], p[3]
+        public Point2D corner2; // p[4], p[5]
+        public Point2D corner3; // p[6], p[7]
+
         [MarshalAs(UnmanagedType.I1)]
         public bool reversed_border;
 
@@ -89,7 +89,7 @@ namespace QuestNav.Native.AprilTag
         public IntPtr bit_x;
         public IntPtr bit_y;
         public uint h;
-        
+
         public IntPtr name;
         public IntPtr impl;
     }
@@ -304,7 +304,7 @@ namespace QuestNav.Native.AprilTag
         // alloc 64 bytes to be safe.
         public fixed byte mutex[64];
     }
-    
+
     /// <summary>
     /// Represents the detection of a tag. These are returned to the user
     /// and must be individually destroyed by the user.
@@ -378,15 +378,14 @@ namespace QuestNav.Native.AprilTag
         public IntPtr H;
 
         // The center of the detection in image pixel coordinates.
-        public Point2D center;      // c[2]
+        public Point2D center; // c[2]
 
         // The corners of the tag in image pixel coordinates. These always
         // wrap counter-clock wise around the tag.
-        public Point2D corner0;     // p[0], p[1]
-        public Point2D corner1;     // p[2], p[3]
-        public Point2D corner2;     // p[4], p[5]
-        public Point2D corner3;     // p[6], p[7]
-
+        public Point2D corner0; // p[0], p[1]
+        public Point2D corner1; // p[2], p[3]
+        public Point2D corner2; // p[4], p[5]
+        public Point2D corner3; // p[6], p[7]
     }
 
     /// <summary>
@@ -417,7 +416,7 @@ namespace QuestNav.Native.AprilTag
         public IntPtr R; // Rotation matrix 3x3 of doubles.
         public IntPtr t; // Translation matrix 3x1 of doubles.
     }
-    
+
     /// <summary>
     /// Represents a integer image
     /// </summary>
@@ -428,10 +427,12 @@ namespace QuestNav.Native.AprilTag
         /// The width of the image in pixels
         /// </summary>
         public int width;
+
         /// <summary>
         /// The height of the image in pixels
         /// </summary>
         public int height;
+
         /// <summary>
         /// Number of bytes per row (usually >= width)
         /// </summary>
@@ -442,32 +443,32 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public IntPtr buf;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public struct PjpegNative
     {
         // status of the decode is put here. Non-zero means error.
         public int error;
 
-        public uint width, height; // pixel dimensions
+        public uint width,
+            height; // pixel dimensions
 
         public int ncomponents;
         public IntPtr components;
     }
-    
+
     /// <summary>
     /// zarray structure layout
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct ZArrayNative
     {
-        public IntPtr el_sz;  // size_t - size of each element
-        public int size;      // number of elements
-        public int alloc;     // allocated capacity
-        public IntPtr data;   // pointer to data
+        public IntPtr el_sz; // size_t - size of each element
+        public int size; // number of elements
+        public int alloc; // allocated capacity
+        public IntPtr data; // pointer to data
     }
 
-    
     /// <summary>
     /// Methods that invoke native code with the apriltag system
     /// </summary>
@@ -500,7 +501,7 @@ namespace QuestNav.Native.AprilTag
             AprilTagFamilyNative* fam,
             int bits_corrected
         );
-        
+
         /// <summary>
         /// Remove a family from the apriltag detector.
         /// Does not deallocate the family.
@@ -511,7 +512,10 @@ namespace QuestNav.Native.AprilTag
         /// void apriltag_detector_remove_family(apriltag_detector_t *td, apriltag_family_t *fam);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void apriltag_detector_remove_family(AprilTagDetectorNative* td, AprilTagFamilyNative* fam);
+        public static extern void apriltag_detector_remove_family(
+            AprilTagDetectorNative* td,
+            AprilTagFamilyNative* fam
+        );
 
         /// <summary>
         /// Unregister all families from the detector, but does not deallocate the underlying tag family objects.
@@ -546,7 +550,10 @@ namespace QuestNav.Native.AprilTag
         /// zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr apriltag_detector_detect(AprilTagDetectorNative* td, ImageU8Native* imOrig);
+        public static extern IntPtr apriltag_detector_detect(
+            AprilTagDetectorNative* td,
+            ImageU8Native* imOrig
+        );
 
         /// <summary>
         /// Call this method on each of the tags returned by apriltag_detector_detect
@@ -592,7 +599,10 @@ namespace QuestNav.Native.AprilTag
         /// double estimate_tag_pose(apriltag_detection_info_t *info, apriltag_pose_t *pose);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
-        public static extern double estimate_tag_pose(ApriltagDetectionInfoNative* info, AprilTagPoseNative* pose);
+        public static extern double estimate_tag_pose(
+            ApriltagDetectionInfoNative* info,
+            AprilTagPoseNative* pose
+        );
 
         /// <summary>
         /// Creates a new tag36h11 family instance.
@@ -615,7 +625,7 @@ namespace QuestNav.Native.AprilTag
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         public static extern void tag36h11_destroy(AprilTagFamilyNative* tf);
-        
+
         /// <summary>
         /// Creates a pjpeg object from a standard JPG input
         /// </summary>
@@ -636,7 +646,7 @@ namespace QuestNav.Native.AprilTag
             uint flags,
             out PjpegError error
         );
-        
+
         /// <summary>
         /// Destroys a pjpeg_t object from memory
         /// </summary>
@@ -646,7 +656,7 @@ namespace QuestNav.Native.AprilTag
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         public static extern void pjpeg_destroy(PjpegNative* pj);
-        
+
         /// <summary>
         /// Error codes that can be returned from converting a JPG to a pjpeg
         /// </summary>
@@ -656,62 +666,72 @@ namespace QuestNav.Native.AprilTag
             /// Everything is OK
             /// </summary>
             PJPEG_OKAY = 0,
+
             /// <summary>
             /// Something wrong reading file
             /// </summary>
             PJPEG_ERR_FILE,
+
             /// <summary>
             /// Something wrong with DQT marker
             /// </summary>
-            PJPEG_ERR_DQT,     
+            PJPEG_ERR_DQT,
+
             /// <summary>
             /// Something wrong with SOF marker
             /// </summary>
-            PJPEG_ERR_SOF,        
+            PJPEG_ERR_SOF,
+
             /// <summary>
             /// Something wrong with DHT marker
             /// </summary>
-            PJPEG_ERR_DHT,        
+            PJPEG_ERR_DHT,
+
             /// <summary>
             /// Something wrong with SOS marker
             /// </summary>
-            PJPEG_ERR_SOS,        
+            PJPEG_ERR_SOS,
+
             /// <summary>
             /// Missing a necessary huffman table
             /// </summary>
-            PJPEG_ERR_MISSING_DHT, 
+            PJPEG_ERR_MISSING_DHT,
+
             /// <summary>
             /// Something wrong with DRI marker
             /// </summary>
-            PJPEG_ERR_DRI,        
+            PJPEG_ERR_DRI,
+
             /// <summary>
-            /// Didn't get a reset marker where we expected.  Corruption? 
+            /// Didn't get a reset marker where we expected.  Corruption?
             /// </summary>
-            PJPEG_ERR_RESET,      
+            PJPEG_ERR_RESET,
+
             /// <summary>
             /// Ran out of bytes while decoding
             /// </summary>
-            PJPEG_ERR_EOF,        
+            PJPEG_ERR_EOF,
+
             /// <summary>
             /// An unsupported format
             /// </summary>
             PJEPG_ERR_UNSUPPORTED,
         };
-        
+
         /// <summary>
         /// Converts a decoded JPEG image into a grayscale image by extracting the first component.
         /// </summary>
-        /// <param name="pj">The pjpeg pointer</param> 
+        /// <param name="pj">The pjpeg pointer</param>
         /// <returns>An image_u8_t of the converted grayscale image</returns>
         /// <code>
         /// image_u8_t *pjpeg_to_u8_baseline(pjpeg_t *pj);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         public static extern ImageU8Native* pjpeg_to_u8_baseline(PjpegNative* pj);
-        
+
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         internal static extern ImageU8Native* image_u8_create(int width, int height);
-        
+
         /// <summary>
         /// Destroys a image_u8 object
         /// </summary>
@@ -721,7 +741,7 @@ namespace QuestNav.Native.AprilTag
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         public static extern void image_u8_destroy(ImageU8Native* im);
-        
+
         /// <summary>
         /// Retrieves the number of elements currently being contained by the passed
         /// array, which may be different from its capacity. The index of the last element
@@ -740,7 +760,7 @@ namespace QuestNav.Native.AprilTag
         {
             if (za == IntPtr.Zero)
                 return 0;
-        
+
             ZArrayNative* arr = (ZArrayNative*)za;
             return arr->size;
         }
@@ -760,15 +780,14 @@ namespace QuestNav.Native.AprilTag
         public static void zarray_get(IntPtr za, int idx, out IntPtr p)
         {
             ZArrayNative* arr = (ZArrayNative*)za;
-        
+
             // zarray stores elements contiguously, each of size el_sz
             // For detection arrays, el_sz is sizeof(pointer), and we want to read that pointer
             long elSize = arr->el_sz.ToInt64();
             IntPtr elementAddr = IntPtr.Add(arr->data, idx * (int)elSize);
-        
+
             // Read the pointer at that location
             p = *(IntPtr*)elementAddr;
         }
-
     }
 }

@@ -5,7 +5,7 @@ namespace QuestNav.Native.AprilTag
     public unsafe class AprilTagDetectionInfo
     {
         internal ApriltagDetectionInfoNative* Handle { get; private set; }
-        
+
         private AprilTagDetectionInfo(ApriltagDetectionInfoNative* handle)
         {
             Handle = handle;

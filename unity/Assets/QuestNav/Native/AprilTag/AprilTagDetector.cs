@@ -40,19 +40,35 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public int ThreadCount
         {
-            get { ThrowIfDisposed(); return Handle->nthreads; }
-            set { ThrowIfDisposed(); Handle->nthreads = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->nthreads;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->nthreads = value;
+            }
         }
 
         /// <summary>
         /// Gets or sets the quad decimation factor.
-        /// Detection can be done on a lower-resolution image, improving speed 
+        /// Detection can be done on a lower-resolution image, improving speed
         /// at a cost of pose accuracy and slight decrease in detection rate.
         /// </summary>
         public float QuadDecimate
         {
-            get { ThrowIfDisposed(); return Handle->quad_decimate; }
-            set { ThrowIfDisposed(); Handle->quad_decimate = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->quad_decimate;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->quad_decimate = value;
+            }
         }
 
         /// <summary>
@@ -61,8 +77,16 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public float QuadSigma
         {
-            get { ThrowIfDisposed(); return Handle->quad_sigma; }
-            set { ThrowIfDisposed(); Handle->quad_sigma = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->quad_sigma;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->quad_sigma = value;
+            }
         }
 
         /// <summary>
@@ -71,8 +95,16 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public bool RefineEdges
         {
-            get { ThrowIfDisposed(); return Handle->refine_edges; }
-            set { ThrowIfDisposed(); Handle->refine_edges = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->refine_edges;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->refine_edges = value;
+            }
         }
 
         /// <summary>
@@ -82,8 +114,16 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public double DecodeSharpening
         {
-            get { ThrowIfDisposed(); return Handle->decode_sharpening; }
-            set { ThrowIfDisposed(); Handle->decode_sharpening = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->decode_sharpening;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->decode_sharpening = value;
+            }
         }
 
         /// <summary>
@@ -92,8 +132,16 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public bool Debug
         {
-            get { ThrowIfDisposed(); return Handle->debug; }
-            set { ThrowIfDisposed(); Handle->debug = value; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->debug;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                Handle->debug = value;
+            }
         }
 
         /// <summary>
@@ -101,7 +149,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public uint LastFrameEdges
         {
-            get { ThrowIfDisposed(); return Handle->nedges; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->nedges;
+            }
         }
 
         /// <summary>
@@ -109,7 +161,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public uint LastFrameSegments
         {
-            get { ThrowIfDisposed(); return Handle->nsegments; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->nsegments;
+            }
         }
 
         /// <summary>
@@ -117,7 +173,11 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         public uint LastFrameQuads
         {
-            get { ThrowIfDisposed(); return Handle->nquads; }
+            get
+            {
+                ThrowIfDisposed();
+                return Handle->nquads;
+            }
         }
 
         /// <summary>
@@ -129,7 +189,7 @@ namespace QuestNav.Native.AprilTag
             ThrowIfDisposed();
             if (family == null)
                 throw new ArgumentNullException(nameof(family));
-            
+
             AprilTagNatives.apriltag_detector_add_family_bits(Handle, family.Handle, 2);
             tagFamilies.Add((IntPtr)family.Handle);
         }
@@ -144,9 +204,9 @@ namespace QuestNav.Native.AprilTag
             ThrowIfDisposed();
             if (family == null)
                 throw new ArgumentNullException(nameof(family));
-            
+
             AprilTagNatives.apriltag_detector_add_family_bits(Handle, family.Handle, bitsCorrected);
-            tagFamilies.Add((IntPtr) family.Handle);
+            tagFamilies.Add((IntPtr)family.Handle);
         }
 
         /// <summary>
@@ -159,7 +219,7 @@ namespace QuestNav.Native.AprilTag
             ThrowIfDisposed();
             if (family == null)
                 throw new ArgumentNullException(nameof(family));
-            
+
             AprilTagNatives.apriltag_detector_remove_family(Handle, family.Handle);
             tagFamilies.Remove((IntPtr)family.Handle);
         }
@@ -195,7 +255,7 @@ namespace QuestNav.Native.AprilTag
                 AprilTagNatives.zarray_get(detectionsArrayPtr, i, out var ptr);
                 detections[i] = new AprilTagDetection((AprilTagDetectionNative*)ptr);
             }
-            
+
             return detections;
         }
 
@@ -220,7 +280,7 @@ namespace QuestNav.Native.AprilTag
                     AprilTagNatives.apriltag_detector_destroy(Handle);
                     Handle = null;
                 }
-                
+
                 tagFamilies.Clear();
                 disposed = true;
             }

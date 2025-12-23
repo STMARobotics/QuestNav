@@ -13,17 +13,17 @@ namespace QuestNav.Native.AprilTag
         /// The handle of the Pjpeg frame
         /// </summary>
         internal PjpegNative* Handle { get; private set; }
-        
+
         /// <summary>
         /// Whether the Pjpeg frame has been disposed or not
         /// </summary>
         private bool disposed;
-        
+
         /// <summary>
         /// Creates a new Pjpeg frame
         /// </summary>
         /// <param name="pj"></param>
-        private  PJpeg(PjpegNative* pj)
+        private PJpeg(PjpegNative* pj)
         {
             Handle = pj;
         }
@@ -44,7 +44,7 @@ namespace QuestNav.Native.AprilTag
             fixed (byte* ptr = rawJpeg)
             {
                 var pjpeg = AprilTagNatives.pjpeg_create_from_buffer(
-                    (IntPtr) ptr,
+                    (IntPtr)ptr,
                     rawJpeg.Length,
                     0, // default flags
                     out var error
@@ -59,20 +59,21 @@ namespace QuestNav.Native.AprilTag
                 return new PJpeg(pjpeg);
             }
         }
-        
+
         /// <summary>
         /// Frees the memory in native code taken by the Pjpeg frame
         /// </summary>
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed)
+                return;
 
             if (Handle != null)
             {
                 AprilTagNatives.pjpeg_destroy(Handle);
                 Handle = null;
             }
-            
+
             disposed = true;
         }
     }

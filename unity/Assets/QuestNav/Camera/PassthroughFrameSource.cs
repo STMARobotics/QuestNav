@@ -232,18 +232,17 @@ namespace QuestNav.Camera
             Debug.Log("Starting AprilTag");
             Debug.Log("Creating detector");
             AprilTagDetector aprilTagDetector = new AprilTagDetector();
-            
+
             Debug.Log("Creating family");
             AprilTagFamily family = new Tag36h11();
-            
+
             Debug.Log("Adding family to detector");
             aprilTagDetector.AddFamily(family);
-            
+
             Debug.Log("Initializing LJPGT");
             var compressor = new LJTCompressor();
             Debug.Log("Initialized");
-            
-            
+
             while (true)
             {
                 try
@@ -265,9 +264,9 @@ namespace QuestNav.Camera
                     var colors = cameraAccess.GetColors();
                     var resolution = cameraAccess.CurrentResolution;
                     using var nativeImg = ImageU8.FromPassthroughCamera(
-                        colors, 
-                        resolution.x, 
-                        resolution.y, 
+                        colors,
+                        resolution.x,
+                        resolution.y,
                         flipVertically: true
                     );
 
