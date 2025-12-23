@@ -131,6 +131,20 @@ namespace QuestNav.Native.AprilTag
                 throw new ObjectDisposedException(nameof(AprilTagDetection));
         }
 
+        /// <summary>
+        /// Formats data as string
+        /// </summary>
+        /// <returns>A friendly string with data formatted</returns>
+        public override string ToString()
+        {
+            return $"Id: {Id}\n" +
+                   $"Family: {FamilyName}\n" +
+                   $"Hamming: {Hamming}\n" +
+                   $"DecisionMargin: {DecisionMargin}\n" +
+                   $"Center: X: {Center.x}, Y: {Center.y}\n" +
+                   $"Corners: {GetCorners()}";
+        }
+
         public void Dispose()
         {
             if (!disposed)

@@ -129,6 +129,36 @@ namespace QuestNav.Network
 
         /// <summary>
         /// Available video modes.
+        /// <list>
+        ///   <item>0: MJPEG, 320x240 @ 1fps</item>
+        ///   <item>1: MJPEG, 320x240 @ 5fps</item>
+        ///   <item>2: MJPEG, 320x240 @ 15fps</item>
+        ///   <item>3: MJPEG, 320x240 @ 24fps</item>
+        ///   <item>4: MJPEG, 320x240 @ 30fps</item>
+        ///   <item>5: MJPEG, 320x240 @ 48fps</item>
+        ///   <item>6: MJPEG, 320x240 @ 60fps</item>
+        ///   <item>7: MJPEG, 640x480 @ 1fps</item>
+        ///   <item>8: MJPEG, 640x480 @ 5fps</item>
+        ///   <item>9: MJPEG, 640x480 @ 15fps</item>
+        ///   <item>10: MJPEG, 640x480 @ 24fps</item>
+        ///   <item>11: MJPEG, 640x480 @ 30fps</item>
+        ///   <item>12: MJPEG, 640x480 @ 48fps</item>
+        ///   <item>13: MJPEG, 640x480 @ 60fps</item>
+        ///   <item>14: MJPEG, 800x600 @ 1fps</item>
+        ///   <item>15: MJPEG, 800x600 @ 5fps</item>
+        ///   <item>16: MJPEG, 800x600 @ 15fps</item>
+        ///   <item>17: MJPEG, 800x600 @ 24fps</item>
+        ///   <item>18: MJPEG, 800x600 @ 30fps</item>
+        ///   <item>19: MJPEG, 800x600 @ 48fps</item>
+        ///   <item>20: MJPEG, 800x600 @ 60fps</item>
+        ///   <item>21: MJPEG, 1280x960 @ 1fps</item>
+        ///   <item>22: MJPEG, 1280x960 @ 5fps</item>
+        ///   <item>23: MJPEG, 1280x960 @ 15fps</item>
+        ///   <item>24: MJPEG, 1280x960 @ 24fps</item>
+        ///   <item>25: MJPEG, 1280x960 @ 30fps</item>
+        ///   <item>26: MJPEG, 1280x960 @ 48fps</item>
+        ///   <item>27: MJPEG, 1280x960 @ 60fps</item>
+        /// </list>
         /// </summary>
         VideoMode[] Modes { get; set; }
 

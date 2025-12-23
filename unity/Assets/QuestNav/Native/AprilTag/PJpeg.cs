@@ -59,22 +59,7 @@ namespace QuestNav.Native.AprilTag
                 return new PJpeg(pjpeg);
             }
         }
-
-        /// <summary>
-        /// Converts this PJpeg to an ImageU8 greyscale frame
-        /// </summary>
-        /// <returns>A new ImageU8 object, or null if conversion failed</returns>
-        public ImageU8 ToImageU8()
-        {
-            if (disposed || Handle == null)
-            {
-                QueuedLogger.LogError("Cannot convert disposed or invalid PJpeg to ImageU8");
-                return null;
-            }
-
-            return ImageU8.FromPjpegHandle(Handle);
-        }
-
+        
         /// <summary>
         /// Frees the memory in native code taken by the Pjpeg frame
         /// </summary>

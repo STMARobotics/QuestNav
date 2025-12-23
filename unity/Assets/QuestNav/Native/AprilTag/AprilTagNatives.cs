@@ -709,6 +709,9 @@ namespace QuestNav.Native.AprilTag
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
         public static extern ImageU8Native* pjpeg_to_u8_baseline(PjpegNative* pj);
         
+        [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern ImageU8Native* image_u8_create(int width, int height);
+        
         /// <summary>
         /// Destroys a image_u8 object
         /// </summary>
