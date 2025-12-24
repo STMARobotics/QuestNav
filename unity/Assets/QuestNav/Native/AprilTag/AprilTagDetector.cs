@@ -240,7 +240,7 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         /// <param name="image">The grayscale image to process</param>
         /// <returns>List of detected AprilTags</returns>
-        public AprilTagDetection[] Detect(ImageU8 image)
+        public AprilTagDetectionResults Detect(ImageU8 image)
         {
             ThrowIfDisposed();
             if (image == null)
@@ -248,15 +248,7 @@ namespace QuestNav.Native.AprilTag
 
             var detectionsArrayPtr = AprilTagNatives.apriltag_detector_detect(Handle, image.Handle);
 
-            int detectionsLength = AprilTagNatives.zarray_size(detectionsArrayPtr);
-            var detections = new AprilTagDetection[detectionsLength];
-            for (int i = 0; i < detectionsLength; i++)
-            {
-                AprilTagNatives.zarray_get(detectionsArrayPtr, i, out var ptr);
-                detections[i] = new AprilTagDetection((AprilTagDetectionNative*)ptr);
-            }
-
-            return detections;
+            return new AprilTagDetectionResults(detectionsArrayPtr);
         }
 
         /// <summary>

@@ -257,10 +257,7 @@ namespace QuestNav.Camera
                     // }
                     // // rawJpeg = compressor.EncodeJPG(texture2D, 30);
                     // CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
-                    // Debug.Log("Encoding frame to pjpeg");
-                    // pJpegImg = PJpeg.FromRawJpeg(rawJpeg);
-                    // // Debug.Log("Encoding frame to imgU8");
-                    // nativeImg = ImageU8.FromPjpeg(pJpegImg);
+
                     var colors = cameraAccess.GetColors();
                     var resolution = cameraAccess.CurrentResolution;
                     using var nativeImg = ImageU8.FromPassthroughCamera(
@@ -276,11 +273,8 @@ namespace QuestNav.Camera
                     foreach (var result in results)
                     {
                         Debug.Log(result);
-                        // Debug.Log("Cleaning up detection");
-                        result.Dispose();
                     }
-                    // Debug.Log("Cleaning up frames");
-                    // pJpegImg.Dispose();
+                    results.Dispose();
                 }
                 catch (NullReferenceException ex)
                 {

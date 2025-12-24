@@ -550,7 +550,7 @@ namespace QuestNav.Native.AprilTag
         /// zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr apriltag_detector_detect(
+        public static extern ZArrayNative* apriltag_detector_detect(
             AprilTagDetectorNative* td,
             ImageU8Native* imOrig
         );
@@ -574,7 +574,7 @@ namespace QuestNav.Native.AprilTag
         /// void apriltag_detections_destroy(zarray_t *detections);
         /// </code>
         [DllImport("apriltag", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void apriltag_detections_destroy(IntPtr detections);
+        public static extern void apriltag_detections_destroy(ZArrayNative* detections);
 
         /// <summary>
         /// Renders the apriltag to an image.
@@ -756,13 +756,12 @@ namespace QuestNav.Native.AprilTag
         /// <summary>
         /// Gets the number of elements in a zarray.
         /// </summary>
-        public static int zarray_size(IntPtr za)
+        public static int zarray_size(ZArrayNative* za)
         {
-            if (za == IntPtr.Zero)
+            if (za == null)
                 return 0;
-
-            ZArrayNative* arr = (ZArrayNative*)za;
-            return arr->size;
+            
+            return za->size;
         }
 
         /// <summary>
@@ -777,7 +776,7 @@ namespace QuestNav.Native.AprilTag
         /// <code>
         /// static inline void zarray_get(const zarray_t *za, int idx, void *p)
         /// </code>
-        public static void zarray_get(IntPtr za, int idx, out IntPtr p)
+        public static void zarray_get(ZArrayNative* za, int idx, out IntPtr p)
         {
             ZArrayNative* arr = (ZArrayNative*)za;
 
