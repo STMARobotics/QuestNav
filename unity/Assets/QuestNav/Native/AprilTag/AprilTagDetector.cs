@@ -28,11 +28,25 @@ namespace QuestNav.Native.AprilTag
         /// <summary>
         /// Creates a new AprilTag detector with default parameters
         /// </summary>
-        public AprilTagDetector()
+        /// <param name="threadCount">Number of threads to use for detection (default: 1)</param>
+        /// <param name="quadDecimate">Quad decimation factor for detection (default: 2.0)</param>
+        /// <param name="quadSigma">Gaussian blur sigma for segmented image (default: 0.0)</param>
+        /// <param name="refineEdges">Whether to refine edges by snapping to strong gradients (default: true)</param>
+        /// <param name="decodeSharpening">Decode sharpening amount (default: 0.25)</param>
+        /// <param name="debug">Whether to write debugging images (default: false)</param>
+        public AprilTagDetector(int threadCount = 1, float quadDecimate = 2.0f, float quadSigma = 0.0f, bool refineEdges = true, double decodeSharpening = 0.25, bool debug = false)
         {
             Handle = AprilTagNatives.apriltag_detector_create();
             if (Handle == null)
                 throw new InvalidOperationException("Failed to create AprilTag detector");
+
+            // Set defaults using properties (which update the native struct)
+            ThreadCount = threadCount;
+            QuadDecimate = quadDecimate;
+            QuadSigma = quadSigma;
+            RefineEdges = refineEdges;
+            DecodeSharpening = decodeSharpening;
+            Debug = debug;
         }
 
         /// <summary>

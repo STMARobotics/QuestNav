@@ -4,6 +4,7 @@ using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
+using QuestNav.QuestNav.Native.CPnP;
 using QuestNav.UI;
 using QuestNav.Utils;
 using QuestNav.WebServer;
@@ -293,6 +294,8 @@ namespace QuestNav.Core
             InvokeRepeating(nameof(MainUpdate), 0, 1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ);
 
             initialized = true;
+            
+            TestPNP.TestSimpleCube();
         }
 
         /// <summary>

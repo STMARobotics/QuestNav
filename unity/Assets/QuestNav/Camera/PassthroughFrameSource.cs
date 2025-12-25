@@ -192,7 +192,7 @@ namespace QuestNav.Camera
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
                     // Arbitrarily pick the first, I guess?
                     // TODO: This should be stored in playerPrefs so that it doesn't reset
-                    cameraSource.Mode = cameraSource.Modes[76];
+                    cameraSource.Mode = cameraSource.Modes[74];
 
                     // Start initialization coroutine
                     frameCaptureCoroutine = coroutineHost.StartCoroutine(FrameCaptureCoroutine());
@@ -231,7 +231,7 @@ namespace QuestNav.Camera
             // START DEBUG:
             Debug.Log("Starting AprilTag");
             Debug.Log("Creating detector");
-            AprilTagDetector aprilTagDetector = new AprilTagDetector();
+            AprilTagDetector aprilTagDetector = new AprilTagDetector(threadCount:5, quadDecimate:2);
 
             Debug.Log("Creating family");
             AprilTagFamily family = new Tag36h11();

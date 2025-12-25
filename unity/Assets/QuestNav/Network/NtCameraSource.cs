@@ -129,6 +129,7 @@ namespace QuestNav.Network
 
         /// <summary>
         /// Available video modes.
+        /// </summary>
         /// <list>
         ///   <item>0: MJPEG, 320x240 @ 1fps</item>
         ///   <item>1: MJPEG, 320x240 @ 5fps</item>
