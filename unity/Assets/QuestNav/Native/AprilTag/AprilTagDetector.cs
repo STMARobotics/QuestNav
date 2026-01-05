@@ -18,7 +18,7 @@ namespace QuestNav.Native.AprilTag
         /// <summary>
         /// A list of family handles added to this detector (for tracking purposes)
         /// </summary>
-        private readonly List<IntPtr> tagFamilies = new List<IntPtr>();
+        private readonly List<AprilTagFamily> tagFamilies = new List<AprilTagFamily>();
 
         /// <summary>
         /// Tracks if the native structure has been disposed
@@ -205,7 +205,7 @@ namespace QuestNav.Native.AprilTag
                 throw new ArgumentNullException(nameof(family));
 
             AprilTagNatives.apriltag_detector_add_family_bits(Handle, family.Handle, 2);
-            tagFamilies.Add((IntPtr)family.Handle);
+            tagFamilies.Add(family);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace QuestNav.Native.AprilTag
                 throw new ArgumentNullException(nameof(family));
 
             AprilTagNatives.apriltag_detector_add_family_bits(Handle, family.Handle, bitsCorrected);
-            tagFamilies.Add((IntPtr)family.Handle);
+            tagFamilies.Add(family);
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace QuestNav.Native.AprilTag
                 throw new ArgumentNullException(nameof(family));
 
             AprilTagNatives.apriltag_detector_remove_family(Handle, family.Handle);
-            tagFamilies.Remove((IntPtr)family.Handle);
+            tagFamilies.Remove(family);
         }
 
         /// <summary>
@@ -281,13 +281,20 @@ namespace QuestNav.Native.AprilTag
         {
             if (!disposed)
             {
+                // Remove all families and dispose them
+                foreach (var tagFamily in tagFamilies)
+                {
+                    tagFamily.Dispose();
+                }
+                RemoveAllFamilies();
+                
+                // Dispose of the actual detector
                 if (Handle != null)
                 {
                     AprilTagNatives.apriltag_detector_destroy(Handle);
                     Handle = null;
                 }
-
-                tagFamilies.Clear();
+                
                 disposed = true;
             }
         }

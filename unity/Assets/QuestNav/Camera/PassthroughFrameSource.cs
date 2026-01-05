@@ -222,7 +222,7 @@ namespace QuestNav.Camera
                 }
             }
         }
-
+        
         /// <summary>
         /// Captures frames from the passthrough camera at the requested frame rate and encodes them as JPEG.
         /// </summary>
@@ -245,9 +245,22 @@ namespace QuestNav.Camera
 
             while (true)
             {
+                Texture texture;
+                
                 try
                 {
-                    // var texture = cameraAccess.GetTexture();
+                    texture = cameraAccess.GetTexture();
+                } catch (NullReferenceException ex)
+                {
+                    // This probably means the app hasn't been given permission to access the headset camera.
+                    QueuedLogger.LogError(
+                        $"Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
+                    );
+                    yield break;
+                }
+                
+                
+                // var texture = cameraAccess.GetTexture();
                     // if (texture is not Texture2D texture2D)
                     // {
                     //     QueuedLogger.LogError(
@@ -275,17 +288,8 @@ namespace QuestNav.Camera
                         Debug.Log(result);
                     }
                     results.Dispose();
-                }
-                catch (NullReferenceException ex)
-                {
-                    // This probably means the app hasn't been given permission to access the headset camera.
-                    QueuedLogger.LogError(
-                        $"Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
-                    );
-                    yield break;
-                }
-
-                yield return new WaitForSeconds(FrameDelaySeconds);
+                    
+                    yield return new WaitForSeconds(FrameDelaySeconds);
             }
         }
     }
