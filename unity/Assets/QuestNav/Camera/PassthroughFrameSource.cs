@@ -5,7 +5,9 @@ using Meta.XR;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.AprilTag;
+using QuestNav.Native.PoseLib;
 using QuestNav.Network;
+using QuestNav.QuestNav.AprilTag;
 using QuestNav.Utils;
 using QuestNav.WebServer;
 using UnityEngine;
@@ -28,10 +30,14 @@ namespace QuestNav.Camera
         /// </summary>
         private readonly MonoBehaviour coroutineHost;
 
+        // TODO: make this private again, seperate instance for apriltags
         /// <summary>
         /// Meta SDK passthrough camera accessor.
         /// </summary>
-        private readonly PassthroughCameraAccess cameraAccess;
+        public readonly PassthroughCameraAccess cameraAccess;
+
+        // TODO: Remove this after moving to seperate file
+        private AprilTagFieldLayout aprilTagFieldLayout;
 
         /// <summary>
         /// NetworkTables camera source for publishing stream info.
@@ -104,13 +110,15 @@ namespace QuestNav.Camera
             MonoBehaviour coroutineHost,
             PassthroughCameraAccess cameraAccess,
             INtCameraSource cameraSource,
-            IConfigManager configManager
+            IConfigManager configManager,
+            AprilTagFieldLayout aprilTagFieldLayout
         )
         {
             this.coroutineHost = coroutineHost;
             this.cameraAccess = cameraAccess;
             this.cameraSource = cameraSource;
             this.configManager = configManager;
+            this.aprilTagFieldLayout = aprilTagFieldLayout;
 
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
@@ -241,6 +249,9 @@ namespace QuestNav.Camera
 
             Debug.Log("Initializing LJPGT");
             var compressor = new LJTCompressor();
+            
+            Debug.Log("Initializing PoseLib");
+            var poseLib = new PoseLibSolver();
             Debug.Log("Initialized");
 
             while (true)
@@ -286,7 +297,29 @@ namespace QuestNav.Camera
                     foreach (var result in results)
                     {
                         Debug.Log(result);
+                        string corner3ds = "";
+                        foreach (var corner in aprilTagFieldLayout.GetTagCorners(result.Id))
+                        {
+                            corner3ds += $"{corner}, ";
+                        }
+                        Debug.Log($"3D Points: {corner3ds}");
                     }
+
+                    if (results.NumberOfDetections > 1)
+                    {
+                        Debug.Log("Trying to solve with PoseLib");
+                        var poseResult = poseLib.PoseLibSolve(results, aprilTagFieldLayout, this);
+
+                        if (poseResult != null)
+                        {
+                            Debug.Log(poseResult.CameraPose);
+                        }
+                        else
+                        {
+                            Debug.Log("PoseResult was null!");
+                        }
+                    }
+                    
                     results.Dispose();
                     
                     yield return new WaitForSeconds(FrameDelaySeconds);

@@ -8,6 +8,11 @@ namespace QuestNav.Native.AprilTag
     {
         public double x;
         public double y;
+
+        public override string ToString()
+        {
+            return $"X: {x},Y: {y}";
+        }
     }
 
     /// <summary>

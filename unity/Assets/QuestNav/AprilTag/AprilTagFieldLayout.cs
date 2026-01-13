@@ -18,11 +18,18 @@ namespace QuestNav.QuestNav.AprilTag
         public Field2d Field { get; set; }
         
         /// <summary>
+        /// Represents the physical size of the AprilTags on the field
+        /// </summary>
+        public double TagSize { get; }
+        
+        /// <summary>
         /// Creates a new AprilTagFieldLayout.
+        /// <param name="tagSize">The size of the tags in meters (black part)</param>
         /// <see cref="LoadJsonFromFileAsync">LoadJsonFromFileAsync</see> MUST be called prior to getting data
         /// </summary>
-        public AprilTagFieldLayout()
+        public AprilTagFieldLayout(double tagSize)
         {
+            TagSize = tagSize;
         }
 
         /// <summary>
@@ -48,22 +55,45 @@ namespace QuestNav.QuestNav.AprilTag
             QueuedLogger.Log($"Loaded new AprilTagFieldLayout '{filePath}' with {Tags.Count} tags");
         }
 
-        public double[] GetTagCorners(int id)
+        /// <summary>
+        /// Gets all four corners of the AprilTag in field relative space given the ID and loaded layout
+        /// </summary>
+        /// <param name="id">The ID of the tag's pose to get</param>
+        /// <returns>An array containing four Translation3Ds of the corners</returns>
+        public Translation3d[] GetTagCorners(int id)
         {
             foreach (var tag in Tags)
             {
-                if (tag.ID == id)
+                if (tag.ID != id) continue;
+                
+                var tagPose = tag.Pose;
+                double halfSize = TagSize / 2.0;
+                
+                var cornerTransforms = new Transform3d[] {
+                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()),  // Bottom-left
+                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()),  // Bottom-right
+                    new Transform3d(new Translation3d(0, -halfSize,  halfSize), new Rotation3d()),  // Top-right
+                    new Transform3d(new Translation3d(0, halfSize,  halfSize), new Rotation3d()),   // Top-left
+                };
+            
+                var fieldTransforms = new[]
                 {
-                  return new []
-                  {
-                      
-                  }
-                }
+                    // Index 0: lb (bottom-left from viewer)
+                    tagPose.Plus(cornerTransforms[0]).Translation,
+                    // Index 1: rb (bottom-right from viewer)
+                    tagPose.Plus(cornerTransforms[1]).Translation,
+                    // Index 2: rt (top-right from viewer)
+                    tagPose.Plus(cornerTransforms[2]).Translation,
+                    // Index 3: lt (top-left from viewer)
+                    tagPose.Plus(cornerTransforms[3]).Translation,
+                };
+
+                return fieldTransforms;
             }
             // ID does not exist in our list. Warn user
             QueuedLogger.LogWarning($"Attempted to get the pose of non-existent ID in the current field layout! ID: {id}");
-            return new double[] { };
-        } 
+            return new Translation3d[] { };
+        }
     }
 }
     

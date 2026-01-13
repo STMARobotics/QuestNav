@@ -4,7 +4,6 @@ using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
-using QuestNav.Native.CPnP;
 using QuestNav.QuestNav.AprilTag;
 using QuestNav.UI;
 using QuestNav.Utils;
@@ -258,12 +257,18 @@ namespace QuestNav.Core
                 autoStartToggle
             );
 
+            // TODO: find a home for this
+            var layoutTest = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
+            await layoutTest.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
+            
+            // TODO: Layout test and others should be seperated out into its own passthrough file
             // Initialize passthrough capture and start capture coroutine
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,
                 networkTableConnection.CreateCameraSource("Passthrough"),
-                configManager
+                configManager,
+                layoutTest
             );
 
             // Initialize web server manager with settings from WebServerConstants
@@ -304,8 +309,6 @@ namespace QuestNav.Core
             InvokeRepeating(nameof(MainUpdate), 0, 1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ);
 
             initialized = true;
-            var layoutTest = new AprilTagFieldLayout();
-            await layoutTest.LoadJsonFromFileAsync("2025-reefscape-welded.json");
         }
 
         /// <summary>

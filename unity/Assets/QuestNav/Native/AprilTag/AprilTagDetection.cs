@@ -77,10 +77,10 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Gets corner 0 of the tag in image pixel coordinates.
+        /// Gets the bottom left corner of the tag in image pixel coordinates.
         /// Corners wrap counter-clockwise around the tag.
         /// </summary>
-        public Point2D Corner0
+        public Point2D CornerBottomLeft0
         {
             get
             {
@@ -90,10 +90,10 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Gets corner 1 of the tag in image pixel coordinates.
+        /// Gets the bottom right corner of the tag in image pixel coordinates.
         /// Corners wrap counter-clockwise around the tag.
         /// </summary>
-        public Point2D Corner1
+        public Point2D CornerBottomRight1
         {
             get
             {
@@ -103,10 +103,10 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Gets corner 2 of the tag in image pixel coordinates.
+        /// Gets the upper corner right of the tag in image pixel coordinates.
         /// Corners wrap counter-clockwise around the tag.
         /// </summary>
-        public Point2D Corner2
+        public Point2D CornerUpperRight2
         {
             get
             {
@@ -116,10 +116,10 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Gets corner 3 of the tag in image pixel coordinates.
+        /// Gets the upper left corner of the tag in image pixel coordinates.
         /// Corners wrap counter-clockwise around the tag.
         /// </summary>
-        public Point2D Corner3
+        public Point2D CornerUpperLeft3
         {
             get
             {
@@ -135,7 +135,7 @@ namespace QuestNav.Native.AprilTag
         public Point2D[] GetCorners()
         {
             ThrowIfDisposed();
-            return new Point2D[] { Corner0, Corner1, Corner2, Corner3 };
+            return new Point2D[] { CornerBottomLeft0, CornerBottomRight1, CornerUpperRight2, CornerUpperLeft3 };
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace QuestNav.Native.AprilTag
                 + $"Hamming: {Hamming}\n"
                 + $"DecisionMargin: {DecisionMargin}\n"
                 + $"Center: X: {Center.x}, Y: {Center.y}\n"
-                + $"Corners: {GetCorners()}";
+                + $"Corners: BL: {CornerBottomLeft0}, BR: {CornerBottomRight1}, UR: {CornerUpperRight2}, UL: {CornerUpperLeft3}";
         }
 
         public void Dispose()

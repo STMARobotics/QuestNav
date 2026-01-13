@@ -13,6 +13,11 @@ namespace QuestNav.QuestNav.Geometry
         {
             Quaternion = quaternion;
         }
+        
+        public Rotation3d()
+        {
+            Quaternion = new Quaternion();
+        }
 
         public Rotation3d(ProtobufRotation3d protobuf)
         {
@@ -28,5 +33,25 @@ namespace QuestNav.QuestNav.Geometry
             return proto;
         }
         
+        public Rotation3d RotateBy(Rotation3d other) {
+            return new Rotation3d(other.Quaternion.Times(Quaternion));
+        }
+        
+        public Rotation3d Plus(Rotation3d other) {
+            return RotateBy(other);
+        }
+        
+        public Rotation3d Minus(Rotation3d other) {
+            return RotateBy(other.UnaryMinus());
+        }
+        
+        public Rotation3d UnaryMinus() {
+            return new Rotation3d(Quaternion.Inverse());
+        }
+        
+        public override string ToString()
+        {
+            return $"Rotation3d({Quaternion})";
+        }
     }
 }
