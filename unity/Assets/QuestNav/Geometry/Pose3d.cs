@@ -64,6 +64,7 @@ namespace QuestNav.QuestNav.Geometry
         /// </summary>
         /// <param name="translation">The translational component of the pose.</param>
         /// <param name="rotation">The rotational component of the pose.</param>
+        [JsonConstructor]
         public Pose3d(Translation3d translation, Rotation3d rotation)
         {
             this.Translation = translation ?? throw new ArgumentNullException(nameof(translation));

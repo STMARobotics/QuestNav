@@ -56,13 +56,13 @@ namespace QuestNav.Native.PoseLib
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
-                (ulong)detections.NumberOfDetections * 4,
+                (ulong) (detections.NumberOfDetections * 4),
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
                 passthroughFrameSource.cameraAccess.CurrentResolution.x,
                 passthroughFrameSource.cameraAccess.CurrentResolution.y,
                 intrinsicsArray,
                 4,
-                0.2,
+                12,
                 out var resultPose,
                 out ulong resultInliers
             );
