@@ -765,7 +765,7 @@ namespace QuestNav.Native.AprilTag
         {
             if (za == null)
                 return 0;
-            
+
             return za->size;
         }
 

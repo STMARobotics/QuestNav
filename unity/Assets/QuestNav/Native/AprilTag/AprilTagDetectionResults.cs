@@ -12,12 +12,12 @@ namespace QuestNav.Native.AprilTag
         /// Whether the array and the containing detections have been disposed yet
         /// </summary>
         private bool disposed;
-        
+
         /// <summary>
         /// The number of detections in the array
         /// </summary>
         public int NumberOfDetections { get; private set; }
-        
+
         /// <summary>
         /// Creates a new AprilTagDetectionResults object
         /// </summary>
@@ -39,12 +39,13 @@ namespace QuestNav.Native.AprilTag
             if (idx >= NumberOfDetections)
             {
                 throw new IndexOutOfRangeException(
-                    $"Attempted to access AprilTagDetection out of bounds {idx} for length {NumberOfDetections}");
+                    $"Attempted to access AprilTagDetection out of bounds {idx} for length {NumberOfDetections}"
+                );
             }
-            
+
             // Pull from index
             AprilTagNatives.zarray_get(Handle, idx, out var ptr);
-            
+
             // Return new AprilTagDetectionNative at that memory address
             return new AprilTagDetection((AprilTagDetectionNative*)ptr);
         }
@@ -68,7 +69,7 @@ namespace QuestNav.Native.AprilTag
         {
             return GetEnumerator();
         }
-        
+
         /// <summary>
         /// Disposes of ALL AprilTagDetection's
         /// </summary>
@@ -84,7 +85,7 @@ namespace QuestNav.Native.AprilTag
                 disposed = true;
             }
         }
-        
+
         /// <summary>
         /// Throws ObjectDisposedException if the detector has been disposed
         /// </summary>

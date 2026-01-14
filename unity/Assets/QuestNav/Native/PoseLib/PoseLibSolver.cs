@@ -52,26 +52,26 @@ namespace QuestNav.Native.PoseLib
                 pcaIntrinsics.PrincipalPoint.x,
                 pcaIntrinsics.PrincipalPoint.y,
             };
-            
+
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
-               (ulong) detections.NumberOfDetections * 4,
-                (int) PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
+                (ulong)detections.NumberOfDetections * 4,
+                (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
                 passthroughFrameSource.cameraAccess.CurrentResolution.x,
                 passthroughFrameSource.cameraAccess.CurrentResolution.y,
                 intrinsicsArray,
                 4,
                 0.2,
                 out var resultPose,
-                out ulong resultInliers);
-            
-        
+                out ulong resultInliers
+            );
+
             if (status == 0)
             {
                 return new PoseLibResult(resultPose, resultInliers);
             }
-            
+
             QueuedLogger.LogError($"PoseLib solve failed! Error code: {status}");
             return null;
         }

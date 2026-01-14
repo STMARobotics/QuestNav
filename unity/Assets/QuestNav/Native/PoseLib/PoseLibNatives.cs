@@ -4,8 +4,8 @@ namespace QuestNav.QuestNav.Native.PoseLib
 {
     public static class PoseLibNatives
     {
-        
-        public enum PoseLibCameraModelIdNative {
+        public enum PoseLibCameraModelIdNative
+        {
             POSELIB_CAMERA_NULL = -1,
             POSELIB_CAMERA_SIMPLE_PINHOLE = 0,
             POSELIB_CAMERA_PINHOLE = 1,
@@ -22,13 +22,13 @@ namespace QuestNav.QuestNav.Native.PoseLib
             /// Quaternion: [QW, QX, QY, QZ]
             /// </summary>
             public fixed double Q[4];
-            
+
             /// <summary>
             /// Translation: [X, Y, Z]
             /// </summary>
             public fixed double T[3];
         }
-        
+
         /// <summary>
         /// Estimate the camera pose from 2D-3D correspondences
         /// </summary>
@@ -47,17 +47,17 @@ namespace QuestNav.QuestNav.Native.PoseLib
         /// <returns>0 on success, non-zero on error</returns>
         [DllImport("poselib", CallingConvention = CallingConvention.Cdecl)]
         public static extern int poselib_estimate_absolute_pose_simple(
-        double[] points2d,
-        double[] points3d,
-        ulong numPoints,
-        int cameraModelID,
-        int imageWidth,
-        int imageHeight,
-        double[] cameraParams,
-        ulong numCameraParams,
-        double maxReprojError,
-        out PoseLibCameraPoseNative poseOut,
-        out ulong numInliersOut
+            double[] points2d,
+            double[] points3d,
+            ulong numPoints,
+            int cameraModelID,
+            int imageWidth,
+            int imageHeight,
+            double[] cameraParams,
+            ulong numCameraParams,
+            double maxReprojError,
+            out PoseLibCameraPoseNative poseOut,
+            out ulong numInliersOut
         );
     }
 }

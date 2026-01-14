@@ -34,7 +34,14 @@ namespace QuestNav.Native.AprilTag
         /// <param name="refineEdges">Whether to refine edges by snapping to strong gradients (default: true)</param>
         /// <param name="decodeSharpening">Decode sharpening amount (default: 0.25)</param>
         /// <param name="debug">Whether to write debugging images (default: false)</param>
-        public AprilTagDetector(int threadCount = 1, float quadDecimate = 2.0f, float quadSigma = 0.0f, bool refineEdges = true, double decodeSharpening = 0.25, bool debug = false)
+        public AprilTagDetector(
+            int threadCount = 1,
+            float quadDecimate = 2.0f,
+            float quadSigma = 0.0f,
+            bool refineEdges = true,
+            double decodeSharpening = 0.25,
+            bool debug = false
+        )
         {
             Handle = AprilTagNatives.apriltag_detector_create();
             if (Handle == null)
@@ -287,14 +294,14 @@ namespace QuestNav.Native.AprilTag
                     tagFamily.Dispose();
                 }
                 RemoveAllFamilies();
-                
+
                 // Dispose of the actual detector
                 if (Handle != null)
                 {
                     AprilTagNatives.apriltag_detector_destroy(Handle);
                     Handle = null;
                 }
-                
+
                 disposed = true;
             }
         }

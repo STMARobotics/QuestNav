@@ -8,7 +8,6 @@ using Wpi.Proto;
 
 namespace QuestNav.QuestNav.AprilTag
 {
-    
     public class AprilTagFieldLayout
     {
         [JsonProperty("tags")]
@@ -16,12 +15,12 @@ namespace QuestNav.QuestNav.AprilTag
 
         [JsonProperty("field")]
         public Field2d Field { get; set; }
-        
+
         /// <summary>
         /// Represents the physical size of the AprilTags on the field
         /// </summary>
         public double TagSize { get; }
-        
+
         /// <summary>
         /// Creates a new AprilTagFieldLayout.
         /// <param name="tagSize">The size of the tags in meters (black part)</param>
@@ -46,12 +45,14 @@ namespace QuestNav.QuestNav.AprilTag
             string filePath = $"{filesPath}/{fileName}";
             using var file = File.OpenText(filePath);
             var jsonSerializer = new JsonSerializer();
-            var root = (AprilTagFieldLayout) jsonSerializer.Deserialize(file, typeof(AprilTagFieldLayout));
-            
-            if (root == null) return;
+            var root = (AprilTagFieldLayout)
+                jsonSerializer.Deserialize(file, typeof(AprilTagFieldLayout));
+
+            if (root == null)
+                return;
             Tags = root.Tags;
             Field = root.Field;
-            
+
             QueuedLogger.Log($"Loaded new AprilTagFieldLayout '{filePath}' with {Tags.Count} tags");
         }
 
@@ -64,18 +65,20 @@ namespace QuestNav.QuestNav.AprilTag
         {
             foreach (var tag in Tags)
             {
-                if (tag.ID != id) continue;
-                
+                if (tag.ID != id)
+                    continue;
+
                 var tagPose = tag.Pose;
                 double halfSize = TagSize / 2.0;
-                
-                var cornerTransforms = new Transform3d[] {
-                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()),  // Bottom-left
-                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()),  // Bottom-right
-                    new Transform3d(new Translation3d(0, -halfSize,  halfSize), new Rotation3d()),  // Top-right
-                    new Transform3d(new Translation3d(0, halfSize,  halfSize), new Rotation3d()),   // Top-left
+
+                var cornerTransforms = new Transform3d[]
+                {
+                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // Bottom-left
+                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // Bottom-right
+                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // Top-right
+                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // Top-left
                 };
-            
+
                 var fieldTransforms = new[]
                 {
                     // Index 0: lb (bottom-left from viewer)
@@ -91,9 +94,10 @@ namespace QuestNav.QuestNav.AprilTag
                 return fieldTransforms;
             }
             // ID does not exist in our list. Warn user
-            QueuedLogger.LogWarning($"Attempted to get the pose of non-existent ID in the current field layout! ID: {id}");
+            QueuedLogger.LogWarning(
+                $"Attempted to get the pose of non-existent ID in the current field layout! ID: {id}"
+            );
             return new Translation3d[] { };
         }
     }
 }
-    

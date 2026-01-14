@@ -135,7 +135,13 @@ namespace QuestNav.Native.AprilTag
         public Point2D[] GetCorners()
         {
             ThrowIfDisposed();
-            return new Point2D[] { CornerBottomLeft0, CornerBottomRight1, CornerUpperRight2, CornerUpperLeft3 };
+            return new Point2D[]
+            {
+                CornerBottomLeft0,
+                CornerBottomRight1,
+                CornerUpperRight2,
+                CornerUpperLeft3,
+            };
         }
 
         /// <summary>

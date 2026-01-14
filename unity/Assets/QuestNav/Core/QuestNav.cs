@@ -260,7 +260,7 @@ namespace QuestNav.Core
             // TODO: find a home for this
             var layoutTest = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
             await layoutTest.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
-            
+
             // TODO: Layout test and others should be seperated out into its own passthrough file
             // Initialize passthrough capture and start capture coroutine
             passthroughFrameSource = new PassthroughFrameSource(

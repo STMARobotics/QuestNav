@@ -14,18 +14,25 @@ namespace QuestNav.Utils
         /// <param name="sourceDirRelative">Source path from the StreamingAssets root</param>
         /// <param name="targetDirAbsolute">Destination path relative to the whole project
         /// (should most likely be extracted into StreamingAssets)</param>
-        public async static Task ExtractAndroidFileAsync(string fileName, string sourceDirRelative, string targetDirAbsolute)
+        public async static Task ExtractAndroidFileAsync(
+            string fileName,
+            string sourceDirRelative,
+            string targetDirAbsolute
+        )
         {
-            string sourceDirAbsolute = Path.Combine(Application.streamingAssetsPath, sourceDirRelative);
-            
+            string sourceDirAbsolute = Path.Combine(
+                Application.streamingAssetsPath,
+                sourceDirRelative
+            );
+
             string sourceFileAbsolute = Path.Combine(sourceDirAbsolute, fileName);
             string targetFileAbsolute = Path.Combine(targetDirAbsolute, fileName);
-            
+
             if (!Directory.Exists(targetDirAbsolute))
             {
                 Directory.CreateDirectory(targetDirAbsolute);
             }
-            
+
             using var www = UnityEngine.Networking.UnityWebRequest.Get(sourceFileAbsolute);
             var operation = www.SendWebRequest();
             while (!operation.isDone)

@@ -344,9 +344,9 @@ namespace QuestNav.WebServer
             string assetsDir = Path.Combine(targetPath, "assets");
             Directory.CreateDirectory(assetsDir);
 
-            await FileManager.ExtractAndroidFileAsync("index.html","ui", targetPath);
-            await FileManager.ExtractAndroidFileAsync("main.css","ui/assets", assetsDir);
-            await FileManager.ExtractAndroidFileAsync("main.js","ui/assets", assetsDir);
+            await FileManager.ExtractAndroidFileAsync("index.html", "ui", targetPath);
+            await FileManager.ExtractAndroidFileAsync("main.css", "ui/assets", assetsDir);
+            await FileManager.ExtractAndroidFileAsync("main.js", "ui/assets", assetsDir);
             await FileManager.ExtractAndroidFileAsync("logo.svg", "ui", targetPath);
             await FileManager.ExtractAndroidFileAsync("logo-dark.svg", "ui", targetPath);
 

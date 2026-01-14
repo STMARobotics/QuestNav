@@ -230,7 +230,7 @@ namespace QuestNav.Camera
                 }
             }
         }
-        
+
         /// <summary>
         /// Captures frames from the passthrough camera at the requested frame rate and encodes them as JPEG.
         /// </summary>
@@ -239,7 +239,10 @@ namespace QuestNav.Camera
             // START DEBUG:
             Debug.Log("Starting AprilTag");
             Debug.Log("Creating detector");
-            AprilTagDetector aprilTagDetector = new AprilTagDetector(threadCount:5, quadDecimate:2);
+            AprilTagDetector aprilTagDetector = new AprilTagDetector(
+                threadCount: 5,
+                quadDecimate: 2
+            );
 
             Debug.Log("Creating family");
             AprilTagFamily family = new Tag36h11();
@@ -249,7 +252,7 @@ namespace QuestNav.Camera
 
             Debug.Log("Initializing LJPGT");
             var compressor = new LJTCompressor();
-            
+
             Debug.Log("Initializing PoseLib");
             var poseLib = new PoseLibSolver();
             Debug.Log("Initialized");
@@ -257,11 +260,12 @@ namespace QuestNav.Camera
             while (true)
             {
                 Texture texture;
-                
+
                 try
                 {
                     texture = cameraAccess.GetTexture();
-                } catch (NullReferenceException ex)
+                }
+                catch (NullReferenceException ex)
                 {
                     // This probably means the app hasn't been given permission to access the headset camera.
                     QueuedLogger.LogError(
@@ -269,60 +273,59 @@ namespace QuestNav.Camera
                     );
                     yield break;
                 }
-                
-                
+
                 // var texture = cameraAccess.GetTexture();
-                    // if (texture is not Texture2D texture2D)
-                    // {
-                    //     QueuedLogger.LogError(
-                    //         $"GetTexture returned an incompatible object ({texture.GetType().Name})"
-                    //     );
-                    //     yield break;
-                    // }
-                    // // rawJpeg = compressor.EncodeJPG(texture2D, 30);
-                    // CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
+                // if (texture is not Texture2D texture2D)
+                // {
+                //     QueuedLogger.LogError(
+                //         $"GetTexture returned an incompatible object ({texture.GetType().Name})"
+                //     );
+                //     yield break;
+                // }
+                // // rawJpeg = compressor.EncodeJPG(texture2D, 30);
+                // CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
 
-                    var colors = cameraAccess.GetColors();
-                    var resolution = cameraAccess.CurrentResolution;
-                    using var nativeImg = ImageU8.FromPassthroughCamera(
-                        colors,
-                        resolution.x,
-                        resolution.y,
-                        flipVertically: true
-                    );
+                var colors = cameraAccess.GetColors();
+                var resolution = cameraAccess.CurrentResolution;
+                using var nativeImg = ImageU8.FromPassthroughCamera(
+                    colors,
+                    resolution.x,
+                    resolution.y,
+                    flipVertically: true
+                );
 
-                    // Debug.Log("Passing frame into detector");
-                    var results = aprilTagDetector.Detect(nativeImg);
-                    // Debug.Log("Printing results");
-                    foreach (var result in results)
+                // Debug.Log("Passing frame into detector");
+                var results = aprilTagDetector.Detect(nativeImg);
+                // Debug.Log("Printing results");
+                foreach (var result in results)
+                {
+                    Debug.Log(result);
+                    string corner3ds = "";
+                    foreach (var corner in aprilTagFieldLayout.GetTagCorners(result.Id))
                     {
-                        Debug.Log(result);
-                        string corner3ds = "";
-                        foreach (var corner in aprilTagFieldLayout.GetTagCorners(result.Id))
-                        {
-                            corner3ds += $"{corner}, ";
-                        }
-                        Debug.Log($"3D Points: {corner3ds}");
+                        corner3ds += $"{corner}, ";
                     }
+                    Debug.Log($"3D Points: {corner3ds}");
+                }
 
-                    if (results.NumberOfDetections > 1)
+                if (results.NumberOfDetections > 1)
+                {
+                    Debug.Log("Trying to solve with PoseLib");
+                    var poseResult = poseLib.PoseLibSolve(results, aprilTagFieldLayout, this);
+
+                    if (poseResult != null)
                     {
-                        Debug.Log("Trying to solve with PoseLib");
-                        var poseResult = poseLib.PoseLibSolve(results, aprilTagFieldLayout, this);
-
-                        if (poseResult != null)
-                        {
-                            Debug.Log(poseResult.CameraPose);
-                        }
-                        else
-                        {
-                            Debug.Log("PoseResult was null!");
-                        }
+                        Debug.Log(poseResult.CameraPose);
                     }
-                    
-                    results.Dispose();
-                    
-                    yield return new WaitForSeconds(FrameDelaySeconds);
+                    else
+                    {
+                        Debug.Log("PoseResult was null!");
+                    }
+                }
+
+                results.Dispose();
+
+                yield return new WaitForSeconds(FrameDelaySeconds);
             }
         }
     }
