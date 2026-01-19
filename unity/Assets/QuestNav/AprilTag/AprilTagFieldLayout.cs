@@ -73,21 +73,21 @@ namespace QuestNav.QuestNav.AprilTag
 
                 var cornerTransforms = new Transform3d[]
                 {
-                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // Bottom-left
-                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // Bottom-right
-                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // Top-right
-                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // Top-left
+                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // Corner1: Bottom-right
+                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // Corner0: Bottom-left
+                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // Corner3: Upper-left
+                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // Corner2: Upper-right
                 };
 
                 var fieldTransforms = new[]
                 {
-                    // Index 0: lb (bottom-left from viewer)
+                    // Index 0: br (bottom-right from viewer)
                     tagPose.Plus(cornerTransforms[0]).Translation,
-                    // Index 1: rb (bottom-right from viewer)
+                    // Index 1: bl (bottom-left from viewer)
                     tagPose.Plus(cornerTransforms[1]).Translation,
-                    // Index 2: rt (top-right from viewer)
+                    // Index 2: ul (upper-left from viewer)
                     tagPose.Plus(cornerTransforms[2]).Translation,
-                    // Index 3: lt (top-left from viewer)
+                    // Index 3: ur (upper-right from viewer)
                     tagPose.Plus(cornerTransforms[3]).Translation,
                 };
 
