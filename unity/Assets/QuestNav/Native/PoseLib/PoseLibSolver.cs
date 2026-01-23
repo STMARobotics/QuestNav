@@ -13,6 +13,11 @@ namespace QuestNav.Native.PoseLib
 {
     public class PoseLibSolver
     {
+        public PoseLibSolver()
+        {
+            
+        }
+        
         public PoseLibResult PoseLibSolve(
             AprilTagDetectionResults detections,
             AprilTagFieldLayout fieldLayout,
