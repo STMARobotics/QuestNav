@@ -13,15 +13,29 @@ namespace QuestNav.Native.PoseLib
 {
     public class PoseLibSolver
     {
-        public PoseLibSolver()
+        private readonly double[] intrinsicsArray;
+        private readonly int resolutionX;
+        private readonly int resolutionY;
+        private readonly AprilTagFieldLayout fieldLayout;
+        
+        public PoseLibSolver(AprilTagFieldLayout fieldLayout, PassthroughCameraAccess.CameraIntrinsics intrinsics)
         {
+            this.fieldLayout = fieldLayout;
             
+            intrinsicsArray = new double[]
+            {
+                intrinsics.FocalLength.x,
+                intrinsics.FocalLength.y,
+                intrinsics.PrincipalPoint.x,
+                intrinsics.PrincipalPoint.y,
+            };
+
+            resolutionX = intrinsics.SensorResolution.x;
+            resolutionY = intrinsics.SensorResolution.y;
         }
         
         public PoseLibResult PoseLibSolve(
-            AprilTagDetectionResults detections,
-            AprilTagFieldLayout fieldLayout,
-            PassthroughFrameSource passthroughFrameSource
+            AprilTagDetectionResults detections
         )
         {
             var corners2d = new List<double>();
@@ -49,22 +63,15 @@ namespace QuestNav.Native.PoseLib
                     corners3d.Add(corner3d.Z);
                 }
             }
-            var pcaIntrinsics = passthroughFrameSource.cameraAccess.Intrinsics;
-            double[] intrinsicsArray = new double[]
-            {
-                pcaIntrinsics.FocalLength.x,
-                pcaIntrinsics.FocalLength.y,
-                pcaIntrinsics.PrincipalPoint.x,
-                pcaIntrinsics.PrincipalPoint.y,
-            };
+             
 
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
                 (ulong) (detections.NumberOfDetections * 4),
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
-                passthroughFrameSource.cameraAccess.CurrentResolution.x,
-                passthroughFrameSource.cameraAccess.CurrentResolution.y,
+                resolutionX,
+                resolutionY,
                 intrinsicsArray,
                 4,
                 12,

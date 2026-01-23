@@ -267,8 +267,7 @@ namespace QuestNav.Core
                 this,
                 cameraAccess,
                 networkTableConnection.CreateCameraSource("Passthrough"),
-                configManager,
-                layoutTest
+                configManager
             );
 
             // Initialize web server manager with settings from WebServerConstants
