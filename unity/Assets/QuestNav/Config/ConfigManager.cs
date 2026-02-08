@@ -26,6 +26,7 @@ namespace QuestNav.Config
         public Task CloseAsync();
 
         #region Events
+        #region Network
         /// <summary>
         /// Raised when team number changes.
         /// </summary>
@@ -35,12 +36,16 @@ namespace QuestNav.Config
         /// Raised when debug IP override changes.
         /// </summary>
         public event Action<string> OnDebugIpOverrideChanged;
+        #endregion
 
+        #region System
         /// <summary>
         /// Raised when auto-start on boot setting changes.
         /// </summary>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
+        #endregion
 
+        #region Camera
         /// <summary>
         /// Raised when passthrough stream setting changes.
         /// </summary>
@@ -50,29 +55,29 @@ namespace QuestNav.Config
         /// Raised when stream mode changes.
         /// </summary>
         public event Action<StreamMode> OnPassthroughStreamModeChanged;
-        
-        /// <summary>
-        /// Raised when AprilTag stream enable/disable changes. NOT THE SETTINGS OF THE DETECTOR ITSELF! 
-        /// </summary>
-        public event Action<bool> OnEnableAprilTagStreamChanged;
-
-        /// <summary>
-        /// Raised when stream mode changes for the AprilTag stream. NOT THE SETTINGS OF THE DETECTOR ITSELF!
-        /// </summary>
-        public event Action<StreamMode> OnAprilTagStreamModeChanged;
 
         /// <summary>
         /// Raised when the high quality stream setting changes.
         /// </summary>
         public event Action<bool> OnEnableHighQualityStreamsChanged;
+        #endregion
 
+        #region AprilTag
+        public event Action<bool> OnEnableAprilTagDetectorChanged;
+
+        public event Action<AprilTagDetectorMode> OnAprilTagDetectorModeChanged;
+        #endregion
+
+        #region Logging
         /// <summary>
         /// Raised when debug logging setting changes.
         /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
         #endregion
+        #endregion
 
         #region Getters
+        #region Network
         /// <summary>
         /// Gets the configured team number.
         /// </summary>
@@ -88,7 +93,9 @@ namespace QuestNav.Config
         /// The IP address string, or empty if using team number.
         /// </returns>
         public Task<string> GetDebugIpOverrideAsync();
+        #endregion
 
+        #region System
         /// <summary>
         /// Gets whether auto-start on boot is enabled.
         /// </summary>
@@ -96,7 +103,9 @@ namespace QuestNav.Config
         /// True if auto-start is enabled.
         /// </returns>
         public Task<bool> GetEnableAutoStartOnBootAsync();
+        #endregion
 
+        #region Camera
         /// <summary>
         /// Gets whether streaming the passthrough camera feed over NT and
         /// </summary>
@@ -112,22 +121,6 @@ namespace QuestNav.Config
         /// The stream mode with width, height, and framerate.
         /// </returns>
         public Task<StreamMode> GetPassthroughStreamModeAsync();
-
-        /// <summary>
-        /// Gets whether streaming the apriltag camera feed over NT and webui (NOT IF THE DETECTOR IS ENABLED)
-        /// </summary>
-        /// <returns>
-        /// True if streaming is enabled.
-        /// </returns>
-        public Task<bool> GetEnableAprilTagStreamAsync();
-
-        /// <summary>
-        /// Gets the stream mode configuration. NOT THE APRILTAG DETECTOR OPTIONS
-        /// </summary>
-        /// <returns>
-        /// The stream mode with width, height, and framerate.
-        /// </returns>
-        public Task<StreamMode> GetAprilTagStreamModeAsync();
         
         /// <summary>
         /// Gets whether high quality streaming is enabled for both the AprilTag and Passthrough streams.
@@ -136,7 +129,15 @@ namespace QuestNav.Config
         /// True if high quality streaming is enabled.
         /// </returns>
         public Task<bool> GetEnableHighQualityStreamsAsync();
+        #endregion
+
+        #region AprilTag
+        public Task<bool> GetEnableAprilTagDetectorAsync();
+
+        public Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync();
+        #endregion
         
+        #region Logging
         /// <summary>
         /// Gets whether debug logging is enabled.
         /// </summary>
@@ -145,8 +146,10 @@ namespace QuestNav.Config
         /// </returns>
         public Task<bool> GetEnableDebugLoggingAsync();
         #endregion
+        #endregion
 
         #region Setters
+        #region Network
         /// <summary>
         /// Sets the team number and clears IP override
         /// .</summary>
@@ -158,12 +161,16 @@ namespace QuestNav.Config
         /// </summary>
         /// <seealso cref="SetTeamNumberAsync"/>
         public Task SetDebugIpOverrideAsync(string ipOverride);
+        #endregion
 
+        #region System
         /// <summary>
         /// Sets whether to auto-start on boot.
         /// </summary>
         public Task SetEnableAutoStartOnBootAsync(bool autoStart);
+        #endregion
 
+        #region Camera
         /// <summary>
         /// Sets whether to stream passthrough camera over NT and WebUI
         /// </summary>
@@ -173,26 +180,24 @@ namespace QuestNav.Config
         /// Sets the stream mode configuration.
         /// </summary>
         public Task SetPassthroughStreamModeAsync(StreamMode mode);
-
-        /// <summary>
-        /// Sets whether to stream AprilTag camera over NT and WebUI. NOT THE STATUS OF THE APRILTAG DETECTOR.
-        /// </summary>
-        public Task SetEnableAprilTagStreamAsync(bool enable);
-        
-        /// <summary>
-        /// Sets the stream mode configuration for the AprilTag stream. NOT THE APRILTAG DETECTOR SETTINGS.
-        /// </summary>
-        public Task SetAprilTagStreamModeAsync(StreamMode mode);
         
         /// <summary>
         /// Sets whether to allow high quality stream modes.
         /// </summary>
         public Task SetEnableHighQualityStreamsAsync(bool enabled);
+        #endregion
 
+        #region AprilTag
+        public Task SetEnableAprilTagDetectorAsync(bool enable);
+
+        public Task SetAprilTagDetectorModeAsnyc(AprilTagDetectorMode mode);
+        #endregion
+        #region Logging
         /// <summary>
         /// Sets whether debug logging is enabled.
         /// </summary>
         public Task SetEnableDebugLoggingAsync(bool enableDebugLogging);
+        #endregion
         #endregion
 
         /// <summary>
@@ -231,6 +236,7 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.Network>();
             await connection.CreateTableAsync<Config.System>();
             await connection.CreateTableAsync<Config.Camera>();
+            await connection.CreateTableAsync<Config.AprilTag>();
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
@@ -239,9 +245,14 @@ namespace QuestNav.Config
             OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
+            
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
             OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
             OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
+            
+            OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
+            OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
+            
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -251,10 +262,12 @@ namespace QuestNav.Config
             var networkDefaults = new Config.Network();
             var systemDefaults = new Config.System();
             var cameraDefaults = new Config.Camera();
+            var aprilTagDefaults = new Config.AprilTag();
             var loggingDefaults = new Config.Logging();
 
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
+            
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
             await SetEnableHighQualityStreamsAsync(cameraDefaults.EnableHighQualityStreams);
             await SetPassthroughStreamModeAsync(
@@ -265,6 +278,20 @@ namespace QuestNav.Config
                     cameraDefaults.PassthroughStreamQuality
                 )
             );
+
+            await SetEnableAprilTagDetectorAsync(aprilTagDefaults.EnableAprilTagDetector);
+            await SetAprilTagDetectorModeAsnyc(
+                new AprilTagDetectorMode(
+                    (AprilTagDetectorMode.DetectionMode)aprilTagDefaults.AprilTagDetectorMode,
+                    aprilTagDefaults.AprilTagDetectorWidth,
+                    aprilTagDefaults.AprilTagDetectorHeight,
+                    aprilTagDefaults.AprilTagDetectorFramerate,
+                    aprilTagDefaults.AprilTagDetectorAllowedIds,
+                    aprilTagDefaults.AprilTagDetectorMaxDistance,
+                    aprilTagDefaults.AprilTagDetectorMinimumNumberOfTags
+                )
+            );
+            
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
@@ -282,15 +309,20 @@ namespace QuestNav.Config
         #endregion
 
         #region Events
+        #region Network
         /// <inheritdoc/>
         public event Action<int> OnTeamNumberChanged;
 
         /// <inheritdoc/>
         public event Action<string> OnDebugIpOverrideChanged;
+        #endregion
 
+        #region System
         /// <inheritdoc/>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
+        #endregion
 
+        #region Camera
         /// <inheritdoc/>
         public event Action<bool> OnEnablePassthroughStreamChanged;
 
@@ -298,16 +330,21 @@ namespace QuestNav.Config
         public event Action<StreamMode> OnPassthroughStreamModeChanged;
 
         /// <inheritdoc/>
-        public event Action<bool> OnEnableAprilTagStreamChanged;
-
-        /// <inheritdoc/>
-        public event Action<StreamMode> OnAprilTagStreamModeChanged;
-
-        /// <inheritdoc/>
         public event Action<bool> OnEnableHighQualityStreamsChanged;
+        #endregion
 
+        #region AprilTag
+        /// <inheritdoc/>
+        public event Action<bool> OnEnableAprilTagDetectorChanged;
+
+        /// <inheritdoc/>
+        public event Action<AprilTagDetectorMode> OnAprilTagDetectorModeChanged;
+        #endregion
+
+        #region Logging
         /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
+        #endregion
         #endregion
 
         #region Getters
@@ -360,27 +397,6 @@ namespace QuestNav.Config
                 config.PassthroughStreamQuality
             );
         }
-
-        /// <inheritdoc/>
-        public async Task<bool> GetEnableAprilTagStreamAsync()
-        {
-            var config = await GetCameraConfigAsync();
-
-            return config.EnableAprilTagStream;
-        }
-
-        /// <inheritdoc/>
-        public async Task<StreamMode> GetAprilTagStreamModeAsync()
-        {
-            var config = await GetCameraConfigAsync();
-
-            return new StreamMode(
-                config.AprilTagStreamWidth,
-                config.AprilTagStreamHeight,
-                config.AprilTagStreamFramerate,
-                config.AprilTagStreamQuality
-                );
-        }
         
         /// <inheritdoc/>
         public async Task<bool> GetEnableHighQualityStreamsAsync()
@@ -392,6 +408,32 @@ namespace QuestNav.Config
         
         #endregion
 
+        #region AprilTag
+        /// <inheritdoc/>
+        public async Task<bool> GetEnableAprilTagDetectorAsync()
+        {
+            var config = await GetAprilTagConfigAsync();
+
+            return config.EnableAprilTagDetector;
+        }
+
+        /// <inheritdoc/>
+        public async Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync()
+        {
+            var config = await GetAprilTagConfigAsync();
+
+            return new AprilTagDetectorMode(
+                (AprilTagDetectorMode.DetectionMode)config.AprilTagDetectorMode,
+                config.AprilTagDetectorWidth,
+                config.AprilTagDetectorHeight,
+                config.AprilTagDetectorFramerate,
+                config.AprilTagDetectorAllowedIds,
+                config.AprilTagDetectorMaxDistance,
+                config.AprilTagDetectorMinimumNumberOfTags
+            );
+        }
+        #endregion
+        
         #region Logging
         /// <inheritdoc/>
         public async Task<bool> GetEnableDebugLoggingAsync()
@@ -494,33 +536,6 @@ namespace QuestNav.Config
             invokeOnMainThread(() => OnPassthroughStreamModeChanged?.Invoke(mode));
             QueuedLogger.Log($"Updated Key 'passthroughStreamMode' to {mode}");
         }
-
-        /// <inheritdoc/>
-        public async Task SetEnableAprilTagStreamAsync(bool enable)
-        {
-            var config = await GetCameraConfigAsync();
-            config.EnableAprilTagStream = enable;
-            await SaveCameraConfigAsync(config);
-
-            // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableAprilTagStreamChanged?.Invoke(enable));
-            QueuedLogger.Log($"Updated Key 'enableAprilTagStream' to {enable}");
-        }
-        
-        /// <inheritdoc/>
-        public async Task SetAprilTagStreamModeAsync(StreamMode mode)
-        {
-            var config = await GetCameraConfigAsync();
-            config.AprilTagStreamWidth = mode.Width;
-            config.AprilTagStreamHeight = mode.Height;
-            config.AprilTagStreamFramerate = mode.Framerate;
-            config.AprilTagStreamQuality = mode.Quality;
-            await SaveCameraConfigAsync(config);
-
-            // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnAprilTagStreamModeChanged?.Invoke(mode));
-            QueuedLogger.Log($"Updated Key 'aprilTagStreamMode' to {mode}");
-        }
         
         /// <inheritdoc/>
         public async Task SetEnableHighQualityStreamsAsync(bool enabled)
@@ -532,6 +547,32 @@ namespace QuestNav.Config
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnEnableHighQualityStreamsChanged?.Invoke(enabled));
             QueuedLogger.Log($"Updated Key 'enableHighQualityStreams' to {enabled}");
+        }
+        #endregion
+
+        #region AprilTag
+        /// <inheritdoc/>
+        public async Task SetEnableAprilTagDetectorAsync(bool enable)
+        {
+            var config = await GetAprilTagConfigAsync();
+            config.EnableAprilTagDetector = enable;
+            
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnEnableAprilTagDetectorChanged?.Invoke(enable));
+            QueuedLogger.Log($"Updated Key 'enableAprilTagDetector' to {enable}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetAprilTagDetectorModeAsnyc(AprilTagDetectorMode mode)
+        {
+            var config = await GetAprilTagConfigAsync();
+            config.AprilTagDetectorMode = (int) mode.Mode;
+            config.AprilTagDetectorWidth = mode.Width;
+            config.AprilTagDetectorHeight = mode.Height;
+            config.AprilTagDetectorFramerate = mode.Framerate;
+            config.AprilTagDetectorAllowedIds = mode.AllowedIds;
+            config.AprilTagDetectorMaxDistance = mode.MaxDistance;
+            config.AprilTagDetectorMinimumNumberOfTags = mode.MinimumNumberOfTags;
         }
         #endregion
 
@@ -599,6 +640,22 @@ namespace QuestNav.Config
             }
             return config;
         }
+        
+        /// <summary>
+        /// Gets AprilTag config from DB, creating defaults if not found.
+        /// </summary>
+        private async Task<Config.AprilTag> GetAprilTagConfigAsync()
+        {
+            var config = await connection.FindAsync<Config.AprilTag>(1);
+
+            // If we don't find one, create a new one with defaults
+            if (config == null)
+            {
+                config = new Config.AprilTag();
+                await SaveAprilTagConfigAsync(config);
+            }
+            return config;
+        }
 
         /// <summary>
         /// Gets logging config from DB, creating defaults if not found.
@@ -640,6 +697,15 @@ namespace QuestNav.Config
         /// Persists camera config to the database.
         /// </summary>
         private async Task SaveCameraConfigAsync(Config.Camera config)
+        {
+            config.ID = 1;
+            await connection.InsertOrReplaceAsync(config);
+        }
+        
+        /// <summary>
+        /// Persists AprilTag config to the database.
+        /// </summary>
+        private async Task SaveAprilTagConfigAsync(Config.AprilTag config)
         {
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
