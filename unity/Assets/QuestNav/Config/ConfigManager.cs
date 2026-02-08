@@ -63,8 +63,14 @@ namespace QuestNav.Config
         #endregion
 
         #region AprilTag
+        /// <summary>
+        /// Raised when AprilTag detector enabled setting changes.
+        /// </summary>
         public event Action<bool> OnEnableAprilTagDetectorChanged;
 
+        /// <summary>
+        /// Raised when AprilTag detector mode changes.
+        /// </summary>
         public event Action<AprilTagDetectorMode> OnAprilTagDetectorModeChanged;
         #endregion
 
@@ -132,8 +138,20 @@ namespace QuestNav.Config
         #endregion
 
         #region AprilTag
+        /// <summary>
+        /// Gets whether AprilTag detector is enabled.
+        /// </summary>
+        /// <returns>
+        /// True if AprilTag detector is enabled.
+        /// </returns>
         public Task<bool> GetEnableAprilTagDetectorAsync();
 
+        /// <summary>
+        /// Gets the AprilTag detector mode configuration.
+        /// </summary>
+        /// <returns>
+        /// The detector mode with detection mode, resolution, framerate, and filter settings.
+        /// </returns>
         public Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync();
         #endregion
         
@@ -188,8 +206,14 @@ namespace QuestNav.Config
         #endregion
 
         #region AprilTag
+        /// <summary>
+        /// Sets whether to enable AprilTag detector.
+        /// </summary>
         public Task SetEnableAprilTagDetectorAsync(bool enable);
 
+        /// <summary>
+        /// Sets the AprilTag detector mode configuration.
+        /// </summary>
         public Task SetAprilTagDetectorModeAsnyc(AprilTagDetectorMode mode);
         #endregion
         #region Logging
@@ -556,6 +580,7 @@ namespace QuestNav.Config
         {
             var config = await GetAprilTagConfigAsync();
             config.EnableAprilTagDetector = enable;
+            await SaveAprilTagConfigAsync(config);
             
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnEnableAprilTagDetectorChanged?.Invoke(enable));
@@ -573,6 +598,11 @@ namespace QuestNav.Config
             config.AprilTagDetectorAllowedIds = mode.AllowedIds;
             config.AprilTagDetectorMaxDistance = mode.MaxDistance;
             config.AprilTagDetectorMinimumNumberOfTags = mode.MinimumNumberOfTags;
+            await SaveAprilTagConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
+            QueuedLogger.Log($"Updated Key 'aprilTagDetectorMode' to {mode}");
         }
         #endregion
 
@@ -596,6 +626,9 @@ namespace QuestNav.Config
         /// <summary>
         /// Gets network config from DB, creating defaults if not found.
         /// </summary>
+        /// <returns>
+        /// The network configuration.
+        /// </returns>
         private async Task<Config.Network> GetNetworkConfigAsync()
         {
             var config = await connection.FindAsync<Config.Network>(1);
@@ -612,6 +645,9 @@ namespace QuestNav.Config
         /// <summary>
         /// Gets system config from DB, creating defaults if not found.
         /// </summary>
+        /// <returns>
+        /// The system configuration.
+        /// </returns>
         private async Task<Config.System> GetSystemConfigAsync()
         {
             var config = await connection.FindAsync<Config.System>(1);
@@ -628,6 +664,9 @@ namespace QuestNav.Config
         /// <summary>
         /// Gets camera config from DB, creating defaults if not found.
         /// </summary>
+        /// <returns>
+        /// The camera configuration.
+        /// </returns>
         private async Task<Config.Camera> GetCameraConfigAsync()
         {
             var config = await connection.FindAsync<Config.Camera>(1);
@@ -644,6 +683,9 @@ namespace QuestNav.Config
         /// <summary>
         /// Gets AprilTag config from DB, creating defaults if not found.
         /// </summary>
+        /// <returns>
+        /// The AprilTag configuration.
+        /// </returns>
         private async Task<Config.AprilTag> GetAprilTagConfigAsync()
         {
             var config = await connection.FindAsync<Config.AprilTag>(1);
@@ -660,6 +702,9 @@ namespace QuestNav.Config
         /// <summary>
         /// Gets logging config from DB, creating defaults if not found.
         /// </summary>
+        /// <returns>
+        /// The logging configuration.
+        /// </returns>
         private async Task<Config.Logging> GetLoggingConfigAsync()
         {
             var config = await connection.FindAsync<Config.Logging>(1);
@@ -678,6 +723,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Persists system config to the database.
         /// </summary>
+        /// <param name="config">The system configuration to save.</param>
         private async Task SaveSystemConfigAsync(Config.System config)
         {
             config.ID = 1;
@@ -687,6 +733,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Persists network config to the database.
         /// </summary>
+        /// <param name="config">The network configuration to save.</param>
         private async Task SaveNetworkConfigAsync(Config.Network config)
         {
             config.ID = 1;
@@ -696,6 +743,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Persists camera config to the database.
         /// </summary>
+        /// <param name="config">The camera configuration to save.</param>
         private async Task SaveCameraConfigAsync(Config.Camera config)
         {
             config.ID = 1;
@@ -705,6 +753,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Persists AprilTag config to the database.
         /// </summary>
+        /// <param name="config">The AprilTag configuration to save.</param>
         private async Task SaveAprilTagConfigAsync(Config.AprilTag config)
         {
             config.ID = 1;
@@ -714,6 +763,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Persists logging config to the database.
         /// </summary>
+        /// <param name="config">The logging configuration to save.</param>
         private async Task SaveLoggingConfigAsync(Config.Logging config)
         {
             config.ID = 1;
@@ -725,6 +775,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Validates if a string is a valid IPv4 address.
         /// </summary>
+        /// <param name="ipString">The IP address string to validate.</param>
         /// <returns>
         /// True if the string is a valid IPv4 address.
         /// </returns>
@@ -766,6 +817,7 @@ namespace QuestNav.Config
         /// Invokes an action on the main thread using the captured SynchronizationContext.
         /// Falls back to direct invocation if no context was captured.
         /// </summary>
+        /// <param name="action">The action to invoke on the main thread.</param>
         private void invokeOnMainThread(Action action)
         {
             if (mainThreadContext == null)
