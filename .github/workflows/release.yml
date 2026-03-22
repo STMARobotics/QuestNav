@@ -73,7 +73,8 @@ jobs:
     if: |
       (needs.determine-publishable-changes.outputs.web-ui-changed == 'true' ||
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.java-changed == 'true') ||
+      needs.determine-publishable-changes.outputs.java-changed == 'true' ||
+      needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
       inputs.force-release
     needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-web-ui.yml
@@ -99,7 +100,7 @@ jobs:
     if: |
       (needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
       inputs.force-release
-    needs: [build-proto-java, build-proto-csharp, determine-publishable-changes]
+    needs: [build-proto-java, build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
       contents: write
