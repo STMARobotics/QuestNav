@@ -60,7 +60,9 @@ Always bring a backup adapter to competitions. Hardware failures often happen at
 :::
 
 ## Video Guide
-[Placeholder for Adapters Video Guide]
+:::tip Video Guide
+A video walkthrough for adapters is coming soon.
+:::
 
 ## Next Steps
 Once you've selected an appropriate adapter, proceed to the [Device Setup](./device-setup) section to configure your Quest headset for QuestNav.

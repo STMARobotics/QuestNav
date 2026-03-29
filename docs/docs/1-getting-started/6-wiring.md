@@ -10,7 +10,7 @@ Proper wiring is essential for reliable communication between your Quest headset
 QuestNav requires a direct Ethernet connection between your Quest headset and the robot's network.
 
 :::info
-As per FRC robot rules (R707 in the 2024 rules), wireless communication is not allowed within the robot. The Ethernet connection ensures compliance with competition rules.
+Per FRC rules, wireless communication is not allowed within the robot. The Ethernet connection ensures compliance with competition rules. See the [current game manual](https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system) for details.
 :::
 
 ### Basic Setup
@@ -32,27 +32,17 @@ Shielded Ethernet cables (STP) provide better resistance to electromagnetic inte
 
 ## Power Options
 
-Depending on your selected adapter, you have different power configuration options:
+The Quest headset should be powered using a **USB battery bank** mounted on the robot. This provides clean, stable 5V power independent of the robot's electrical system.
 
-### Option 1: Power Passthrough (Recommended)
+### Recommended Setup
 
-If you selected an adapter with power passthrough capabilities:
+1. Mount a 5V USB battery bank securely on the robot
+2. Connect a USB-A to USB-C cable from the battery bank to your adapter's power input
+3. The battery bank should supply enough power to sustain the Quest headset indefinitely
+4. Charge state can be monitored externally using the power meter on the battery bank
 
-1. Connect your robot's power source to the USB-C power input on the adapter
-    - Use a regulated 5V power supply (2A minimum)
-    - Many teams use a voltage regulator connected to the robot battery
-2. The headset will charge while operating, allowing for extended runtime
-
-### Option 2: Battery Operation
-
-If using an adapter without power passthrough:
-
-1. Fully charge the Quest headset before each match
-2. The Quest battery typically lasts 2-3 hours in QuestNav mode
-3. Consider a portable battery bank for extended practice sessions
-
-:::note
-While the Quest can operate on its internal battery, this approach is not recommended for competition use due to the risk of battery depletion during long events.
+:::danger
+Only use 5V output from power banks. Avoid banks that support USB-C Power Delivery (PD) or use a USB-A to USB-C cable to force 5V delivery. Some adapters will boot loop when voltage greater than 5V is applied.
 :::
 
 ### Power Requirements
@@ -61,50 +51,15 @@ While the Quest can operate on its internal battery, this approach is not recomm
 - **Current**: 2-3A recommended
 - **Connector**: USB-C
 
-## Power Source Options
+### Without Power Passthrough
 
-There are several ways to power the Quest headset + USB to Ethernet adapter on an FRC robot:
+If your adapter does not support power passthrough:
 
-### 1. Power via RoboRIO USB Port
-
-The USB ports on the RoboRIO provide a stable 5V source:
-
-1. Connect a USB-A to USB-C cable from the RoboRIO to your adapter
-2. This is the simplest option, requiring no additional components
+1. Fully charge the Quest headset before each match
+2. The Quest battery typically lasts 2-3 hours in QuestNav mode
 
 :::warning
-The RoboRIO USB ports will not supply enough power to charge the Quest headset while in use, only delay its death. You'll need to monitor charge levels throughout the event.
-:::
-
-### 2. Power via 5V USB Battery Bank
-
-Using a portable battery bank offers several benefits:
-
-1. It provides clean, reliable power to the headset and adapter
-2. The battery should supply enough power to sustain the Quest headset indefinitely
-3. Charge state can be monitored externally using the power meter on the battery bank
-
-:::danger
-Only use 5V output from power banks. Avoid banks that support USB-C Power Delivery (PD) or use a USB-A to USB-C cable to force 5V delivery. Some adapters will boot loop when voltage greater than 5V is applied.
-:::
-
-### 3. Power via 5V Regulator
-
-Using a dedicated voltage regulator from your robot's main battery:
-
-1. Connect a quality 5V regulator to your robot's power distribution panel
-2. Ensure adequate current capability (minimum 3A output)
-3. Connect the regulator output to your USB-C adapter's power input
-
-Recommended USB-compliant 5V regulators:
-- [Redux Robotics Zinc-V](https://shop.reduxrobotics.com/zinc-v/)
-- [Grapple Robotics MitoCANdria](https://www.thethriftybot.com/products/mitocandria)
-
-Recommended 5V regulators (requires soldering and custom circuitry):
-- [Pololu D36V50F5 Regulator](https://www.pololu.com/product/4091)
-
-:::tip
-For non-compliant regulators, use a USB breakout board like [this one](https://a.co/d/gLUZN0Z) that includes onboard sense resistors so that the headset knows that it's connected to a 5V power source.
+Running on the Quest's internal battery alone is not recommended for competition use due to the risk of battery depletion during long events.
 :::
 
 ## Wiring Best Practices
@@ -157,7 +112,9 @@ If your Quest is losing charge during operation despite being connected to power
 :::
 
 ## Video Guide
-[Placeholder for Wiring Video Guide]
+:::tip Video Guide
+A video walkthrough for wiring is coming soon.
+:::
 
 ## Next Steps
 With your Quest properly wired, proceed to the [Robot Code Setup](./robot-code) section to configure your robot's software for QuestNav integration.

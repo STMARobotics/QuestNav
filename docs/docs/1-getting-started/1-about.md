@@ -75,4 +75,4 @@ For questions, troubleshooting help, or to share your experiences with QuestNav,
 
 
 ## Next Steps
-Ready to get started? Continue to the [Choosing an Ethernet Adapter](./adapters) section to select the appropriate hardware for your setup.
+Ready to get started? The fastest way to configure your headset is using the [QuestNav Setup Page](https://setup.questnav.gg/). For manual setup or more details, continue to the [Choosing an Ethernet Adapter](./adapters) section to select the appropriate hardware for your setup.

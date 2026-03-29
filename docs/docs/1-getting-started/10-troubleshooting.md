@@ -31,6 +31,34 @@ This guide covers common issues you might encounter when setting up and using Qu
 Most connection issues are related to the adapter or cable. Always try a known working adapter and cable first when troubleshooting connection problems.
 :::
 
+### Quest Not Connecting During Simulation
+
+**Symptoms:**
+- Quest web UI (`http://<Quest IP>:5801/api/status`) shows `networkConnected: false`
+- `QuestNav/Connected` stays `false` in the simulation GUI
+- The Quest headset is on the same network and has the correct Debug IP Override set
+
+**Cause:**
+Windows Firewall (or your OS firewall) is blocking incoming connections to the Java process running the simulation,
+preventing the Quest from reaching the NetworkTables server.
+
+**Solutions:**
+1. **Allow Java through Windows Firewall**
+    - Open **Windows Security > Firewall & network protection > Allow an app through firewall**
+    - Click **Change settings**, then **Allow another app...**
+    - Browse to the WPILib JDK's `java.exe` (typically `C:\Users\Public\wpilib\<year>\jdk\bin\java.exe`)
+    - Ensure both **Private** and **Public** checkboxes are selected
+
+2. **Verify the correct JDK**: your simulation may use a different JDK than you expect. Check Task Manager
+   while the simulation is running to see which `java.exe` is active.
+
+3. **Check for port conflicts**: if a previous simulation didn't exit cleanly, ports 1735 and 5810 may still be
+   in use. End any stale `java.exe` processes in Task Manager and restart.
+
+:::info
+See the [Testing & Simulation](./simulation) page for more details on running QuestNav with WPILib desktop simulation.
+:::
+
 ### Intermittent Connection Drops
 
 **Symptoms:**
@@ -71,7 +99,7 @@ Most connection issues are related to the adapter or cable. Always try a known w
     - Clear the app cache in Android settings
 
 :::info
-Some drift is normal over time as small tracking errors accumulate. Consider implementing automatic resets at known positions (such as game pieces or field elements) during a match. **AprilTag support is coming soon!**
+Some drift is normal over time as small tracking errors accumulate. Consider implementing automatic resets at known positions (such as game pieces or field elements) during a match. An upcoming release of QuestNav will include AprilTag detection.
 :::
 
 ### Sudden Position Jumps
@@ -141,6 +169,26 @@ The Quest will automatically shut down when battery is critically low. Always en
 
 ## Software Issues
 
+### Version Mismatch Warnings
+
+**Symptoms:**
+- Console is flooded with warnings every 5 seconds:
+  `WARNING FROM QUESTNAV: QuestNavLib version (X.X.X) on your robot does not match QuestNav app version (Y.Y.Y) on your headset.`
+
+**Solutions:**
+1. **Update to matching versions**: ensure the `questnavlib.json` vendordep version matches the QuestNav APK
+   installed on the headset. Both should be the same release.
+
+2. **Suppress during development**: if you're intentionally running mismatched versions (e.g. testing a new library
+   against an older headset app), you can suppress the warning:
+    ```java
+    questNav.setVersionCheckEnabled(false);
+    ```
+
+:::warning
+Re-enable version checking before competition. Mismatched versions can cause subtle compatibility issues.
+:::
+
 ### App Crashes
 
 **Symptoms:**
@@ -202,7 +250,12 @@ The diagnostic metrics can help identify whether issues are occurring on the Que
 
 ### "Why is my robot's position still wrong after resetting?"
 
-Make sure you're resetting the pose to the correct field coordinates. The reset position should match your **headset's** actual position on the field, including orientation. **NOT THE ROBOT POSE**
+Make sure you're resetting the pose to the correct field coordinates. The reset position should match your **headset's** actual position on the field, including orientation. **NOT THE ROBOT POSE.** If you know the robot's pose, you must apply the `ROBOT_TO_QUEST` transform before calling `setPose()`:
+
+```java
+Pose3d questPose = robotPose.transformBy(ROBOT_TO_QUEST);
+questNav.setPose(questPose);
+```
 
 ### "Why does my Quest display 'USB Device Not Supported'?"
 
@@ -217,7 +270,9 @@ When functioning properly, QuestNav will:
 - Show "tracking: true" in the Network Tables viewer
 
 ## Video Guide
-[Placeholder for Troubleshooting Video Guide]
+:::tip Video Guide
+A video walkthrough for troubleshooting is coming soon.
+:::
 
 ## Getting More Help
 

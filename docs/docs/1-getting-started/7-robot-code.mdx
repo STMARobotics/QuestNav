@@ -2,6 +2,9 @@
 title: Robot Code Setup
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Robot Code Setup
 
 This guide explains how to integrate QuestNav into your robot code to provide accurate position tracking for your FRC robot.
@@ -32,9 +35,47 @@ The QuestNav library is provided as a vendor dependency that you can add to your
 
 ### Installation Steps
 
-1. Download the latest `questnavlib.json` asset from the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases)
-2. Add this file to the `vendordeps` folder in your robot project (usually it will contain other JSON files as well)
-3. Rebuild your robot code project
+<Tabs>
+    <TabItem value="vscode" label="VS Code (Recommended)" default>
+
+        1. Open your robot project in VS Code
+        2. Press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS) to open the command palette
+        3. Select **WPILib: Manage Vendor Libraries**
+        4. Select **Install new libraries (online)**
+        5. Paste the following URL and press Enter:
+
+        ```
+        https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
+        ```
+
+        :::tip
+        You can find the latest JSON URL on the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases).
+        :::
+
+    </TabItem>
+    <TabItem value="gradlew" label="Command Line">
+
+        Run the following from your robot project directory:
+
+        ```
+        # Windows
+        .\gradlew vendordep --url=https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
+
+        # macOS / Linux
+        ./gradlew vendordep --url=https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
+        ```
+
+        This downloads the JSON file and places it in the `vendordeps` folder automatically.
+
+    </TabItem>
+    <TabItem value="manual" label="Manual">
+
+        1. Download the latest `questnavlib.json` from the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases)
+        2. Copy the file into the `vendordeps` folder in your robot project
+        3. Rebuild your project
+
+    </TabItem>
+</Tabs>
 
 ## Basic Usage
 
@@ -43,11 +84,11 @@ We recommend you call these methods from a subsystem if possible.
 
 ### Prerequisites
 :::danger
-v2025-1.0.0 **REQUIRES** the following methods from the `QuestNav` vendor dependency to be called periodically. Without this, the system
-will not function correctly.
+The `QuestNav` vendor dependency **REQUIRES** the following method to be called periodically. Without this, the system
+will not function correctly (command responses will not be processed and event callbacks will not fire).
 :::
 
-Call this in *any* periodic method run by the CommandScheduler.
+Call this in *any* periodic method (e.g. `periodic()` in a subsystem, or `robotPeriodic()` in a `TimedRobot`).
 ```java title="e.g. QuestNavSubsystem.java"
 QuestNav questNav = new QuestNav();
 
@@ -68,7 +109,7 @@ Here is an example of getting the latest pose from the Quest and transforming it
 QuestNav questNav = new QuestNav();
 
 // First, Declare our geometrical transform from the robot center to the Quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ )
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ );
 
 // Get the latest pose data frames from the Quest
 PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
@@ -99,11 +140,12 @@ for details
 :::note
 An upcoming release of QuestNav will include AprilTag detection to periodically and automatically reset the pose to
 a field relative position, potentially making this method unnecessary. However, it may still be used to provide
-positional updates from other systems (auto start positions, PhotonVision, etc.)
+positional updates from other systems (auto start positions, [Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.)
 :::
 :::info
-As of v2025-1.0.0, QuestNav uses [dead reckoning](https://en.wikipedia.org/wiki/Dead_reckoning) to estimate the headset's
-position, so it's important to reset it at an accurate, known location on the field.
+QuestNav uses [Visual Inertial Odometry (VIO)](https://en.wikipedia.org/wiki/Visual_odometry) to estimate the headset's
+position. While VIO is highly accurate, it can drift over time, so it's important to reset the pose at an accurate, known
+location on the field (e.g. at the start of autonomous).
 :::
 Likewise, in order to set the pose of QuestNav, we need to transform that pose back from the robot centric pose to
 the frame of the Quest.
@@ -111,7 +153,7 @@ the frame of the Quest.
 QuestNav questNav = new QuestNav();
 
 // First, Declare our geometrical transform from the robot center to the Quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ )
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ );
 
 // Assume this is the requested reset pose
 Pose3d robotPose = new Pose3d( /* Some pose data */ );
@@ -126,18 +168,16 @@ questNav.setPose(questPose);
 Notice how when transforming back to the Quest pose from the robot pose, we **don't** use the inverse translation.
 :::
 
-### Updating Swerve Drive Pose
-The most common use case is to utilize the pose data from QuestNav with a SwerveDrivePoseEstimator for vision
-correction. Most swerve libraries have a method to accomplish this.
+### Updating Drive Pose Estimator
+The most common use case is to utilize the pose data from QuestNav with a `PoseEstimator` for vision
+correction. This works with `SwerveDrivePoseEstimator`, `DifferentialDrivePoseEstimator`, and
+`MecanumDrivePoseEstimator`, or any class that provides `addVisionMeasurement()`.
 
 
 :::danger
 The last published value to NetworkTables will persist even if QuestNav disconnects. It is **imperative** you ensure
 the Quest is connected and is tracking before using its pose data!
 :::
-
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 <Tabs>
     <TabItem value="AdvantageKit-YAGSL" label="AdvantageKit/YAGSL/CTRE >2025.3.1.0">
@@ -188,3 +228,196 @@ import TabItem from '@theme/TabItem';
 :::note
 The above example should be called in a **periodic loop** to ensure vision measurements are always being added!
 :::
+
+:::tip
+The same pattern works for `DifferentialDrivePoseEstimator` and `MecanumDrivePoseEstimator`. Replace
+`swerveDriveSubsystem.addVisionMeasurement(...)` with the equivalent method on your drive subsystem.
+:::
+
+## Advanced Usage
+
+### Publishing Diagnostics
+
+Publishing QuestNav status to SmartDashboard (or NetworkTables) helps with debugging during development
+and in the pits at competition.
+
+```java title="e.g. QuestNavSubsystem.java"
+@Override
+public void periodic() {
+    questNav.commandPeriodic();
+
+    SmartDashboard.putBoolean("QuestNav/Connected", questNav.isConnected());
+    SmartDashboard.putBoolean("QuestNav/Tracking", questNav.isTracking());
+    SmartDashboard.putNumber("QuestNav/Latency", questNav.getLatency());
+    questNav.getBatteryPercent().ifPresent(
+        b -> SmartDashboard.putNumber("QuestNav/Battery%", b));
+    questNav.getTrackingLostCounter().ifPresent(
+        c -> SmartDashboard.putNumber("QuestNav/TrackingLostCount", c));
+
+    // ... pose processing ...
+}
+```
+
+### Event Callbacks
+
+QuestNav provides an event-driven callback system for reacting to state changes in the Quest headset. Callbacks are
+evaluated every `commandPeriodic()` call, so make sure that is being called periodically as described in the
+[Prerequisites](#prerequisites) section.
+
+All callbacks are registered on your `QuestNav` instance, typically in your subsystem's constructor.
+
+#### Connection Callbacks
+
+Fire once when the Quest transitions between connected and disconnected states.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onConnected(() -> System.out.println("Quest connected!"));
+    questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
+}
+```
+
+#### Tracking Callbacks
+
+Fire once when the Quest transitions between actively tracking and not tracking. When tracking is lost, pose
+data becomes unreliable and should not be used for robot control.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
+    questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+}
+```
+
+:::tip
+Use `onTrackingLost` to switch your robot to a fallback localization strategy (wheel odometry, [Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.)
+until tracking is restored.
+:::
+
+#### Low Battery Callback
+
+Fires once when the Quest's battery level drops at or below a specified threshold. The callback will not fire again
+until the battery rises back above the threshold and drops below it again.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    // Warn when battery reaches 20% or below
+    questNav.onLowBattery(20, level ->
+        DriverStation.reportWarning("Quest battery low: " + level + "%", false)
+    );
+}
+```
+
+#### Command Callbacks
+
+Fire for each response to a command sent via `setPose()`. Failures are also automatically logged to the
+DriverStation regardless of whether a callback is registered.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onCommandSuccess(response ->
+        System.out.println("Pose reset succeeded for command ID: " + response.getCommandId())
+    );
+    questNav.onCommandFailure(response ->
+        DriverStation.reportError("Pose reset failed: " + response.getErrorMessage(), false)
+    );
+}
+```
+
+#### All Callbacks Together
+
+Here is an example registering all available callbacks in a single subsystem:
+
+```java title="e.g. QuestNavSubsystem.java"
+public class QuestNavSubsystem extends SubsystemBase {
+    private final QuestNav questNav = new QuestNav();
+
+    public QuestNavSubsystem() {
+        questNav.onConnected(() ->
+            System.out.println("Quest connected!")
+        );
+        questNav.onDisconnected(() ->
+            DriverStation.reportWarning("Quest disconnected!", false)
+        );
+        questNav.onTrackingAcquired(() ->
+            System.out.println("Quest tracking acquired!")
+        );
+        questNav.onTrackingLost(() ->
+            DriverStation.reportWarning("Quest tracking lost!", false)
+        );
+        questNav.onLowBattery(20, level ->
+            DriverStation.reportWarning("Quest battery low: " + level + "%", false)
+        );
+        questNav.onCommandSuccess(response ->
+            System.out.println("Command succeeded: " + response.getCommandId())
+        );
+        questNav.onCommandFailure(response ->
+            DriverStation.reportError("Command failed: " + response.getErrorMessage(), false)
+        );
+    }
+
+    @Override
+    public void periodic() {
+        questNav.commandPeriodic();
+    }
+}
+```
+
+#### Callback Reference
+
+| Method | Trigger | Notes |
+|--------|---------|-------|
+| `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
+| `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition |
+| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition |
+| `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires per response |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Also logged to DriverStation automatically |
+
+---
+
+### Suppressing Version Mismatch Warnings
+
+During development, you may see repeated warnings if the QuestNav library version on the robot doesn't exactly match
+the QuestNav app version on the headset. To suppress these warnings:
+
+```java
+questNav.setVersionCheckEnabled(false);
+```
+
+:::warning
+Re-enable version checking for competition use. Version mismatches can cause subtle compatibility issues.
+:::
+
+### Field-Bounds Filtering
+
+A practical improvement is to reject pose measurements that fall outside the field boundaries, which can happen
+during initial tracking or after a bad pose reset:
+
+```java title="e.g. QuestNavSubsystem.java"
+private static final AprilTagFieldLayout FIELD_LAYOUT =
+    AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+private boolean shouldReject(Pose3d pose) {
+    return pose.getX() < 0.0
+        || pose.getX() > FIELD_LAYOUT.getFieldLength()
+        || pose.getY() < 0.0
+        || pose.getY() > FIELD_LAYOUT.getFieldWidth();
+}
+```
+
+Use this in your pose processing loop to skip measurements that are clearly outside the field before feeding
+them to your pose estimator.

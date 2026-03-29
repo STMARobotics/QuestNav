@@ -5,12 +5,16 @@ title: App Setup
 
 After configuring your Quest headset, the next step is installing and setting up the QuestNav application. This guide walks you through the installation process and initial configuration.
 
+:::tip
+The [QuestNav Setup Page](https://setup.questnav.gg/) can also install QuestNav on your headset. If you've already used it during device setup, your app may already be installed.
+:::
+
 ## Installing QuestNav
 
 QuestNav is distributed as an APK file that you'll need to install manually onto your Quest headset. There are several methods to do this:
 
 :::info
-You'll need to have Developer Mode enabled on your Quest headset before proceeding with these installation methods. If you haven't done that yet, please refer to the [Device Setup](/docs/getting-started/device-setup) section.
+You'll need to have Developer Mode enabled on your Quest headset before proceeding with these installation methods. If you haven't done that yet, please refer to the [Device Setup](./device-setup) section.
 :::
 
 ### Method 1: Using ADB (Android Debug Bridge)
@@ -32,7 +36,7 @@ Select "always allow" to allow easy use of ADB with your laptop, even if the Que
 ### Method 2: Using Meta Quest Developer Hub (MQDH)
 Meta Developer Hub provides a graphical interface for app installation:
 
-1. Download and install [Meta Developer Hub](https://developer.oculus.com/documentation/unity/ts-odh/) on your computer
+1. Download and install [Meta Quest Developer Hub](https://developers.meta.com/horizon/documentation/unity/ts-odh/) on your computer
 2. Connect your Quest to your computer via USB
 3. Open Meta Developer Hub and select your device
 4. Navigate to the "Applications" tab
@@ -117,7 +121,9 @@ If the APK was not built with the "Development Build" flag, it will crash at lau
 - Custom builds allow changing the default team number, but this is unnecessary for most teams
 
 ## Video Guide
-[Placeholder for App Setup Video Guide]
+:::tip Video Guide
+A video walkthrough for app setup is coming soon.
+:::
 
 ## Next Steps
 With QuestNav installed and configured, proceed to the [Mounting](./mounting) section to learn how to properly mount the Quest on your robot.
