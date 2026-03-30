@@ -77,6 +77,22 @@ The QuestNav library is provided as a vendor dependency that you can add to your
     </TabItem>
 </Tabs>
 
+## Key Concepts
+
+Before diving into the code, here are a few terms you'll encounter throughout this guide:
+
+- **Pose**: A position (X, Y, Z) combined with an orientation (rotation) that describes where and how the robot is located on the field. See the [WPILib Geometry Classes documentation](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/pose.html) for details.
+
+- **Coordinate System**: FRC uses a right-handed coordinate system where X is forward, Y is left, and Z is up. Rotations are counter-clockwise positive. This [WPILib video](https://youtu.be/PMvIWws8WEo) provides a visual explanation of coordinate systems, rotations, and quaternions.
+
+- **Transform3d / ROBOT_TO_QUEST**: A geometrical offset that describes where the Quest headset is mounted relative to the center of the robot. QuestNav reports the *headset's* position, and this transform converts it to the *robot's* position.
+
+- **Visual Inertial Odometry (VIO)**: The tracking technology used by the Quest headset. It combines camera images with IMU (accelerometer/gyroscope) data to estimate position. Unlike wheel odometry (which counts wheel rotations), VIO measures position externally and is not affected by wheel slip.
+
+- **Standard Deviations (Std Devs)**: When fusing QuestNav data with your drive pose estimator, standard deviations tell the estimator how much to trust QuestNav measurements. Smaller values = more trust. See [WPILib Pose Estimators](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html) for background.
+
+- **PoseFrame**: A single snapshot of pose data from QuestNav, including the headset position, timestamp, and tracking status.
+
 ## Basic Usage
 
 QuestNav communicates with your robot through NetworkTables. The class provides methods to access pose data from the Quest headset.
@@ -90,6 +106,8 @@ will not function correctly (command responses will not be processed and event c
 
 Call this in *any* periodic method (e.g. `periodic()` in a subsystem, or `robotPeriodic()` in a `TimedRobot`).
 ```java title="e.g. QuestNavSubsystem.java"
+import gg.questnav.questnav.QuestNav;
+
 QuestNav questNav = new QuestNav();
 
 @Override
@@ -103,13 +121,20 @@ The `QuestNav` vendor dependency provides a method for getting the pose of the Q
 robot, we need to transform the Quest's pose to the robot's center.
 
 Here is an example of getting the latest pose from the Quest and transforming it to the robot pose. See the
-[Setting Robot Pose](#updating-swerve-drive-pose) section below for a more complete example of using the pose from QuestNav for robot pose estimation.
+[Updating Drive Pose Estimator](#updating-drive-pose-estimator) section below for a more complete example of using the pose from QuestNav for robot pose estimation.
 
 ```java title="e.g. QuestNavSubsystem.java"
+import gg.questnav.questnav.QuestNav;
+import gg.questnav.questnav.PoseFrame;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+
 QuestNav questNav = new QuestNav();
 
-// First, Declare our geometrical transform from the robot center to the Quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ );
+// Geometrical transform from the robot center to the Quest headset.
+// Example: Quest is 0.3m forward, 0.0m left, 0.5m above robot center, with no rotation.
+Transform3d ROBOT_TO_QUEST = new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
 
 // Get the latest pose data frames from the Quest
 PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
@@ -122,6 +147,35 @@ if (poseFrames.length > 0) {
     Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
 }
 ```
+
+#### Measuring `ROBOT_TO_QUEST`
+
+The `ROBOT_TO_QUEST` transform describes where the Quest headset is physically mounted relative to the center of the robot, using the [FRC coordinate system](https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html) (X forward, Y left, Z up).
+
+<!-- TODO: Add diagram showing robot center vs Quest position with labeled axes -->
+:::note Diagram Placeholder
+A diagram showing the robot center, Quest headset position, and X/Y/Z axes will be added here.
+:::
+
+To measure the offset:
+1. Identify the center of your robot (the origin of your drive pose estimator)
+2. Measure the distance from robot center to the Quest headset along each axis:
+   - **X** (forward/backward from robot center, in meters)
+   - **Y** (left/right from robot center, in meters)
+   - **Z** (up/down from robot center, in meters)
+3. If the headset is mounted level and facing the same direction as the robot, the rotation is `new Rotation3d()`
+
+**Example**: If the Quest is mounted 30 cm forward and 50 cm above robot center:
+```java
+Transform3d ROBOT_TO_QUEST = new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
+```
+
+:::tip
+Mounting the headset at an angle (tilted, rotated 90 degrees, 180 degrees, etc.) is perfectly valid and works well. If the headset is rotated relative to the robot's forward direction, include the rotation in the `Rotation3d`. For example, if the Quest faces the right side of the robot (90 degrees clockwise when viewed from above):
+```java
+Transform3d ROBOT_TO_QUEST = new Transform3d(0.0, 0.0, 0.5, new Rotation3d(0, 0, -Math.PI / 2));
+```
+:::
 
 :::tip
 The FRC coordinate system follows these standards:
@@ -150,10 +204,15 @@ location on the field (e.g. at the start of autonomous).
 Likewise, in order to set the pose of QuestNav, we need to transform that pose back from the robot centric pose to
 the frame of the Quest.
 ```java title="e.g. QuestNavSubsystem.java"
+import gg.questnav.questnav.QuestNav;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+
 QuestNav questNav = new QuestNav();
 
-// First, Declare our geometrical transform from the robot center to the Quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ );
+// Geometrical transform from the robot center to the Quest headset
+Transform3d ROBOT_TO_QUEST = new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
 
 // Assume this is the requested reset pose
 Pose3d robotPose = new Pose3d( /* Some pose data */ );
@@ -187,6 +246,14 @@ the Quest is connected and is tracking before using its pose data!
         are YAGSL and the AdvantageKit template.
         :::
         ```java title="e.g. QuestNavSubsystem.java"
+        import gg.questnav.questnav.QuestNav;
+        import gg.questnav.questnav.PoseFrame;
+        import edu.wpi.first.math.geometry.Pose3d;
+        import edu.wpi.first.math.Matrix;
+        import edu.wpi.first.math.VecBuilder;
+        import edu.wpi.first.math.numbers.N1;
+        import edu.wpi.first.math.numbers.N3;
+
         QuestNav questNav = new QuestNav();
         SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
         Matrix<N3, N1> QUESTNAV_STD_DEVS =
@@ -242,6 +309,9 @@ Publishing QuestNav status to SmartDashboard (or NetworkTables) helps with debug
 and in the pits at competition.
 
 ```java title="e.g. QuestNavSubsystem.java"
+import gg.questnav.questnav.QuestNav;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 @Override
 public void periodic() {
     questNav.commandPeriodic();
@@ -341,6 +411,10 @@ public QuestNavSubsystem() {
 Here is an example registering all available callbacks in a single subsystem:
 
 ```java title="e.g. QuestNavSubsystem.java"
+import gg.questnav.questnav.QuestNav;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 public class QuestNavSubsystem extends SubsystemBase {
     private final QuestNav questNav = new QuestNav();
 
@@ -408,6 +482,10 @@ A practical improvement is to reject pose measurements that fall outside the fie
 during initial tracking or after a bad pose reset:
 
 ```java title="e.g. QuestNavSubsystem.java"
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+
 private static final AprilTagFieldLayout FIELD_LAYOUT =
     AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 

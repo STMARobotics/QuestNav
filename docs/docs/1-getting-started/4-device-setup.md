@@ -25,13 +25,33 @@ If this is your first time using a Quest headset, take a few minutes to familiar
 
 ## Developer Account Setup
 
-Before you can install custom applications on your Quest, you need to set up a developer account. There are two ways to do this:
+Before you can install custom applications on your Quest, you need to enable Developer Mode. This requires a smartphone with the **Meta Horizon mobile app** installed and paired with your headset.
 
-### Method 1: Manual Meta Account Setup
-1. Follow [this guide](https://medium.com/sidequestvr/how-to-turn-on-developer-mode-for-the-quest-3-509244ccd386) to set up "Developer Mode"
-2. Sign into your Meta developer account and download the [Meta Quest Developer Hub (MQDH)](https://developers.meta.com/horizon/develop)
+### Prerequisites
 
-### Method 2: SideQuest-Led Setup
+- A [Meta Developer Account](https://developers.meta.com/sign-up/) (free to create). You must be a verified Meta developer (verify your account at [developers.meta.com/manage/verify](https://developers.meta.com/manage/verify/)).
+- The **Meta Horizon** mobile app installed on an iOS or Android phone, paired with your Quest headset.
+- A USB-C data cable capable of transferring data (the cable that comes with the Quest is charging-only and will not work).
+
+### Enable Developer Mode
+
+1. Open the **Meta Horizon** app on your phone
+2. Tap the **headset icon** in the toolbar
+3. Tap your paired headset at the top of the screen (it shows the model and status)
+4. Tap **Headset Settings**
+5. Tap **Developer Mode**
+6. Toggle Developer Mode **On**
+7. Restart your Quest headset for the change to take effect
+
+For the full official walkthrough, see [Enable developer mode on headset](https://developers.meta.com/horizon/documentation/android-apps/enable-developer-mode).
+
+### USB Debugging
+
+After enabling Developer Mode, connect the Quest to your computer with a USB-C data cable. When prompted inside the headset, select **Always allow from this computer** to authorize USB debugging. This allows ADB, Meta Quest Developer Hub, and the QuestNav Setup Page to communicate with the headset.
+
+### Alternative: SideQuest-Led Setup
+
+If you prefer a guided setup:
 1. Download the SideQuest advanced installer from [sidequestvr.com](https://sidequestvr.com/setup-howto)
 2. Connect your Quest to your PC using a USB cable
 3. Follow the on-screen prompts to enable developer mode

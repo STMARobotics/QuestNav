@@ -86,6 +86,10 @@ The example app has a team number set to 9999. You'll need to change this to you
 1. Enter your FRC team number in the provided field and click set
 2. This ensures correct network communication with your robot
 
+:::info
+The team number determines the IP address QuestNav connects to. QuestNav uses the FRC convention `10.TE.AM.2` (e.g. team 1234 connects to `10.12.34.2`). If the team number is wrong, the Quest will attempt to reach the wrong IP address and will never connect to your robot.
+:::
+
 ## Automatic Startup
 
 QuestNav can automatically start when the headset is powered up or rebooted. This feature can be controlled with the _Auto Start On Boot_ option on the main window.
@@ -108,12 +112,12 @@ Some USB cables only support charging and not data transfer. If you're having co
 :::
 
 ### App Crashes on Launch
-- Verify the APK was built with the "Development Build" flag if building with Unity
 - Check for adequate storage space on the Quest
 - Try reinstalling the app
+- Reboot the Quest headset
 
-:::warning
-If the APK was not built with the "Development Build" flag, it will crash at launch! This is a critical setting when building the app from source.
+:::note
+If you compiled QuestNav from source (not the official release APK), the Unity project must have the "Development Build" flag enabled or the app will crash immediately at launch. Teams using the official APK from the GitHub releases page do not need to worry about this.
 :::
 
 ### Team Number Issues

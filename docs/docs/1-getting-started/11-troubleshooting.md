@@ -3,7 +3,7 @@ title: Troubleshooting
 ---
 # Troubleshooting
 
-This guide covers common issues you might encounter when setting up and using QuestNav, along with their solutions. If you experience problems not covered here, please reach out on the [QuestNav Discord server](https://discord.gg/Zfan2qgkRZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083).
+This guide covers common issues you might encounter when setting up and using QuestNav, along with their solutions. If you experience problems not covered here, please reach out on the [QuestNav Discord server](https://discord.gg/CsRjKfn8Xa) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083).
 
 ## Connection Issues
 
@@ -209,7 +209,7 @@ Re-enable version checking before competition. Mismatched versions can cause sub
    - If you are using an official build, let us know on Discord or Chief Delphi
 
 :::note
-If the app was compiled without the "Development Build" flag, it will crash immediately at launch. Make sure you're using the official release or a properly compiled development build.
+If you compiled QuestNav from source (not the official release APK), the Unity project must have the "Development Build" flag enabled or the app will crash immediately at launch. Teams using the official APK from the GitHub releases page do not need to worry about this.
 :::
 
 ### Installing ADB on RoboRIO (Optional)
@@ -226,25 +226,85 @@ Installing ADB on your RoboRIO allows you to send commands to the Quest headset 
 
 ## Diagnostic Tools
 
-### QuestNav Log Files
+QuestNav exposes a web interface at `http://<Quest IP Address>:5801` that provides several tools for diagnosing issues without needing to touch the headset or write any code.
 
-Log viewer coming soon!
+### Web Interface Status
 
-### Network Tables Analysis
+Open `http://<Quest IP Address>:5801/api/status` in a browser to see a real-time JSON snapshot of the headset's state, including:
 
-For network tables diagnostic information:
+- `isTracking`: whether the headset is actively tracking its position
+- `networkConnected`: whether the headset has a NetworkTables connection to the robot
+- `batteryPercent` / `batteryCharging`: battery level and charging status
+- `position` / `rotation` / `eulerAngles`: current headset pose
+- `fps`: current tracking framerate
+- `trackingLostEvents`: number of times tracking was lost since the app started
+- `ipAddress` / `robotIpAddress` / `teamNumber`: network configuration
 
-1. Use AdvantageScope to record NT data
-2. Check for missing updates or invalid values
-3. Compare timestamps to identify delays
+This is the fastest way to verify that the headset is connected, tracking, and sending data.
 
-### Performance Metrics
+### Viewing Logs
 
-Coming soon!
+The Quest stores application logs that can be retrieved via:
 
-:::info
-The diagnostic metrics can help identify whether issues are occurring on the Quest side or the robot side of the communication.
-:::
+```
+http://<Quest IP Address>:5801/api/logs
+```
+
+This returns recent log entries including warnings and errors. To get the last 200 entries:
+
+```
+http://<Quest IP Address>:5801/api/logs?count=200
+```
+
+Logs can be cleared with a DELETE request:
+
+```
+curl -X DELETE http://<Quest IP Address>:5801/api/logs
+```
+
+### Restarting QuestNav Remotely
+
+If the app is in a bad state, you can restart it without physically touching the headset:
+
+```
+curl -X POST http://<Quest IP Address>:5801/api/restart
+```
+
+### Resetting Pose via Web Interface
+
+You can trigger a pose reset from the web interface:
+
+```
+curl -X POST http://<Quest IP Address>:5801/api/reset-pose
+```
+
+### Reading and Updating Configuration
+
+To read the current configuration:
+
+```
+http://<Quest IP Address>:5801/api/config
+```
+
+This shows the team number, debug IP override, auto-start setting, passthrough stream setting, and debug logging state.
+
+To update a setting (e.g. team number):
+
+```
+curl -X POST http://<Quest IP Address>:5801/api/config \
+     -H "Content-Type: application/json" \
+     -d '{"path":"WebServerConstants/webConfigTeamNumber","value":1234}'
+```
+
+See the [Web API Reference](/docs/api-reference/web-api) for the complete endpoint documentation.
+
+### NetworkTables Analysis
+
+For deeper diagnostics from the robot side:
+
+1. Use [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html) to record and replay NetworkTables data
+2. Check for missing updates or invalid values in the `QuestNav` table
+3. Compare timestamps to identify delays between the headset and robot code
 
 ## Common Questions
 
@@ -280,7 +340,7 @@ If you've tried the solutions above and are still experiencing issues:
 
 1. Take a video of the problem if possible
 2. Gather log files from both QuestNav and robot
-3. Post details on the [QuestNav Discord](https://discord.gg/Zfan2qgkRZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083)
+3. Post details on the [QuestNav Discord](https://discord.gg/CsRjKfn8Xa) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083)
 4. Include your Quest model, robot controller, and QuestNav version
 
 :::tip

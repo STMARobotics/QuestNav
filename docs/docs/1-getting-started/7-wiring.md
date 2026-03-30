@@ -32,22 +32,21 @@ Shielded Ethernet cables (STP) provide better resistance to electromagnetic inte
 
 ## Power Options
 
-The Quest headset should be powered using a **USB battery bank** mounted on the robot. This provides clean, stable 5V power independent of the robot's electrical system.
+The Quest headset should be powered using a **USB battery bank** mounted on the robot. This provides clean, stable power independent of the robot's electrical system.
 
 ### Recommended Setup
 
-1. Mount a 5V USB battery bank securely on the robot
-2. Connect a USB-A to USB-C cable from the battery bank to your adapter's power input
+1. Mount a USB battery bank securely on the robot
+2. Connect a USB cable from the battery bank to your adapter's power input
 3. The battery bank should supply enough power to sustain the Quest headset indefinitely
 4. Charge state can be monitored externally using the power meter on the battery bank
 
-:::danger
-Only use 5V output from power banks. Avoid banks that support USB-C Power Delivery (PD) or use a USB-A to USB-C cable to force 5V delivery. Some adapters will boot loop when voltage greater than 5V is applied.
+:::warning
+Some adapters may boot loop when exposed to USB Power Delivery (PD) voltages higher than 5V. If you experience this, use a USB-A to USB-C cable (which forces 5V output) or a battery bank that does not support PD negotiation.
 :::
 
 ### Power Requirements
 
-- **Voltage**: 5V DC ±5%
 - **Current**: 2-3A recommended
 - **Connector**: USB-C
 
@@ -117,4 +116,4 @@ A video walkthrough for wiring is coming soon.
 :::
 
 ## Next Steps
-With your Quest properly wired, proceed to the [Robot Code Setup](./robot-code) section to configure your robot's software for QuestNav integration.
+With your Quest properly wired, proceed to the [Testing & Simulation](./simulation) section to verify your setup, or skip ahead to [Robot Code Setup](./robot-code) to start integrating QuestNav into your robot's software.

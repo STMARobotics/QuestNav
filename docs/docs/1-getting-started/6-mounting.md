@@ -63,6 +63,10 @@ It's important to remember that the headset was designed to be worn on a person'
 While the Quest can track in any orientation, keeping it in its designed upright position produces the most reliable results for robot navigation. If you wouldn't play VR in that position, try not to mount it that way!
 :::
 
+:::tip
+Mounting the headset at an angle, sideways, or even rotated 90 or 180 degrees relative to the robot's forward direction is perfectly valid. QuestNav will still track correctly. You will need to account for the rotation in the `ROBOT_TO_QUEST` transform in your robot code. See [Robot Code Setup](./robot-code) for details on how to specify the rotation offset.
+:::
+
 ### Field of View Requirements
 
 The Quest headset needs clear visibility to track effectively:

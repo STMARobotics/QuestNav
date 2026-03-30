@@ -16,6 +16,10 @@ QuestNav can also be configured to use a specific IP address:
 This setting should NEVER be used during a competition. To reset, follow steps 1-2 above, then clear the contents of `Debug IP Override`.
 :::
 
+:::info
+During simulation, the Quest needs network access to reach your development machine. If you disabled Wi-Fi during device setup (as recommended for competition), you will need to **temporarily re-enable Wi-Fi** on the headset so it can connect to the same network as your PC. Alternatively, connect both the Quest and your PC via Ethernet to the same switch or router. Remember to disable Wi-Fi again before competition.
+:::
+
 ## WPILib Desktop Simulation
 
 QuestNav works with WPILib's desktop simulation mode (`simulateJava` / `simulateNative`). This allows you to test
