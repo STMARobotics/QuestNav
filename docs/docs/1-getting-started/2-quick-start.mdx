@@ -1,6 +1,20 @@
 ---
 title: Quick Start
 ---
+import CodeBlock from '@theme/CodeBlock';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+
+export const VendorDepUrl = () => {
+    const {siteConfig} = useDocusaurusContext();
+    const v = siteConfig.customFields.questnavLibVersion;
+    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
+};
+
+export const VendorDepCodeBlock = () => {
+    const url = VendorDepUrl();
+    return <CodeBlock>{url}</CodeBlock>;
+};
+
 # Quick Start
 
 This page walks through the entire QuestNav setup from unboxing to a working robot integration. Each step links to a detailed page if you need more information.
@@ -79,9 +93,7 @@ See [Wiring](./wiring) for cable selection, power details, and best practices.
 
 In VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Manage Vendor Libraries > Install new libraries (online)**, and paste:
 
-```
-https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
-```
+<VendorDepCodeBlock />
 
 See [Robot Code Setup](./robot-code) for command-line and manual installation methods.
 

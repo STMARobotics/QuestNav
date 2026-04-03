@@ -4,6 +4,26 @@ title: Robot Code Setup
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import CodeBlock from '@theme/CodeBlock';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+
+export const VendorDepUrl = () => {
+    const {siteConfig} = useDocusaurusContext();
+    const v = siteConfig.customFields.questnavLibVersion;
+    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
+};
+
+export const VendorDepCodeBlock = () => {
+    const url = VendorDepUrl();
+    return <CodeBlock>{url}</CodeBlock>;
+};
+
+export const GradlewCodeBlock = () => {
+    const url = VendorDepUrl();
+    return (
+        <CodeBlock>{`# Windows\n.\\gradlew vendordep --url=${url}\n\n# macOS / Linux\n./gradlew vendordep --url=${url}`}</CodeBlock>
+    );
+};
 
 # Robot Code Setup
 
@@ -44,9 +64,7 @@ The QuestNav library is provided as a vendor dependency that you can add to your
         4. Select **Install new libraries (online)**
         5. Paste the following URL and press Enter:
 
-        ```
-        https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
-        ```
+        <VendorDepCodeBlock />
 
         :::tip
         You can find the latest JSON URL on the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases).
@@ -57,13 +75,7 @@ The QuestNav library is provided as a vendor dependency that you can add to your
 
         Run the following from your robot project directory:
 
-        ```
-        # Windows
-        .\gradlew vendordep --url=https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
-
-        # macOS / Linux
-        ./gradlew vendordep --url=https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json
-        ```
+        <GradlewCodeBlock />
 
         This downloads the JSON file and places it in the `vendordeps` folder automatically.
 
