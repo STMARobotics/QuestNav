@@ -9,6 +9,10 @@ First, you'll need a USB to Ethernet adapter. The Quest 3/3s has a USB-C port th
 Not all USB-C to Ethernet adapters work with the Quest! Some adapters will not be recognized by the Android operating system, making them useless for QuestNav.
 :::
 
+:::info
+Adapters not listed on this page may also work. If you have an adapter not on either list, test it yourself using the steps in the [Testing Your Adapter](#testing-your-adapter) section below and consider contributing your results.
+:::
+
 ## Recommended Adapters
 The list below includes pictures, links, and other information for USB to Ethernet adapters known to work with Quest headsets, our most recommended choices are nearest to the top. We highly suggest that you use an adapter with power pass through to keep your headset charged during the match.
 
@@ -60,7 +64,9 @@ Always bring a backup adapter to competitions. Hardware failures often happen at
 :::
 
 ## Video Guide
-[Placeholder for Adapters Video Guide]
+:::tip Video Guide
+A video walkthrough for adapters is coming soon.
+:::
 
 ## Next Steps
 Once you've selected an appropriate adapter, proceed to the [Device Setup](./device-setup) section to configure your Quest headset for QuestNav.

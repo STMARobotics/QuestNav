@@ -4,7 +4,7 @@ title: About QuestNav
 
 # About QuestNav
 
-QuestNav enables streaming Oculus VR headset pose information to an FRC robot using the Network Tables 4 (NT4) protocol. This pose data provides robot control systems with accurate mapping and navigation capabilities in competition fields, practice spaces, or any location.
+QuestNav enables streaming Meta Quest headset pose information to an FRC robot using the Network Tables 4 (NT4) protocol. This pose data provides robot control systems with accurate mapping and navigation capabilities in competition fields, practice spaces, or any location.
 
 :::info
 QuestNav produces a more stable and reliable tracking pose than any other FRC vision solution (LimeLight, Photon Vision, etc.), making it an ideal choice for teams seeking precise robot localization.
@@ -70,9 +70,9 @@ QuestNav exists because of many sidebar discussions, technical deep-dives, and w
 ## Support
 
 :::info
-For questions, troubleshooting help, or to share your experiences with QuestNav, join the community discussion on our [Discord](https://discord.gg/hD3FtR7YAZ).
+For questions, troubleshooting help, or to share your experiences with QuestNav, join the community discussion on our [Discord](https://discord.gg/CsRjKfn8Xa).
 :::
 
 
 ## Next Steps
-Ready to get started? Continue to the [Choosing an Ethernet Adapter](./adapters) section to select the appropriate hardware for your setup.
+Ready to get started? The fastest way to get up and running is by following the [Quick Start](./quick-start) guide. You can also use the [QuestNav Setup Page](https://setup.questnav.gg/) to configure your headset automatically.
