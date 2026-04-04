@@ -5,6 +5,12 @@ title: Device Setup
 
 Setting up your Quest headset correctly is crucial for optimal QuestNav performance. This guide will walk you through the initial configuration to prepare your Quest for robot navigation.
 
+:::tip Recommended: Use the QuestNav Setup Page
+The [QuestNav Setup Page](https://setup.questnav.gg/) automates headset configuration by applying all required settings over USB. This is more reliable and consistent than configuring everything manually. **We strongly recommend using the setup page instead of following the manual steps below.**
+
+The setup page requires Developer Mode to be enabled on your headset (see below) and a USB connection to a computer.
+:::
+
 ## Initial Setup
 
 1. **Power on the Quest headset** and put it on.
@@ -19,13 +25,33 @@ If this is your first time using a Quest headset, take a few minutes to familiar
 
 ## Developer Account Setup
 
-Before you can install custom applications on your Quest, you need to set up a developer account. There are two ways to do this:
+Before you can install custom applications on your Quest, you need to enable Developer Mode. This requires a smartphone with the **Meta Horizon mobile app** installed and paired with your headset.
 
-### Method 1: Manual Meta Account Setup
-1. Follow [this guide](https://medium.com/sidequestvr/how-to-turn-on-developer-mode-for-the-quest-3-509244ccd386) to set up "Developer Mode"
-2. Sign into your Meta developer account and download the [Meta Quest Developer Hub (MQDH)](https://developers.meta.com/horizon/develop)
+### Prerequisites
 
-### Method 2: SideQuest-Led Setup
+- A [Meta Developer Account](https://developers.meta.com/sign-up/) (free to create). You must be a verified Meta developer (verify your account at [developers.meta.com/manage/verify](https://developers.meta.com/manage/verify/)).
+- The **Meta Horizon** mobile app installed on an iOS or Android phone, paired with your Quest headset.
+- A USB-C data cable capable of transferring data (the cable that comes with the Quest is charging-only and will not work).
+
+### Enable Developer Mode
+
+1. Open the **Meta Horizon** app on your phone
+2. Tap the **headset icon** in the toolbar
+3. Tap your paired headset at the top of the screen (it shows the model and status)
+4. Tap **Headset Settings**
+5. Tap **Developer Mode**
+6. Toggle Developer Mode **On**
+7. Restart your Quest headset for the change to take effect
+
+For the full official walkthrough, see [Enable developer mode on headset](https://developers.meta.com/horizon/documentation/android-apps/enable-developer-mode).
+
+### USB Debugging
+
+After enabling Developer Mode, connect the Quest to your computer with a USB-C data cable. When prompted inside the headset, select **Always allow from this computer** to authorize USB debugging. This allows ADB, Meta Quest Developer Hub, and the QuestNav Setup Page to communicate with the headset.
+
+### Alternative: SideQuest-Led Setup
+
+If you prefer a guided setup:
 1. Download the SideQuest advanced installer from [sidequestvr.com](https://sidequestvr.com/setup-howto)
 2. Connect your Quest to your PC using a USB cable
 3. Follow the on-screen prompts to enable developer mode
@@ -34,11 +60,11 @@ Before you can install custom applications on your Quest, you need to set up a d
 Developer mode is required to install and use custom applications like QuestNav. Without it, you won't be able to complete the installation process.
 :::
 
-:::tip
-The following steps can be automated by visiting the [QuestNav Setup Page](https://setup.questnav.gg/) and following the steps provided.
-:::
-
 ## Optimizing for QuestNav
+
+:::info
+All of the settings below are automatically applied by the [QuestNav Setup Page](https://setup.questnav.gg/). The manual steps are provided here for reference only.
+:::
 
 Once developer mode is enabled, you'll need to adjust several system settings:
 
@@ -112,7 +138,9 @@ Meta occasionally releases Quest updates that may reset some of these settings. 
 :::
 
 ## Video Guide
-[Placeholder for Device Setup Video Guide]
+:::tip Video Guide
+A video walkthrough for device setup is coming soon.
+:::
 
 ## Next Steps
 Now that your Quest is configured, proceed to the [App Setup](./app-setup) section to install the QuestNav application.

@@ -91,8 +91,8 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
 ```
 
 ## GET /api/download-database
-- Description: Downloads the entire SQLite configuration atabase.
-- Request: non
+- Description: Downloads the entire SQLite configuration database.
+- Request: none
 - Responses:
 - 200 OK → `application/octet-stream` containing the SQLite database file.
 
@@ -305,7 +305,7 @@ Host: <device-ip>:5801
 ```json
 [
   {"width": 100, "height": 100, "framerate": 24},
-  {"width": 200, "height": 200, "framerate": 24},
+  {"width": 200, "height": 200, "framerate": 24}
 ]
 ```
 - Errors:

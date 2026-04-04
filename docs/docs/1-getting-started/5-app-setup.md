@@ -5,12 +5,16 @@ title: App Setup
 
 After configuring your Quest headset, the next step is installing and setting up the QuestNav application. This guide walks you through the installation process and initial configuration.
 
+:::tip
+The [QuestNav Setup Page](https://setup.questnav.gg/) can also install QuestNav on your headset. If you've already used it during device setup, your app may already be installed.
+:::
+
 ## Installing QuestNav
 
 QuestNav is distributed as an APK file that you'll need to install manually onto your Quest headset. There are several methods to do this:
 
 :::info
-You'll need to have Developer Mode enabled on your Quest headset before proceeding with these installation methods. If you haven't done that yet, please refer to the [Device Setup](/docs/getting-started/device-setup) section.
+You'll need to have Developer Mode enabled on your Quest headset before proceeding with these installation methods. If you haven't done that yet, please refer to the [Device Setup](./device-setup) section.
 :::
 
 ### Method 1: Using ADB (Android Debug Bridge)
@@ -32,7 +36,7 @@ Select "always allow" to allow easy use of ADB with your laptop, even if the Que
 ### Method 2: Using Meta Quest Developer Hub (MQDH)
 Meta Developer Hub provides a graphical interface for app installation:
 
-1. Download and install [Meta Developer Hub](https://developer.oculus.com/documentation/unity/ts-odh/) on your computer
+1. Download and install [Meta Quest Developer Hub](https://developers.meta.com/horizon/documentation/unity/ts-odh/) on your computer
 2. Connect your Quest to your computer via USB
 3. Open Meta Developer Hub and select your device
 4. Navigate to the "Applications" tab
@@ -82,6 +86,10 @@ The example app has a team number set to 9999. You'll need to change this to you
 1. Enter your FRC team number in the provided field and click set
 2. This ensures correct network communication with your robot
 
+:::info
+The team number determines the IP address QuestNav connects to. QuestNav uses the FRC convention `10.TE.AM.2` (e.g. team 1234 connects to `10.12.34.2`). If the team number is wrong, the Quest will attempt to reach the wrong IP address and will never connect to your robot.
+:::
+
 ## Automatic Startup
 
 QuestNav can automatically start when the headset is powered up or rebooted. This feature can be controlled with the _Auto Start On Boot_ option on the main window.
@@ -104,12 +112,12 @@ Some USB cables only support charging and not data transfer. If you're having co
 :::
 
 ### App Crashes on Launch
-- Verify the APK was built with the "Development Build" flag if building with Unity
 - Check for adequate storage space on the Quest
 - Try reinstalling the app
+- Reboot the Quest headset
 
-:::warning
-If the APK was not built with the "Development Build" flag, it will crash at launch! This is a critical setting when building the app from source.
+:::note
+If you compiled QuestNav from source (not the official release APK), the Unity project must have the "Development Build" flag enabled or the app will crash immediately at launch. Teams using the official APK from the GitHub releases page do not need to worry about this.
 :::
 
 ### Team Number Issues
@@ -117,7 +125,9 @@ If the APK was not built with the "Development Build" flag, it will crash at lau
 - Custom builds allow changing the default team number, but this is unnecessary for most teams
 
 ## Video Guide
-[Placeholder for App Setup Video Guide]
+:::tip Video Guide
+A video walkthrough for app setup is coming soon.
+:::
 
 ## Next Steps
 With QuestNav installed and configured, proceed to the [Mounting](./mounting) section to learn how to properly mount the Quest on your robot.

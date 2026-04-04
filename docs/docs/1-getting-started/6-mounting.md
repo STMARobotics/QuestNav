@@ -54,13 +54,17 @@ Mounting the headset too close to the ground can result in poor tracking as the 
 
 ### Orientation
 
-It's important to remember that the headset was designed to be worn on a person's head. This means that the headset's front-facing and side cameras will favor one direction than another since they're designed to "look down" rather than directly outwards. 
+It's important to remember that the headset was designed to be worn on a person's head. This means that the headset's front-facing and side cameras will favor one direction more than another since they're designed to "look down" rather than directly outwards. 
 
 - **Upright Orientation**: Ideally, keep the headset in its normal upright position
 - **Level Positioning**: Mount should keep the headset approximately level
 
 :::info
 While the Quest can track in any orientation, keeping it in its designed upright position produces the most reliable results for robot navigation. If you wouldn't play VR in that position, try not to mount it that way!
+:::
+
+:::tip
+Mounting the headset at an angle, sideways, or even rotated 90 or 180 degrees relative to the robot's forward direction is perfectly valid. QuestNav will still track correctly. You will need to account for the rotation in the `ROBOT_TO_QUEST` transform in your robot code. See [Robot Code Setup](./robot-code) for details on how to specify the rotation offset.
 :::
 
 ### Field of View Requirements
@@ -120,7 +124,9 @@ To access pass-through view, launch the QuestNav app. This allows you to see wha
 :::
 
 ## Video Guide
-[Placeholder for Mounting Video Guide]
+:::tip Video Guide
+A video walkthrough for mounting is coming soon.
+:::
 
 ## Next Steps
 Once your Quest is securely mounted, proceed to the [Wiring](./wiring) section to learn how to connect your headset to the robot's network.
