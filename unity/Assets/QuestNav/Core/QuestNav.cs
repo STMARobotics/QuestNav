@@ -279,7 +279,7 @@ namespace QuestNav.Core
             // value is read once at startup and changes require a restart to apply.
             await configManager.OpenAsync();
 
-            var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
+            var aprilTagFieldLayout = new AprilTagFieldLayout();
             string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
             await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
             aprilTagManager = new AprilTagManager(

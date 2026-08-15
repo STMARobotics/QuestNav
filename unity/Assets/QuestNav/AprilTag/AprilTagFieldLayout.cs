@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using QuestNav.Core;
 using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using Wpi.Proto;
@@ -33,12 +34,30 @@ namespace QuestNav.QuestNav.AprilTag
         public double TagSize { get; }
 
         /// <summary>
-        /// Creates a new AprilTagFieldLayout.
+        /// Creates a new AprilTagFieldLayout using the standard FRC tag size
+        /// (<see cref="QuestNavConstants.AprilTag.TAG_SIZE_METERS"/>). This is the
+        /// constructor Newtonsoft uses when deserializing a layout file.
+        /// <see cref="LoadJsonFromFileAsync">LoadJsonFromFileAsync</see> MUST be called prior to getting data
+        /// </summary>
+        public AprilTagFieldLayout()
+            : this(QuestNavConstants.AprilTag.TAG_SIZE_METERS) { }
+
+        /// <summary>
+        /// Creates a new AprilTagFieldLayout with a non-standard tag size, e.g. a
+        /// practice field printed with tags that are not 6.5 in.
         /// <param name="tagSize">The size of the tags in meters (black part)</param>
         /// <see cref="LoadJsonFromFileAsync">LoadJsonFromFileAsync</see> MUST be called prior to getting data
         /// </summary>
         public AprilTagFieldLayout(double tagSize)
         {
+            if (tagSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(tagSize),
+                    "Tag size must be positive (meters)."
+                );
+            }
+
             TagSize = tagSize;
         }
 

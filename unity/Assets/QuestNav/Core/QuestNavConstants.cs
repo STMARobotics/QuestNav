@@ -274,6 +274,20 @@ namespace QuestNav.Core
             public const string DEFAULT_FIELD_LAYOUT_FILE = "2026-rebuilt-welded.json";
 
             /// <summary>
+            /// Physical edge length of the black square of a tag36h11 tag, in meters
+            /// (6.5 in). FRC has used this size since 2023, and every layout in
+            /// <see cref="BUNDLED_FIELD_LAYOUTS"/> assumes it.
+            ///
+            /// This cannot be read from the layout file: the WPILib field-layout JSON
+            /// schema carries only <c>tags</c> and <c>field</c>, no tag size. A practice
+            /// field printed with different-sized tags requires constructing
+            /// <c>AprilTagFieldLayout</c> with an explicit size instead - the value feeds
+            /// <c>GetTagCorners</c> and therefore the PnP solve, so a wrong size scales
+            /// every solved distance proportionally.
+            /// </summary>
+            public const double TAG_SIZE_METERS = 0.1651;
+
+            /// <summary>
             /// Allowed values for the "Minimum Tags Required" dropdown. The estimator
             /// already rejects pose updates with fewer than this many kept tags; the
             /// list is constrained to plausible single-frame tag counts on the Quest

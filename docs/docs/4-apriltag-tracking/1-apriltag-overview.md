@@ -131,7 +131,7 @@ Each tag entry specifies:
 - **ID** — The tag's numeric identifier
 - **Pose** — The tag's position (x, y, z in meters) and orientation (quaternion) in FRC field coordinates
 
-The tag size (the black square portion) is configured at startup (default: 0.1651m / 6.5 inches).
+The tag size (the black square portion) comes from `QuestNavConstants.AprilTag.TAG_SIZE_METERS` (0.1651 m / 6.5 inches), the standard FRC size.
 
 ## Recenter Handling
 

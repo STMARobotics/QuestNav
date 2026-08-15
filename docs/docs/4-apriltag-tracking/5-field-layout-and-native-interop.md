@@ -39,13 +39,14 @@ The layout file follows the WPILib field layout format. Each tag entry contains:
 
 ### Tag Size
 
-The physical tag size (the black square of the tag36h11 family) is hardcoded:
+The physical tag size (the black square of the tag36h11 family) is a constant, `QuestNavConstants.AprilTag.TAG_SIZE_METERS` (0.1651 m / 6.5 in). The default constructor uses it:
 
 ```csharp
-new AprilTagFieldLayout(0.1651)  // meters
+new AprilTagFieldLayout()             // standard FRC tags
+new AprilTagFieldLayout(0.2032)       // overload, for different-sized tags (meters)
 ```
 
-This value is specific to FRC competition fields. If using different-sized tags, this constructor argument must be changed.
+The size is not carried in the layout JSON — the WPILib schema has only `tags` and `field` — so a practice field printed with different-sized tags must pass an explicit size to the overload.
 
 ### 3D Corner Computation
 
