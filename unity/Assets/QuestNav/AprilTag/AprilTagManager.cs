@@ -144,19 +144,13 @@ namespace QuestNav.QuestNav.AprilTag
         }
 
         /// <summary>
-        /// Called when the camera arbiter applies a new effective resolution. Sets a flag so the
-        /// next loop pulls the latest intrinsics from the Meta SDK and forwards them to
-        /// <see cref="PoseLibSolver"/>.
-        /// Wrapped in try/catch because <see cref="PassthroughCameraAccess.Intrinsics"/> can
-        /// throw if accessed while the camera is mid-state-change.
+        /// Called when the camera arbiter applies a new effective resolution. Marks the cached
+        /// intrinsics stale so the next capture iteration refreshes them via
+        /// <see cref="UpdateCameraIntrinsics"/> before solving.
         /// </summary>
         private void OnCameraArbiterResolutionChanged(Vector2Int? newResolution)
         {
             isLensOffsetInitialized = false;
-            if (!detectorActive || !newResolution.HasValue || poseLibSolver == null)
-            {
-                return;
-            }
         }
 
         private void UpdateCameraIntrinsics(int targetWidth, int targetHeight)
@@ -399,11 +393,15 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
-                // Use hardware exposure time
-                // Calculate how far in the past the exposure occurred relative to current time,
-                // then use that to create a corrected timestamp in the Time.time domain.
-                TimeSpan timeSinceExposure = DateTime.Now - cameraAccess.Timestamp;
-                float captureTimestamp = Time.time - (float)timeSinceExposure.TotalSeconds;
+                // Use hardware exposure time to build a capture timestamp in the Time.time
+                // domain. Timestamp is UTC, so it must pair with UtcNow; clamped because the
+                // wall clock can step and an out-of-range value stalls the estimator's buffer.
+                double timeSinceExposure = Math.Clamp(
+                    (DateTime.UtcNow - cameraAccess.Timestamp).TotalSeconds,
+                    0.0,
+                    VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS
+                );
+                float captureTimestamp = Time.time - (float)timeSinceExposure;
 
                 NativeArray<Color32> colors;
 
@@ -529,7 +527,9 @@ namespace QuestNav.QuestNav.AprilTag
                         )
                         {
                             UpdateCameraIntrinsics(actualW, actualH);
-                            yield return null; // Skip this frame to avoid processing with mismatched intrinsics
+                            // Skip this frame; these detections predate the refreshed intrinsics.
+                            yield return null;
+                            continue;
                         }
 
                         var poseLibResult = poseLibSolver.PoseLibSolve(kept);
