@@ -138,9 +138,9 @@ The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-E
 ### 9. Deploy and verify
 
 1. Deploy your robot code
-2. Open [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html) or the WPILib simulation GUI
+2. Open [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html)
 3. Look for the `QuestNav` table in NetworkTables
-4. Verify that `QuestNav/Connected` = `true` and `QuestNav/Tracking` = `true`
+4. Verify that `QuestNav/framedata/isTracking` = `true`
 
 ---
 
@@ -166,14 +166,13 @@ Print this checklist and verify each item before every match.
 - [ ] All cables are secured with zip ties or clips (no loose cables)
 
 ### Pre-Match (on the Field)
-- [ ] Open your dashboard and verify `QuestNav/Connected` = `true`
-- [ ] Verify `QuestNav/Tracking` = `true`
-- [ ] Check `QuestNav/Battery%` is above 20%
+- [ ] Open your dashboard and verify `QuestNav/framedata/isTracking` = `true`
+- [ ] Check `QuestNav/deviceData/battery_percent` is above 20%
 - [ ] Reset the pose to your starting position before autonomous
 - [ ] Verify the reported pose matches the physical position on the field
 
 ### If Something Goes Wrong
 - **QuestNav/Connected = false**: Check the Ethernet cable and adapter. Verify the headset is powered on and QuestNav is running.
-- **QuestNav/Tracking = false**: Ensure the headset cameras have a clear view. Restart QuestNav if tracking doesn't recover.
+- **`QuestNav.isConnected()` returns `false`**: Ensure the headset cameras have a clear view. Restart QuestNav if tracking doesn't recover.
 - **Pose is wrong after reset**: Make sure you're applying the `ROBOT_TO_QUEST` transform before calling `setPose()`. The reset pose is the *Quest's* position, not the robot's.
 - **Battery dropping fast**: Verify the USB battery bank is connected and outputting power. Check for a damaged cable.

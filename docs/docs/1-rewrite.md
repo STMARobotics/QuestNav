@@ -15,12 +15,14 @@ This page tracks planned and completed improvements to QuestNav.
 - ✅ **Enable streaming passthrough video to devices on the robot network** (#40)
   - Remote visualization capability
 
-## In Progress
+## In Beta
 
 - **AprilTag detection and tracking** (#31)
-  - An upcoming release of QuestNav will include AprilTag detection.<br /><br />
+  - An upcoming release of QuestNav will include AprilTag detection and FRC field absolute positioning.<br /><br />
 
   <iframe width="560" height="315" src="https://www.youtube.com/embed/EBK9KA7otfA" title="QuestNav AprilTag detection preview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## In Progress
 
 - **Get each AprilTag position and place a spatial anchor** (#32)
   - Building on detection capabilities
