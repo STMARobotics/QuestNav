@@ -45,6 +45,11 @@
             <CameraView />
           </div>
           
+          <!-- AprilTag Tab -->
+          <div v-show="activeTab === 'AprilTag'" class="tab-panel">
+            <AprilTagView />
+          </div>
+          
           <!-- Settings Tab -->
           <div v-show="activeTab === 'Settings'" class="tab-panel">
             <div class="settings-grid">
@@ -169,21 +174,10 @@
                 </label>
               </ConfigField>
 
-              <!-- Passthrough Stream -->
-              <ConfigField
-                title="Passthrough Camera Stream"
-                description="Stream headset camera over network"
-                control-class="checkbox-control"
-              >
-                <label class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    :checked="configStore.config.enablePassthroughStream"
-                    @change="handlePassthroughStreamChange"
-                  />
-                  {{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}
-                </label>
-              </ConfigField>
+              <!-- Passthrough Stream enable/disable lives on the Camera tab now (next to
+                   the resolution / FPS controls it gates). The High Quality toggle stays
+                   here in Settings because it has app-wide implications (CPU, battery,
+                   network) beyond just the visual stream. -->
 
               <!-- High Quality Passthrough Stream -->
               <ConfigField
@@ -213,7 +207,7 @@
                 description="Reset all settings to defaults"
                 field-class="reset-field"
               >
-                <button @click="handleReset" class="reset-button">Reset to Defaults</button>
+                <button @click="handleReset" class="danger">Reset to Defaults</button>
               </ConfigField>
 
               <!-- Database Management -->
@@ -223,8 +217,8 @@
                 field-class="database-field"
                 control-class="database-buttons"
               >
-                <button @click="handleDownloadDatabase" class="database-button">Download Database</button>
-                <label class="database-button upload-label">
+                <button @click="handleDownloadDatabase" class="secondary">Download Database</button>
+                <label class="secondary upload-label">
                   Upload Database
                   <input type="file" accept=".db" @change="handleUploadDatabase" hidden />
                 </label>
@@ -253,10 +247,11 @@ import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
 import CameraView from './CameraView.vue'
 import ConfigField from './ConfigField.vue'
+import AprilTagView from './AprilTagView.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
-const tabs = ['Status', 'Logs', 'Camera', 'Settings']
+const tabs = ['Status', 'Logs', 'Camera', 'AprilTag', 'Settings']
 let pollInterval: number | null = null
 
 const pendingTeamNumber = ref<number | null>(null)
@@ -346,11 +341,6 @@ async function handleAutoStartChange(event: Event) {
 async function handleDebugLoggingChange(event: Event) {
   const target = event.target as HTMLInputElement
   await configStore.updateEnableDebugLogging(target.checked)
-}
-
-async function handlePassthroughStreamChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  await configStore.updateEnablePassthroughStream(target.checked)
 }
 
 async function handleHighQualityStreamChange(event: Event) {
@@ -456,12 +446,6 @@ async function handleUploadDatabase(event: Event) {
   min-height: 400px;
 }
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
 .debug-badge, .override-badge {
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
@@ -484,55 +468,7 @@ async function handleUploadDatabase(event: Event) {
   margin-top: 0.5rem;
 }
 
-.submit-button {
-  padding: 0.75rem 1.25rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.checkbox-label {
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.reset-button {
-  padding: 0.75rem 1.5rem;
-  background: var(--danger-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.database-button {
-  padding: 0.75rem 1.5rem;
-  background: var(--card-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.database-button:hover {
-  background: var(--border-color);
-}
-
 .upload-label {
   display: inline-block;
-}
-
-@media (max-width: 768px) {
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

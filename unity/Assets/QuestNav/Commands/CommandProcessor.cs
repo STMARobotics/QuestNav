@@ -3,6 +3,7 @@ using QuestNav.Commands.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
+using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
 using UnityEngine;
 
@@ -30,6 +31,11 @@ namespace QuestNav.Commands
         private INetworkTableConnection networkTableConnection;
 
         /// <summary>
+        /// The pose estimator required for pose reset commands
+        /// </summary>
+        private IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
+
+        /// <summary>
         /// Command handler for pose reset operations
         /// </summary>
         private PoseResetCommand poseResetCommand;
@@ -43,12 +49,14 @@ namespace QuestNav.Commands
         /// Initializes a new command processor with required dependencies
         /// </summary>
         /// <param name="networkTableConnection">Network connection for command communication</param>
+        /// <param name="vioAprilTagPoseEstimator">Pose estimator for Kalman filter resets</param>
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         /// <param name="configManager">Configuration manager for subscribing to setting changes</param>
         public CommandProcessor(
             INetworkTableConnection networkTableConnection,
+            IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform,
@@ -69,7 +77,8 @@ namespace QuestNav.Commands
                 commandContext,
                 vrCamera,
                 vrCameraRoot,
-                resetTransform
+                resetTransform,
+                vioAprilTagPoseEstimator
             );
         }
 

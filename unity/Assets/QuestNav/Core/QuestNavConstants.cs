@@ -245,6 +245,57 @@ namespace QuestNav.Core
         }
 
         /// <summary>
+        /// Constants for the AprilTag detector / field layout discovery.
+        /// </summary>
+        public static class AprilTag
+        {
+            /// <summary>
+            /// Bundled field-layout JSON files that ship inside the APK under
+            /// <c>StreamingAssets/apriltag/fieldlayouts/</c>. Hardcoded here because
+            /// Android's <c>UnityWebRequest</c> path to streaming assets does not allow
+            /// directory enumeration; this list is the authoritative source for the
+            /// <c>/api/apriltag-field-layouts</c> endpoint.
+            ///
+            /// Add a new entry here whenever a new field layout JSON is added to the
+            /// StreamingAssets directory.
+            /// </summary>
+            public static readonly string[] BUNDLED_FIELD_LAYOUTS =
+            {
+                "2026-rebuilt-welded.json",
+                "2025-reefscape-welded.json",
+            };
+
+            /// <summary>
+            /// Default field layout used when the user has not chosen one and on hard
+            /// recovery from a missing custom file. Must appear in
+            /// <see cref="BUNDLED_FIELD_LAYOUTS"/>.
+            /// </summary>
+            public const string DEFAULT_FIELD_LAYOUT_FILE = "2026-rebuilt-welded.json";
+
+            /// <summary>
+            /// Physical edge length of the black square of a tag36h11 tag, in meters
+            /// (6.5 in). FRC has used this size since 2023, and every layout in
+            /// <see cref="BUNDLED_FIELD_LAYOUTS"/> assumes it.
+            ///
+            /// This cannot be read from the layout file: the WPILib field-layout JSON
+            /// schema carries only <c>tags</c> and <c>field</c>, no tag size. A practice
+            /// field printed with different-sized tags requires constructing
+            /// <c>AprilTagFieldLayout</c> with an explicit size instead - the value feeds
+            /// <c>GetTagCorners</c> and therefore the PnP solve, so a wrong size scales
+            /// every solved distance proportionally.
+            /// </summary>
+            public const double TAG_SIZE_METERS = 0.1651;
+
+            /// <summary>
+            /// Allowed values for the "Minimum Tags Required" dropdown. The estimator
+            /// already rejects pose updates with fewer than this many kept tags; the
+            /// list is constrained to plausible single-frame tag counts on the Quest
+            /// passthrough camera (the camera FOV makes 5+ tags vanishingly rare).
+            /// </summary>
+            public static readonly int[] MINIMUM_TAGS_OPTIONS = { 1, 2, 3, 4 };
+        }
+
+        /// <summary>
         /// Constants for video streaming
         /// </summary>
         public static class VideoStream
@@ -269,6 +320,15 @@ namespace QuestNav.Core
             /// The maximum framerate allowed when high-quality streams are disabled
             /// </summary>
             public const int MAX_LOW_QUAL_FRAMERATE = 30;
+
+            /// <summary>
+            /// Framerate options exposed to the UI dropdown. Used by both
+            /// <c>PassthroughFrameSource</c> and the AprilTag detector since they share the
+            /// same Meta SDK camera; FPS is enforced via coroutine timing, not at the SDK
+            /// level, so any value is technically callable but these are the values we
+            /// actively support.
+            /// </summary>
+            public static readonly int[] SUPPORTED_FPS = { 1, 5, 15, 24, 30, 48, 60 };
         }
     }
 }

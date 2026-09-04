@@ -1,15 +1,18 @@
-using System;
 using Meta.XR;
 using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
+using QuestNav.QuestNav.AprilTag;
+using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.UI;
 using QuestNav.Utils;
 using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Core
 {
@@ -30,16 +33,6 @@ namespace QuestNav.Core
         /// Current timestamp from Unity's Time.time
         /// </summary>
         private double timeStamp;
-
-        /// <summary>
-        /// Current position of the VR headset
-        /// </summary>
-        private Vector3 position;
-
-        /// <summary>
-        /// Current rotation of the VR headset as a Quaternion
-        /// </summary>
-        private Quaternion rotation;
 
         /// <summary>
         /// Reference to the OVR Camera Rig for tracking
@@ -154,6 +147,11 @@ namespace QuestNav.Core
         private PassthroughCameraAccess cameraAccess;
 
         /// <summary>
+        /// The current pose of the HMD
+        /// </summary>
+        private Pose3d pose;
+
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -220,6 +218,16 @@ namespace QuestNav.Core
         /// </summary>
         private PassthroughFrameSource passthroughFrameSource;
 
+        /// <summary>
+        /// Single owner of camera enable/resolution. Both <see cref="passthroughFrameSource"/>
+        /// and <see cref="aprilTagManager"/> reserve through this arbiter; AprilTag wins ties.
+        /// </summary>
+        private CameraResourceManager cameraArbiter;
+
+        private IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
+
+        private AprilTagManager aprilTagManager;
+
         #endregion
 
         #endregion
@@ -231,6 +239,7 @@ namespace QuestNav.Core
         private async void Awake()
         {
             QueuedLogger.Initialize();
+            FileManager.Initialize();
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 
@@ -256,10 +265,36 @@ namespace QuestNav.Core
                 autoStartToggle
             );
 
-            // Initialize passthrough capture and start capture coroutine
+            vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
+            OVRManager.display.RecenteredPose += OnVioRecenter;
+
+            // Construct the camera arbiter before any subsystem that touches the camera.
+            // Both PassthroughFrameSource (Low priority) and AprilTagManager (High priority)
+            // route enable/resolution changes through this single owner.
+            cameraArbiter = new CameraResourceManager(cameraAccess);
+
+            // Open the SQLite connection now (without firing events) so we can read the
+            // user-selected AprilTag field layout file before constructing the
+            // AprilTagFieldLayout / AprilTagManager. Field layout is "boot only" - the
+            // value is read once at startup and changes require a restart to apply.
+            await configManager.OpenAsync();
+
+            var aprilTagFieldLayout = new AprilTagFieldLayout();
+            string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
+            await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
+            aprilTagManager = new AprilTagManager(
+                configManager,
+                vioAprilTagPoseEstimator,
+                cameraAccess,
+                cameraArbiter,
+                aprilTagFieldLayout,
+                this
+            );
+
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,
+                cameraArbiter,
                 networkTableConnection.CreateCameraSource("Passthrough"),
                 configManager
             );
@@ -268,14 +303,18 @@ namespace QuestNav.Core
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
+                vioAprilTagPoseEstimator,
                 vrCamera,
                 vrCameraRoot,
                 passthroughFrameSource,
+                cameraArbiter,
+                cameraAccess,
                 resetTransform
             );
 
             commandProcessor = new CommandProcessor(
                 networkTableConnection,
+                vioAprilTagPoseEstimator,
                 vrCamera,
                 vrCameraRoot,
                 resetTransform,
@@ -283,16 +322,8 @@ namespace QuestNav.Core
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
-            // Use try-catch due to async
-            try
-            {
-                await configManager.InitializeAsync();
-                await webServerManager.InitializeAsync();
-            }
-            catch (Exception e)
-            {
-                QueuedLogger.LogException(e);
-            }
+            await configManager.InitializeAsync();
+            await webServerManager.InitializeAsync();
 
             networkTableConnection.Initialize();
 
@@ -330,8 +361,7 @@ namespace QuestNav.Core
             networkTableConnection.PublishFrameData(
                 frameCount,
                 timeStamp,
-                position,
-                rotation,
+                vioAprilTagPoseEstimator.EstimatedPose,
                 currentlyTracking
             );
 
@@ -361,7 +391,7 @@ namespace QuestNav.Core
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.UpdatePositionText(position, rotation);
+            uiManager.UpdatePositionText(vioAprilTagPoseEstimator.EstimatedPose);
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
@@ -369,8 +399,9 @@ namespace QuestNav.Core
             networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
             // Update web server with current pose data (it handles everything else internally)
-            var frcPose = Conversions.UnityToFrc3d(position, rotation);
-            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
+            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(
+                vioAprilTagPoseEstimator.EstimatedPose.ToProtobuf()
+            );
             webServerManager?.Periodic(
                 frcPosition,
                 frcRotation,
@@ -392,6 +423,7 @@ namespace QuestNav.Core
         /// </summary>
         private void OnDestroy()
         {
+            OVRManager.display.RecenteredPose -= OnVioRecenter;
             configManager.CloseAsync();
             webServerManager?.Shutdown();
         }
@@ -552,13 +584,29 @@ namespace QuestNav.Core
             // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
 
-            // Get the center eye position - this is the averaged position between left and right eyes
-            // This represents the "head" position that the robot should track
-            position = cameraRig.centerEyeAnchor.position;
+            // Add latest VIO data to kalman filter
+            pose = new Pose3d(
+                Conversions.UnityToFrc3d(
+                    cameraRig.centerEyeAnchor.position,
+                    cameraRig.centerEyeAnchor.rotation
+                )
+            );
+            vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
+        }
 
-            // Get the headset orientation as a quaternion
-            // This includes pitch (looking up/down), yaw (turning left/right), and roll (tilting head)
-            rotation = cameraRig.centerEyeAnchor.rotation;
+        /// <summary>
+        /// Handles the OVR tracking recenter event (Quest logo long-press).
+        /// Resets the VIO baseline in the estimator without disturbing the KF state.
+        /// </summary>
+        private void OnVioRecenter()
+        {
+            var newPose = new Pose3d(
+                Conversions.UnityToFrc3d(
+                    cameraRig.centerEyeAnchor.position,
+                    cameraRig.centerEyeAnchor.rotation
+                )
+            );
+            vioAprilTagPoseEstimator.HandleRecenter(newPose, Time.time);
         }
 
         /// <summary>
